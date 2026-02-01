@@ -1,0 +1,14 @@
+{
+  "mcp": {
+    "ckb": {
+      "type": "local",
+      "command": [
+        "/Users/mrt/.nvm/versions/node/v24.6.0/lib/node_modules/@tastehub/ckb/node_modules/@tastehub/ckb-darwin-arm64/bin/ckb",
+        "mcp",
+        "--preset=full"
+      ],
+      "enabled": true
+    }
+  },
+  "$schema": "https://opencode.ai/config.json"
+}

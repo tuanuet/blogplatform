@@ -148,6 +148,13 @@ func New(p Params) *gin.Engine {
 
 		// My subscriptions
 		v1.GET("/subscriptions", p.SubscriptionHandler.GetMySubscriptions)
+
+		// Unified Subscription/Follow API (users can follow/subscribe to each other)
+		v1.GET("/users/:userId/followers", p.SubscriptionHandler.GetSubscribers)
+		v1.GET("/users/:userId/following", p.SubscriptionHandler.GetUserSubscriptions)
+		v1.GET("/users/:userId/follow-counts", p.SubscriptionHandler.GetSubscriptionCounts)
+		v1.POST("/users/:userId/follow", p.SubscriptionHandler.Subscribe)
+		v1.DELETE("/users/:userId/follow", p.SubscriptionHandler.Unsubscribe)
 	}
 
 	return engine

@@ -23,6 +23,7 @@ type SubscriptionUseCase interface {
 	GetSubscriptions(ctx context.Context, subscriberID uuid.UUID, page, pageSize int) (*repository.PaginatedResult[dto.SubscriptionResponse], error)
 	GetSubscribers(ctx context.Context, authorID uuid.UUID, page, pageSize int) (*repository.PaginatedResult[dto.SubscriptionResponse], error)
 	CountSubscribers(ctx context.Context, authorID uuid.UUID) (*dto.SubscriptionCountResponse, error)
+	GetSubscriptionCounts(ctx context.Context, userID uuid.UUID) (*dto.SubscriptionCountResponse, error)
 }
 
 type subscriptionUseCase struct {
@@ -99,6 +100,24 @@ func (uc *subscriptionUseCase) CountSubscribers(ctx context.Context, authorID uu
 	return &dto.SubscriptionCountResponse{
 		AuthorID:        authorID,
 		SubscriberCount: count,
+	}, nil
+}
+
+func (uc *subscriptionUseCase) GetSubscriptionCounts(ctx context.Context, userID uuid.UUID) (*dto.SubscriptionCountResponse, error) {
+	subscriberCount, err := uc.subscriptionSvc.CountSubscribers(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	subscriptionCount, err := uc.subscriptionSvc.CountSubscriptions(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.SubscriptionCountResponse{
+		AuthorID:          userID,
+		SubscriberCount:   subscriberCount,
+		SubscriptionCount: subscriptionCount,
 	}, nil
 }
 

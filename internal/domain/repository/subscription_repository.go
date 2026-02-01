@@ -15,4 +15,5 @@ type SubscriptionRepository interface {
 	FindBySubscriber(ctx context.Context, subscriberID uuid.UUID, pagination Pagination) (*PaginatedResult[entity.Subscription], error)
 	FindByAuthor(ctx context.Context, authorID uuid.UUID, pagination Pagination) (*PaginatedResult[entity.Subscription], error)
 	CountSubscribers(ctx context.Context, authorID uuid.UUID) (int64, error)
+	CountBySubscriber(ctx context.Context, subscriberID uuid.UUID) (int64, error)
 }

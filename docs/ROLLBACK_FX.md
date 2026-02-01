@@ -181,3 +181,159 @@ func main() {
 	logger.Info("Server exited properly")
 }
 ```
+
+---
+
+# Follow Feature - Rollback Plan
+
+## Feature Overview
+
+Implemented Follow/Following Model (Twitter-style social relationships) for the blog platform.
+
+## Changes Made
+
+### 1. Database Migration
+- **File**: `migrations/000005_follow_feature.up.sql`
+- **Table**: `follows` with unique constraint on (follower_id, following_id)
+- **Indexes**: follower_id, following_id, created_at
+- **Constraints**: Foreign keys to users table, prevents self-follows
+
+### 2. Domain Layer
+- **Entity**: `internal/domain/entity/follow.go`
+- **Repository Interface**: `internal/domain/repository/follow_repository.go`
+- **Service**: `internal/domain/service/follow_service.go`
+
+### 3. Infrastructure Layer
+- **Repository Implementation**: `internal/infrastructure/persistence/postgres/repository/follow_repository.go`
+
+### 4. Application Layer
+- **DTOs**: `internal/application/dto/follow.go`
+- **UseCase**: `internal/application/usecase/follow_usecase.go`
+
+### 5. Interface Layer
+- **Handler**: `internal/interfaces/http/handler/follow_handler.go`
+- **Routes**: Added to `internal/interfaces/http/router/router.go`
+
+### 6. Dependency Injection
+- Updated: `cmd/api/modules/domain_service_module.go`
+- Updated: `cmd/api/modules/repository_module.go`
+- Updated: `cmd/api/modules/usecase_module.go`
+- Updated: `cmd/api/modules/handler_module.go`
+
+## API Endpoints Added
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/v1/users/:userId/follow` | Follow a user | Yes |
+| DELETE | `/api/v1/users/:userId/follow` | Unfollow a user | Yes |
+| GET | `/api/v1/users/:userId/followers` | Get user's followers | No |
+| GET | `/api/v1/users/:userId/following` | Get users being followed | No |
+| GET | `/api/v1/users/:userId/follow-counts` | Get follower/following counts | No |
+| GET | `/api/v1/users/:userId/follow-status` | Check if current user follows target | Yes |
+
+## Rollback Instructions
+
+### Step 1: Revert Database Migration
+
+```bash
+# Run down migration to drop follows table
+psql -U your_db_user -d your_db_name -f migrations/000005_follow_feature.down.sql
+```
+
+Or manually:
+```sql
+DROP TABLE IF EXISTS follows;
+```
+
+### Step 2: Remove Source Files
+
+```bash
+# Remove domain layer
+rm internal/domain/entity/follow.go
+rm internal/domain/repository/follow_repository.go
+rm internal/domain/service/follow_service.go
+
+# Remove infrastructure layer
+rm internal/infrastructure/persistence/postgres/repository/follow_repository.go
+
+# Remove application layer
+rm internal/application/dto/follow.go
+rm internal/application/usecase/follow_usecase.go
+
+# Remove interface layer
+rm internal/interfaces/http/handler/follow_handler.go
+
+# Remove migration files
+rm migrations/000005_follow_feature.up.sql
+rm migrations/000005_follow_feature.down.sql
+```
+
+### Step 3: Revert Dependency Injection
+
+Edit `cmd/api/modules/domain_service_module.go`:
+- Remove: `service.NewFollowService,`
+
+Edit `cmd/api/modules/repository_module.go`:
+- Remove: `pgRepo.NewFollowRepository,`
+
+Edit `cmd/api/modules/usecase_module.go`:
+- Remove: `usecase.NewFollowUseCase,`
+
+Edit `cmd/api/modules/handler_module.go`:
+- Remove: `handler.NewFollowHandler,`
+
+### Step 4: Revert Router
+
+Edit `internal/interfaces/http/router/router.go`:
+1. Remove `FollowHandler *handler.FollowHandler` from Params struct
+2. Remove follow routes from v1 group:
+   ```go
+   v1.GET("/users/:userId/followers", ...)
+   v1.GET("/users/:userId/following", ...)
+   v1.GET("/users/:userId/follow-counts", ...)
+   v1.GET("/users/:userId/follow-status", ...)
+   v1.POST("/users/:userId/follow", ...)
+   v1.DELETE("/users/:userId/follow", ...)
+   ```
+
+### Step 5: Rebuild
+
+```bash
+go mod tidy
+go build ./cmd/api
+```
+
+## Verification Checklist
+
+- [ ] Build succeeds: `go build ./...`
+- [ ] Database migration reverted: `follows` table no longer exists
+- [ ] No follow-related API endpoints respond
+- [ ] All other features still work (subscriptions, blogs, etc.)
+- [ ] Tests pass: `go test ./... -v`
+
+## Quick Rollback Script
+
+```bash
+#!/bin/bash
+# rollback_follow.sh
+
+echo "Rolling back Follow Feature..."
+
+# Database rollback
+psql -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS follows;"
+
+# Remove files
+rm -f internal/domain/entity/follow.go
+rm -f internal/domain/repository/follow_repository.go
+rm -f internal/domain/service/follow_service.go
+rm -f internal/infrastructure/persistence/postgres/repository/follow_repository.go
+rm -f internal/application/dto/follow.go
+rm -f internal/application/usecase/follow_usecase.go
+rm -f internal/interfaces/http/handler/follow_handler.go
+rm -f migrations/000005_follow_feature.*.sql
+
+echo "Follow Feature rolled back successfully!"
+echo "Remember to revert changes in:"
+echo "  - cmd/api/modules/*.go"
+echo "  - internal/interfaces/http/router/router.go"
+```

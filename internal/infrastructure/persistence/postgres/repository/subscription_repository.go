@@ -114,3 +114,12 @@ func (r *subscriptionRepository) CountSubscribers(ctx context.Context, authorID 
 		Count(&count).Error
 	return count, err
 }
+
+func (r *subscriptionRepository) CountBySubscriber(ctx context.Context, subscriberID uuid.UUID) (int64, error) {
+	var count int64
+	err := r.db.WithContext(ctx).
+		Model(&entity.Subscription{}).
+		Where("subscriber_id = ?", subscriberID).
+		Count(&count).Error
+	return count, err
+}

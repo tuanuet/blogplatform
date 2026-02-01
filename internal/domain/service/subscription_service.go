@@ -22,6 +22,7 @@ type SubscriptionService interface {
 	GetSubscriptions(ctx context.Context, subscriberID uuid.UUID, page, pageSize int) (*repository.PaginatedResult[entity.Subscription], error)
 	GetSubscribers(ctx context.Context, authorID uuid.UUID, page, pageSize int) (*repository.PaginatedResult[entity.Subscription], error)
 	CountSubscribers(ctx context.Context, authorID uuid.UUID) (int64, error)
+	CountSubscriptions(ctx context.Context, subscriberID uuid.UUID) (int64, error)
 }
 
 type subscriptionService struct {
@@ -78,4 +79,8 @@ func (s *subscriptionService) GetSubscribers(ctx context.Context, authorID uuid.
 
 func (s *subscriptionService) CountSubscribers(ctx context.Context, authorID uuid.UUID) (int64, error) {
 	return s.subscriptionRepo.CountSubscribers(ctx, authorID)
+}
+
+func (s *subscriptionService) CountSubscriptions(ctx context.Context, subscriberID uuid.UUID) (int64, error) {
+	return s.subscriptionRepo.CountBySubscriber(ctx, subscriberID)
 }

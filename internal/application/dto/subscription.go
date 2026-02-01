@@ -16,8 +16,9 @@ type SubscriptionResponse struct {
 	CreatedAt    time.Time          `json:"createdAt"`
 }
 
-// SubscriptionCountResponse represents subscriber count
+// SubscriptionCountResponse represents subscriber and subscription counts
 type SubscriptionCountResponse struct {
-	AuthorID        uuid.UUID `json:"authorId"`
-	SubscriberCount int64     `json:"subscriberCount"`
+	AuthorID          uuid.UUID `json:"authorId,omitempty"`
+	SubscriberCount   int64     `json:"subscriberCount"`
+	SubscriptionCount int64     `json:"subscriptionCount,omitempty"`
 }
