@@ -3,7 +3,16 @@ package router
 import (
 	"github.com/aiagent/boilerplate/internal/application/usecase"
 	"github.com/aiagent/boilerplate/internal/infrastructure/config"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/blog"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/category"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/comment"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/fraud"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/health"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/profile"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/ranking"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/role"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/subscription"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/tag"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/middleware"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -19,15 +28,16 @@ import (
 type Params struct {
 	fx.In
 
-	HealthHandler       *handler.HealthHandler
-	BlogHandler         *handler.BlogHandler
-	CategoryHandler     *handler.CategoryHandler
-	TagHandler          *handler.TagHandler
-	CommentHandler      *handler.CommentHandler
-	SubscriptionHandler *handler.SubscriptionHandler
-	ProfileHandler      *handler.ProfileHandler
-	RoleHandler         *handler.RoleHandler
-	RankingHandler      *handler.RankingHandler
+	HealthHandler       health.HealthHandler
+	BlogHandler         blog.BlogHandler
+	CategoryHandler     category.CategoryHandler
+	TagHandler          tag.TagHandler
+	CommentHandler      comment.CommentHandler
+	SubscriptionHandler subscription.SubscriptionHandler
+	ProfileHandler      profile.ProfileHandler
+	RoleHandler         role.RoleHandler
+	RankingHandler      ranking.RankingHandler
+	FraudHandler        fraud.FraudHandler
 	RoleUseCase         usecase.RoleUseCase // For authorization middleware
 	Config              *config.Config
 }
@@ -165,6 +175,29 @@ func New(p Params) *gin.Engine {
 			rankings.GET("/users/:userId", p.RankingHandler.GetUserRanking)
 			rankings.POST("/recalculate", auth.RequireAdmin("rankings"), p.RankingHandler.RecalculateScores)
 		}
+
+		// Fraud Detection & Risk Management
+		// User risk score and badge
+		v1.GET("/users/:id/risk-score", p.FraudHandler.GetUserRiskScore)
+		v1.GET("/users/:id/badge", p.FraudHandler.GetUserBadgeStatus)
+		v1.GET("/users/:id/bot-notifications", p.FraudHandler.GetUserBotNotifications)
+
+		// Admin fraud dashboard
+		admin := v1.Group("/admin", auth.RequireAdmin("fraud"))
+		{
+			admin.GET("/fraud-dashboard", p.FraudHandler.GetFraudDashboard)
+			admin.POST("/users/:id/review", p.FraudHandler.ReviewUser)
+			admin.POST("/users/:id/ban", p.FraudHandler.BanUser)
+		}
+
+		// Analytics
+		v1.GET("/analytics/fraud-trends", auth.RequireAdmin("analytics"), p.FraudHandler.GetFraudTrends)
+
+		// Batch operations
+		v1.POST("/followers/batch-analyze", auth.RequireAdmin("fraud"), p.FraudHandler.TriggerBatchAnalysis)
+
+		// Notifications
+		v1.POST("/notifications/:id/read", p.FraudHandler.MarkNotificationAsRead)
 	}
 
 	return engine

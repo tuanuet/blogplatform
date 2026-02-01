@@ -1,0 +1,322 @@
+package subscription
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/aiagent/boilerplate/internal/application/usecase"
+	"github.com/aiagent/boilerplate/pkg/response"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+)
+
+type subscriptionHandler struct {
+	subscriptionUseCase usecase.SubscriptionUseCase
+}
+
+func NewSubscriptionHandler(subscriptionUseCase usecase.SubscriptionUseCase) SubscriptionHandler {
+	return &subscriptionHandler{
+		subscriptionUseCase: subscriptionUseCase,
+	}
+}
+
+// Subscribe godoc
+// @Summary Subscribe to an author
+// @Description Subscribe to receive access to subscriber-only content
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param authorId path string true "Author ID"
+// @Success 201 {object} dto.SubscriptionResponse
+// @Failure 400 {object} response.Response
+// @Failure 409 {object} response.Response
+// @Security Bearer
+// @Router /api/v1/authors/{authorId}/subscribe [post]
+func (h *subscriptionHandler) Subscribe(c *gin.Context) {
+	subscriberID, exists := c.Get("userID")
+	if !exists {
+		response.Unauthorized(c, "authentication required")
+		return
+	}
+
+	authorID, err := uuid.Parse(c.Param("authorId"))
+	if err != nil {
+		response.BadRequest(c, "invalid author ID")
+		return
+	}
+
+	subscription, err := h.subscriptionUseCase.Subscribe(c.Request.Context(), subscriberID.(uuid.UUID), authorID)
+	if err != nil {
+		switch err {
+		case usecase.ErrCannotSubscribeToSelf:
+			response.BadRequest(c, err.Error())
+		case usecase.ErrAlreadySubscribed:
+			response.Conflict(c, err.Error())
+		default:
+			response.InternalServerError(c, err.Error())
+		}
+		return
+	}
+
+	response.Success(c, http.StatusCreated, subscription)
+}
+
+// Unsubscribe godoc
+// @Summary Unsubscribe from an author
+// @Description Remove subscription from an author
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param authorId path string true "Author ID"
+// @Success 204
+// @Failure 404 {object} response.Response
+// @Security Bearer
+// @Router /api/v1/authors/{authorId}/unsubscribe [post]
+func (h *subscriptionHandler) Unsubscribe(c *gin.Context) {
+	subscriberID, exists := c.Get("userID")
+	if !exists {
+		response.Unauthorized(c, "authentication required")
+		return
+	}
+
+	authorID, err := uuid.Parse(c.Param("authorId"))
+	if err != nil {
+		response.BadRequest(c, "invalid author ID")
+		return
+	}
+
+	if err := h.subscriptionUseCase.Unsubscribe(c.Request.Context(), subscriberID.(uuid.UUID), authorID); err != nil {
+		if err == usecase.ErrSubscriptionNotFound {
+			response.NotFound(c, err.Error())
+			return
+		}
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+// GetMySubscriptions godoc
+// @Summary Get my subscriptions
+// @Description Get list of authors the current user is subscribed to
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number" default(1)
+// @Param pageSize query int false "Page size" default(20)
+// @Success 200 {object} response.Response
+// @Security Bearer
+// @Router /api/v1/subscriptions [get]
+func (h *subscriptionHandler) GetMySubscriptions(c *gin.Context) {
+	subscriberID, exists := c.Get("userID")
+	if !exists {
+		response.Unauthorized(c, "authentication required")
+		return
+	}
+
+	page := 1
+	pageSize := 20
+
+	if p := c.Query("page"); p != "" {
+		if v, err := strconv.Atoi(p); err == nil && v > 0 {
+			page = v
+		}
+	}
+	if ps := c.Query("pageSize"); ps != "" {
+		if v, err := strconv.Atoi(ps); err == nil && v > 0 && v <= 100 {
+			pageSize = v
+		}
+	}
+
+	result, err := h.subscriptionUseCase.GetSubscriptions(c.Request.Context(), subscriberID.(uuid.UUID), page, pageSize)
+	if err != nil {
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.SuccessWithMeta(c, result.Data, &response.Meta{
+		Page:       result.Page,
+		PageSize:   result.PageSize,
+		Total:      result.Total,
+		TotalPages: result.TotalPages,
+	})
+}
+
+// GetSubscribers godoc
+// @Summary Get author's subscribers
+// @Description Get list of subscribers for an author
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param authorId path string true "Author ID"
+// @Param page query int false "Page number" default(1)
+// @Param pageSize query int false "Page size" default(20)
+// @Success 200 {object} response.Response
+// @Router /api/v1/authors/{authorId}/subscribers [get]
+func (h *subscriptionHandler) GetSubscribers(c *gin.Context) {
+	authorID, err := uuid.Parse(c.Param("authorId"))
+	if err != nil {
+		response.BadRequest(c, "invalid author ID")
+		return
+	}
+
+	page := 1
+	pageSize := 20
+
+	if p := c.Query("page"); p != "" {
+		if v, err := strconv.Atoi(p); err == nil && v > 0 {
+			page = v
+		}
+	}
+	if ps := c.Query("pageSize"); ps != "" {
+		if v, err := strconv.Atoi(ps); err == nil && v > 0 && v <= 100 {
+			pageSize = v
+		}
+	}
+
+	result, err := h.subscriptionUseCase.GetSubscribers(c.Request.Context(), authorID, page, pageSize)
+	if err != nil {
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.SuccessWithMeta(c, result.Data, &response.Meta{
+		Page:       result.Page,
+		PageSize:   result.PageSize,
+		Total:      result.Total,
+		TotalPages: result.TotalPages,
+	})
+}
+
+// CountSubscribers godoc
+// @Summary Get subscriber count
+// @Description Get the number of subscribers for an author
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param authorId path string true "Author ID"
+// @Success 200 {object} dto.SubscriptionCountResponse
+// @Router /api/v1/authors/{authorId}/subscribers/count [get]
+func (h *subscriptionHandler) CountSubscribers(c *gin.Context) {
+	authorID, err := uuid.Parse(c.Param("authorId"))
+	if err != nil {
+		response.BadRequest(c, "invalid author ID")
+		return
+	}
+
+	count, err := h.subscriptionUseCase.CountSubscribers(c.Request.Context(), authorID)
+	if err != nil {
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, count)
+}
+
+// GetSubscriptionCounts godoc
+// @Summary Get subscription counts for a user
+// @Description Get both subscriber count and subscription count for a user
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param userId path string true "User ID"
+// @Success 200 {object} dto.SubscriptionCountResponse
+// @Router /api/v1/users/{userId}/subscription-counts [get]
+func (h *subscriptionHandler) GetSubscriptionCounts(c *gin.Context) {
+	userID, err := uuid.Parse(c.Param("userId"))
+	if err != nil {
+		response.BadRequest(c, "invalid user ID")
+		return
+	}
+
+	counts, err := h.subscriptionUseCase.GetSubscriptionCounts(c.Request.Context(), userID)
+	if err != nil {
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, counts)
+}
+
+// GetUserSubscriptions godoc
+// @Summary Get user's subscriptions
+// @Description Get list of authors that a specific user is subscribed to
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param userId path string true "User ID"
+// @Param page query int false "Page number" default(1)
+// @Param pageSize query int false "Page size" default(20)
+// @Success 200 {object} response.Response
+// @Router /api/v1/users/{userId}/subscriptions [get]
+func (h *subscriptionHandler) GetUserSubscriptions(c *gin.Context) {
+	userID, err := uuid.Parse(c.Param("userId"))
+	if err != nil {
+		response.BadRequest(c, "invalid user ID")
+		return
+	}
+
+	page := 1
+	pageSize := 20
+
+	if p := c.Query("page"); p != "" {
+		if v, err := strconv.Atoi(p); err == nil && v > 0 {
+			page = v
+		}
+	}
+	if ps := c.Query("pageSize"); ps != "" {
+		if v, err := strconv.Atoi(ps); err == nil && v > 0 && v <= 100 {
+			pageSize = v
+		}
+	}
+
+	result, err := h.subscriptionUseCase.GetSubscriptions(c.Request.Context(), userID, page, pageSize)
+	if err != nil {
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.SuccessWithMeta(c, result.Data, &response.Meta{
+		Page:       result.Page,
+		PageSize:   result.PageSize,
+		Total:      result.Total,
+		TotalPages: result.TotalPages,
+	})
+}
+
+// CheckSubscriptionStatus godoc
+// @Summary Check subscription status
+// @Description Check if the current user is subscribed to a specific author
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param authorId path string true "Author ID"
+// @Success 200 {object} map[string]interface{}
+// @Security Bearer
+// @Router /api/v1/authors/{authorId}/subscription-status [get]
+func (h *subscriptionHandler) CheckSubscriptionStatus(c *gin.Context) {
+	subscriberID, exists := c.Get("userID")
+	if !exists {
+		response.Unauthorized(c, "authentication required")
+		return
+	}
+
+	authorID, err := uuid.Parse(c.Param("authorId"))
+	if err != nil {
+		response.BadRequest(c, "invalid author ID")
+		return
+	}
+
+	isSubscribed, err := h.subscriptionUseCase.IsSubscribed(c.Request.Context(), subscriberID.(uuid.UUID), authorID)
+	if err != nil {
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, gin.H{
+		"subscriberId": subscriberID.(uuid.UUID),
+		"authorId":     authorID,
+		"isSubscribed": isSubscribed,
+	})
+}

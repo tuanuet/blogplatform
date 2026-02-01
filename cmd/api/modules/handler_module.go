@@ -1,7 +1,16 @@
 package modules
 
 import (
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/blog"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/category"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/comment"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/fraud"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/health"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/profile"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/ranking"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/role"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/subscription"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/tag"
 	"go.uber.org/fx"
 )
 
@@ -9,14 +18,15 @@ import (
 // Uses constructors directly - no wrapper functions needed
 var HandlerModule = fx.Module("handler",
 	fx.Provide(
-		handler.NewHealthHandler,
-		handler.NewBlogHandler,
-		handler.NewCategoryHandler,
-		handler.NewTagHandler,
-		handler.NewCommentHandler,
-		handler.NewSubscriptionHandler,
-		handler.NewProfileHandler,
-		handler.NewRoleHandler,
-		handler.NewRankingHandler,
+		health.NewHealthHandler,
+		blog.NewBlogHandler,
+		category.NewCategoryHandler,
+		tag.NewTagHandler,
+		comment.NewCommentHandler,
+		subscription.NewSubscriptionHandler,
+		profile.NewProfileHandler,
+		role.NewRoleHandler,
+		ranking.NewRankingHandler,
+		fraud.NewFraudHandler,
 	),
 )

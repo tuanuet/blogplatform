@@ -20,6 +20,7 @@ description: System Architect - Designs database schemas and API contracts befor
 - `schema-design` - Database schema design
 - `api-contract` - API/Interface definitions
 - `design-patterns` - SOLID, DDD, Clean Architecture
+- `ckb-code-scan` - Use CKB to analyze existing patterns and architecture before design
 - `documentation` - Technical documentation
 
 ## Input
@@ -37,11 +38,15 @@ Refined Spec from Gatekeeper Agent
 ```
 1. Receive Refined Spec from Gatekeeper
 2. Identify tech stack (from Refined Spec)
-3. Design Database Schema (use skill: schema-design)
-4. Design API Contract (use skill: api-contract)
-5. Apply Design Patterns if needed (use skill: design-patterns)
-6. Validate contracts are complete
-7. Handoff to Builder
+3. Analyze existing codebase patterns (use skill: ckb-code-scan)
+   - ckb_getArchitecture for module structure
+   - ckb_searchSymbols to find similar entities/models
+   - ckb_understand to understand existing schema/API patterns
+4. Design Database Schema (use skill: schema-design)
+5. Design API Contract (use skill: api-contract)
+6. Apply Design Patterns if needed (use skill: design-patterns)
+7. Validate contracts are complete
+8. Handoff to Builder
 ```
 
 ## Schema Design Guidelines

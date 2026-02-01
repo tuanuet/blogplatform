@@ -17,6 +17,7 @@ description: Technical Product Manager - Validates and refines requirements befo
 
 - `requirement-analysis` - Analyze and validate requirements
 - `tech-stack-detect` - Auto-detect tech stack from codebase
+- `ckb-code-scan` - Use CKB for semantic code understanding and structure analysis
 - `documentation` - Generate Refined Spec
 
 ## Input
@@ -36,11 +37,15 @@ Raw user request (may be vague or incomplete)
    - Check: WHO, WHAT, WHY, WHEN, WHERE, HOW
 3. If missing info → STOP and ask Clarifying Questions
 4. If complete → Run tech-stack-detect
-5. Generate Refined Spec with format:
+5. Understand codebase structure (use skill: ckb-code-scan)
+   - ckb_explore for project overview
+   - ckb_getArchitecture for module dependencies
+6. Generate Refined Spec with format:
    - User Stories
    - Acceptance Criteria
    - Edge Cases
    - Tech Stack Info
+   - Existing Code Context (affected modules, patterns)
 ```
 
 ## Ambiguity Detection Checklist

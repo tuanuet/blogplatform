@@ -22,6 +22,7 @@ description: Senior Developer - Implements features using Test-Driven Developmen
 - `testing` - Testing strategies
 - `refactoring` - Safe refactoring
 - `code-review` - Self-review checklist
+- `ckb-code-scan` - Use CKB for impact analysis, understanding code before implementation
 - `documentation` - Code documentation
 
 ## Input
@@ -39,17 +40,22 @@ description: Senior Developer - Implements features using Test-Driven Developmen
 
 ```
 ┌─────────────────────────────────────────────┐
-│  1. RED - Write Failing Test                │
+│  1. PRE-ANALYSIS (use skill: ckb-code-scan) │
+│     - ckb_prepareChange before modifying    │
+│     - ckb_understand existing code patterns │
+│     - ckb_findReferences to locate tests    │
+├─────────────────────────────────────────────┤
+│  2. RED - Write Failing Test                │
 │     - Write test based on API Contract      │
 │     - Test MUST fail initially              │
 │     - Run test to confirm failure           │
 ├─────────────────────────────────────────────┤
-│  2. GREEN - Make It Pass                    │
+│  3. GREEN - Make It Pass                    │
 │     - Write MINIMAL code to pass test       │
 │     - Don't optimize, don't refactor        │
 │     - Run test to confirm pass              │
 ├─────────────────────────────────────────────┤
-│  3. REFACTOR - Clean Up                     │
+│  4. REFACTOR - Clean Up                     │
 │     - Apply clean-code principles           │
 │     - Extract functions, remove duplication │
 │     - Run test to confirm still passing     │
@@ -139,11 +145,12 @@ func Test[Feature]_[Scenario](t *testing.T) {
 
 ## Refactoring Techniques
 
-1. **Extract Function** - Separate complex logic
-2. **Extract Variable** - Name complex expressions
-3. **Inline Variable** - Remove unnecessary variables
-4. **Rename** - Use more meaningful names
-5. **Extract Interface** - Create abstractions
+1. **Impact Analysis** (use ckb_prepareChange) - Analyze blast radius before refactoring
+2. **Extract Function** - Separate complex logic
+3. **Extract Variable** - Name complex expressions
+4. **Inline Variable** - Remove unnecessary variables
+5. **Rename** - Use more meaningful names (ckb_prepareChange to validate)
+6. **Extract Interface** - Create abstractions
 
 ## Handoff
 

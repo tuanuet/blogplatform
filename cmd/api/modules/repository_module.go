@@ -2,6 +2,7 @@ package modules
 
 import (
 	"github.com/aiagent/boilerplate/internal/infrastructure/adapter"
+	"github.com/aiagent/boilerplate/internal/infrastructure/persistence"
 	pgRepo "github.com/aiagent/boilerplate/internal/infrastructure/persistence/postgres/repository"
 	"go.uber.org/fx"
 )
@@ -21,5 +22,6 @@ var RepositoryModule = fx.Module("repository",
 		pgRepo.NewUserRankingHistoryRepository,
 		pgRepo.NewUserFollowerSnapshotRepository,
 		adapter.NewSystemRepository,
+		persistence.NewFraudDetectionRepository,
 	),
 )

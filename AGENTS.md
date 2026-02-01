@@ -31,6 +31,7 @@
 
 - `requirement-analysis`
 - `tech-stack-detect`
+- `ckb-code-scan`
 - `documentation`
 
 **Input**: Raw user request
@@ -55,6 +56,7 @@
 - `schema-design`
 - `api-contract`
 - `design-patterns`
+- `ckb-code-scan`
 - `documentation`
 
 **Input**: Refined Spec from Gatekeeper
@@ -81,6 +83,7 @@
 - `testing`
 - `refactoring`
 - `code-review`
+- `ckb-code-scan`
 - `documentation`
 
 **Input**: API Contract from Architect

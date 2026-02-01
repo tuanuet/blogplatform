@@ -3,6 +3,7 @@ package modules
 import (
 	"context"
 
+	"github.com/aiagent/boilerplate/internal/domain/entity"
 	"github.com/aiagent/boilerplate/internal/infrastructure/cache"
 	"github.com/aiagent/boilerplate/internal/infrastructure/config"
 	"github.com/aiagent/boilerplate/internal/infrastructure/persistence/postgres"
@@ -23,6 +24,12 @@ func newDatabase(lc fx.Lifecycle, cfg *config.DatabaseConfig) (*gorm.DB, error) 
 		return nil, err
 	}
 
+	// Auto-migrate fraud detection models
+	if err := autoMigrateFraudModels(db); err != nil {
+		logger.Error("Failed to auto-migrate fraud detection models: %v", err)
+		return nil, err
+	}
+
 	lc.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
 			logger.Info("Closing database connection...")
@@ -32,6 +39,27 @@ func newDatabase(lc fx.Lifecycle, cfg *config.DatabaseConfig) (*gorm.DB, error) 
 
 	logger.Info("Database connected successfully")
 	return db, nil
+}
+
+// autoMigrateFraudModels migrates fraud detection related database tables
+func autoMigrateFraudModels(db *gorm.DB) error {
+	logger.Info("Auto-migrating fraud detection models...")
+
+	models := []interface{}{
+		&entity.FollowerEvent{},
+		&entity.BotDetectionSignal{},
+		&entity.UserRiskScore{},
+		&entity.UserBadgeStatus{},
+		&entity.AdminReview{},
+		&entity.BotFollowerNotification{},
+	}
+
+	if err := db.AutoMigrate(models...); err != nil {
+		return err
+	}
+
+	logger.Info("Fraud detection models migrated successfully")
+	return nil
 }
 
 // newRedisClient creates Redis client with cleanup on shutdown
