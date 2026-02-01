@@ -12,6 +12,7 @@ import (
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/profile"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/ranking"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/role"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/series"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/subscription"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/tag"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/middleware"
@@ -38,6 +39,7 @@ type Params struct {
 	SubscriptionHandler subscription.SubscriptionHandler
 	ProfileHandler      profile.ProfileHandler
 	RoleHandler         role.RoleHandler
+	SeriesHandler       series.SeriesHandler
 	RankingHandler      ranking.RankingHandler
 	FraudHandler        fraud.FraudHandler
 	RoleUseCase         usecase.RoleUseCase // For authorization middleware
@@ -123,6 +125,19 @@ func New(p Params) *gin.Engine {
 			// Blog comments
 			blogs.GET("/:id/comments", p.CommentHandler.GetByBlogID)
 			blogs.POST("/:id/comments", auth.RequireCreate("comments"), p.CommentHandler.Create)
+		}
+
+		// Series
+		seriesGroup := v1.Group("/series")
+		{
+			seriesGroup.GET("", p.SeriesHandler.List)
+			seriesGroup.GET("/:id", p.SeriesHandler.GetByID)
+			seriesGroup.GET("/slug/:slug", p.SeriesHandler.GetBySlug)
+			seriesGroup.POST("", auth.RequireCreate("series"), p.SeriesHandler.Create)
+			seriesGroup.PUT("/:id", auth.RequireUpdate("series"), p.SeriesHandler.Update)
+			seriesGroup.DELETE("/:id", auth.RequireDelete("series"), p.SeriesHandler.Delete)
+			seriesGroup.POST("/:id/blogs", auth.RequireUpdate("series"), p.SeriesHandler.AddBlog)
+			seriesGroup.DELETE("/:id/blogs/:blogId", auth.RequireUpdate("series"), p.SeriesHandler.RemoveBlog)
 		}
 
 		// Comments (for update/delete)

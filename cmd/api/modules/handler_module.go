@@ -10,6 +10,7 @@ import (
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/profile"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/ranking"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/role"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/series"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/subscription"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/tag"
 	"go.uber.org/fx"
@@ -28,6 +29,7 @@ var HandlerModule = fx.Module("handler",
 		subscription.NewSubscriptionHandler,
 		profile.NewProfileHandler,
 		role.NewRoleHandler,
+		series.NewSeriesHandler,
 		ranking.NewRankingHandler,
 		fraud.NewFraudHandler,
 	),

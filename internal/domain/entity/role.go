@@ -130,4 +130,5 @@ const (
 	ResourceComments   = "comments"
 	ResourceUsers      = "users"
 	ResourceRoles      = "roles"
+	ResourceSeries     = "series"
 )

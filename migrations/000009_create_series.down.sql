@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS series_blogs;
+DROP TABLE IF EXISTS series;
