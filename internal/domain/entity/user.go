@@ -30,10 +30,11 @@ type User struct {
 	Birthday      *time.Time `gorm:"type:date" json:"birthday,omitempty"`
 
 	// Relationships
-	Blogs         []Blog         `gorm:"foreignKey:AuthorID" json:"blogs,omitempty"`
-	Comments      []Comment      `gorm:"foreignKey:UserID" json:"comments,omitempty"`
-	Subscriptions []Subscription `gorm:"foreignKey:SubscriberID" json:"subscriptions,omitempty"`
-	Subscribers   []Subscription `gorm:"foreignKey:AuthorID" json:"subscribers,omitempty"`
+	Blogs           []Blog         `gorm:"foreignKey:AuthorID" json:"blogs,omitempty"`
+	BookmarkedBlogs []Blog         `gorm:"many2many:user_bookmarks;joinForeignKey:user_id;joinReferences:blog_id" json:"bookmarkedBlogs,omitempty"`
+	Comments        []Comment      `gorm:"foreignKey:UserID" json:"comments,omitempty"`
+	Subscriptions   []Subscription `gorm:"foreignKey:SubscriberID" json:"subscriptions,omitempty"`
+	Subscribers     []Subscription `gorm:"foreignKey:AuthorID" json:"subscribers,omitempty"`
 }
 
 // TableName returns the table name for User

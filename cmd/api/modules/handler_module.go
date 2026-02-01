@@ -2,6 +2,7 @@ package modules
 
 import (
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/blog"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/bookmark"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/category"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/comment"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/fraud"
@@ -20,6 +21,7 @@ var HandlerModule = fx.Module("handler",
 	fx.Provide(
 		health.NewHealthHandler,
 		blog.NewBlogHandler,
+		bookmark.NewBookmarkHandler,
 		category.NewCategoryHandler,
 		tag.NewTagHandler,
 		comment.NewCommentHandler,

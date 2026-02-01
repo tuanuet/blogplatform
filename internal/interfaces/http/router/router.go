@@ -4,6 +4,7 @@ import (
 	"github.com/aiagent/boilerplate/internal/application/usecase"
 	"github.com/aiagent/boilerplate/internal/infrastructure/config"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/blog"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/bookmark"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/category"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/comment"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/fraud"
@@ -30,6 +31,7 @@ type Params struct {
 
 	HealthHandler       health.HealthHandler
 	BlogHandler         blog.BlogHandler
+	BookmarkHandler     bookmark.BookmarkHandler
 	CategoryHandler     category.CategoryHandler
 	TagHandler          tag.TagHandler
 	CommentHandler      comment.CommentHandler
@@ -115,6 +117,8 @@ func New(p Params) *gin.Engine {
 			blogs.POST("/:id/publish", auth.RequireUpdate("blogs"), p.BlogHandler.Publish)     // Requires UPDATE permission
 			blogs.POST("/:id/unpublish", auth.RequireUpdate("blogs"), p.BlogHandler.Unpublish) // Requires UPDATE permission
 			blogs.POST("/:id/reaction", p.BlogHandler.React)                                   // Authenticated users
+			blogs.POST("/:id/bookmark", p.BookmarkHandler.Bookmark)
+			blogs.DELETE("/:id/bookmark", p.BookmarkHandler.Unbookmark)
 
 			// Blog comments
 			blogs.GET("/:id/comments", p.CommentHandler.GetByBlogID)
@@ -159,6 +163,9 @@ func New(p Params) *gin.Engine {
 
 		// My subscriptions
 		v1.GET("/subscriptions", p.SubscriptionHandler.GetMySubscriptions)
+
+		// My bookmarks
+		v1.GET("/bookmarks", p.BookmarkHandler.List)
 
 		// Unified Subscription/Follow API (users can follow/subscribe to each other)
 		v1.GET("/users/:userId/followers", p.SubscriptionHandler.GetSubscribers)
