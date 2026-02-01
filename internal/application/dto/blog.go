@@ -9,29 +9,32 @@ import (
 
 // CreateBlogRequest represents the request to create a blog
 type CreateBlogRequest struct {
-	Title        string   `json:"title" binding:"required,min=1,max=255"`
-	Slug         string   `json:"slug" binding:"required,min=1,max=255"`
-	Content      string   `json:"content" binding:"required"`
-	Excerpt      *string  `json:"excerpt,omitempty"`
-	ThumbnailURL *string  `json:"thumbnailUrl,omitempty" binding:"omitempty,url"`
-	CategoryID   *string  `json:"categoryId,omitempty" binding:"omitempty,uuid"`
-	TagIDs       []string `json:"tagIds,omitempty"`
+	Title        string     `json:"title" binding:"required,min=1,max=255"`
+	Slug         string     `json:"slug" binding:"required,min=1,max=255"`
+	Content      string     `json:"content" binding:"required"`
+	Excerpt      *string    `json:"excerpt,omitempty"`
+	ThumbnailURL *string    `json:"thumbnailUrl,omitempty" binding:"omitempty,url"`
+	CategoryID   *string    `json:"categoryId,omitempty" binding:"omitempty,uuid"`
+	TagIDs       []string   `json:"tagIds,omitempty"`
+	PublishedAt  *time.Time `json:"publishedAt,omitempty"`
 }
 
 // UpdateBlogRequest represents the request to update a blog
 type UpdateBlogRequest struct {
-	Title        *string  `json:"title,omitempty" binding:"omitempty,min=1,max=255"`
-	Slug         *string  `json:"slug,omitempty" binding:"omitempty,min=1,max=255"`
-	Content      *string  `json:"content,omitempty"`
-	Excerpt      *string  `json:"excerpt,omitempty"`
-	ThumbnailURL *string  `json:"thumbnailUrl,omitempty" binding:"omitempty,url"`
-	CategoryID   *string  `json:"categoryId,omitempty" binding:"omitempty,uuid"`
-	TagIDs       []string `json:"tagIds,omitempty"`
+	Title        *string    `json:"title,omitempty" binding:"omitempty,min=1,max=255"`
+	Slug         *string    `json:"slug,omitempty" binding:"omitempty,min=1,max=255"`
+	Content      *string    `json:"content,omitempty"`
+	Excerpt      *string    `json:"excerpt,omitempty"`
+	ThumbnailURL *string    `json:"thumbnailUrl,omitempty" binding:"omitempty,url"`
+	CategoryID   *string    `json:"categoryId,omitempty" binding:"omitempty,uuid"`
+	TagIDs       []string   `json:"tagIds,omitempty"`
+	PublishedAt  *time.Time `json:"publishedAt,omitempty"`
 }
 
 // PublishBlogRequest represents the request to publish a blog
 type PublishBlogRequest struct {
-	Visibility string `json:"visibility" binding:"required,oneof=public subscribers_only"`
+	Visibility  string     `json:"visibility" binding:"required,oneof=public subscribers_only"`
+	PublishedAt *time.Time `json:"publishedAt,omitempty"`
 }
 
 // ReactionRequest represents the request to react to a blog

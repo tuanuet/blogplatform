@@ -20,4 +20,8 @@ type UserRepository interface {
 
 	// UpdateProfile updates only profile fields
 	UpdateProfile(ctx context.Context, userID uuid.UUID, updates map[string]interface{}) error
+
+	// Interest operations
+	GetInterests(ctx context.Context, userID uuid.UUID) ([]entity.Tag, error)
+	ReplaceInterests(ctx context.Context, userID uuid.UUID, tagIDs []uuid.UUID) error
 }

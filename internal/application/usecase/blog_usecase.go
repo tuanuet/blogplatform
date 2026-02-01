@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"github.com/aiagent/boilerplate/internal/application/dto"
 	"github.com/aiagent/boilerplate/internal/domain/entity"
@@ -49,6 +50,7 @@ func (uc *blogUseCase) Create(ctx context.Context, authorID uuid.UUID, req *dto.
 		ThumbnailURL: req.ThumbnailURL,
 		Status:       entity.BlogStatusDraft,
 		Visibility:   entity.BlogVisibilityPublic,
+		PublishedAt:  req.PublishedAt,
 	}
 
 	if req.CategoryID != nil {
@@ -110,6 +112,17 @@ func (uc *blogUseCase) List(ctx context.Context, params *dto.BlogFilterParams, v
 	}
 	if params.Search != nil {
 		filter.Search = params.Search
+	}
+
+	// Filter scheduled posts if not viewing own posts
+	shouldFilterScheduled := true
+	if viewerID != nil && filter.AuthorID != nil && *filter.AuthorID == *viewerID {
+		shouldFilterScheduled = false
+	}
+
+	if shouldFilterScheduled {
+		now := time.Now()
+		filter.PublishedBefore = &now
 	}
 
 	result, err := uc.blogSvc.List(ctx, filter, repository.Pagination{Page: params.Page, PageSize: params.PageSize}, viewerID)
@@ -190,6 +203,9 @@ func (uc *blogUseCase) Update(ctx context.Context, id uuid.UUID, authorID uuid.U
 	if req.ThumbnailURL != nil {
 		blog.ThumbnailURL = req.ThumbnailURL
 	}
+	if req.PublishedAt != nil {
+		blog.PublishedAt = req.PublishedAt
+	}
 	if req.CategoryID != nil {
 		if id, err := uuid.Parse(*req.CategoryID); err == nil {
 			blog.CategoryID = &id
@@ -219,7 +235,7 @@ func (uc *blogUseCase) Delete(ctx context.Context, id uuid.UUID, authorID uuid.U
 }
 
 func (uc *blogUseCase) Publish(ctx context.Context, id uuid.UUID, authorID uuid.UUID, req *dto.PublishBlogRequest) (*dto.BlogResponse, error) {
-	blog, err := uc.blogSvc.Publish(ctx, id, authorID, entity.BlogVisibility(req.Visibility))
+	blog, err := uc.blogSvc.Publish(ctx, id, authorID, entity.BlogVisibility(req.Visibility), req.PublishedAt)
 	if err != nil {
 		return nil, err
 	}

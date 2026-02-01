@@ -17,4 +17,5 @@ type TagRepository interface {
 	FindOrCreate(ctx context.Context, name, slug string) (*entity.Tag, error)
 	Update(ctx context.Context, tag *entity.Tag) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	FindPopular(ctx context.Context, limit int) ([]entity.Tag, error)
 }

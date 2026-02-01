@@ -11,6 +11,8 @@ import (
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/health"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/profile"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/ranking"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/reading_history"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/recommendation"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/role"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/series"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/subscription"
@@ -30,20 +32,22 @@ import (
 type Params struct {
 	fx.In
 
-	HealthHandler       health.HealthHandler
-	BlogHandler         blog.BlogHandler
-	BookmarkHandler     bookmark.BookmarkHandler
-	CategoryHandler     category.CategoryHandler
-	TagHandler          tag.TagHandler
-	CommentHandler      comment.CommentHandler
-	SubscriptionHandler subscription.SubscriptionHandler
-	ProfileHandler      profile.ProfileHandler
-	RoleHandler         role.RoleHandler
-	SeriesHandler       series.SeriesHandler
-	RankingHandler      ranking.RankingHandler
-	FraudHandler        fraud.FraudHandler
-	RoleUseCase         usecase.RoleUseCase // For authorization middleware
-	Config              *config.Config
+	HealthHandler         health.HealthHandler
+	BlogHandler           blog.BlogHandler
+	BookmarkHandler       bookmark.BookmarkHandler
+	CategoryHandler       category.CategoryHandler
+	TagHandler            tag.TagHandler
+	CommentHandler        comment.CommentHandler
+	SubscriptionHandler   subscription.SubscriptionHandler
+	ProfileHandler        profile.ProfileHandler
+	RoleHandler           role.RoleHandler
+	SeriesHandler         series.SeriesHandler
+	RankingHandler        ranking.RankingHandler
+	ReadingHistoryHandler reading_history.ReadingHistoryHandler
+	RecommendationHandler recommendation.RecommendationHandler
+	FraudHandler          fraud.FraudHandler
+	RoleUseCase           usecase.RoleUseCase // For authorization middleware
+	Config                *config.Config
 }
 
 // New creates and configures a new Gin engine with all routes
@@ -91,6 +95,7 @@ func New(p Params) *gin.Engine {
 		// Users
 		users := v1.Group("/users")
 		{
+			users.POST("/me/interests", p.RecommendationHandler.UpdateInterests) // Update interests
 			users.GET("/:id/profile", p.ProfileHandler.GetPublicProfile)
 			users.GET("/:id/roles", p.RoleHandler.GetUserRoles)
 			users.POST("/:id/roles", auth.RequireAdmin("users"), p.RoleHandler.AssignRole)           // Admin only
@@ -112,13 +117,16 @@ func New(p Params) *gin.Engine {
 		blogs := v1.Group("/blogs")
 		{
 			blogs.GET("", p.BlogHandler.List)
+			blogs.GET("/feed", p.RecommendationHandler.GetPersonalizedFeed) // Personalized feed
 			blogs.GET("/:id", p.BlogHandler.GetByID)
+			blogs.GET("/:id/related", p.RecommendationHandler.GetRelatedBlogs)                 // Related blogs
 			blogs.POST("", auth.RequireCreate("blogs"), p.BlogHandler.Create)                  // Requires CREATE permission
 			blogs.PUT("/:id", auth.RequireUpdate("blogs"), p.BlogHandler.Update)               // Requires UPDATE permission
 			blogs.DELETE("/:id", auth.RequireDelete("blogs"), p.BlogHandler.Delete)            // Requires DELETE permission
 			blogs.POST("/:id/publish", auth.RequireUpdate("blogs"), p.BlogHandler.Publish)     // Requires UPDATE permission
 			blogs.POST("/:id/unpublish", auth.RequireUpdate("blogs"), p.BlogHandler.Unpublish) // Requires UPDATE permission
 			blogs.POST("/:id/reaction", p.BlogHandler.React)                                   // Authenticated users
+			blogs.POST("/:id/read", p.ReadingHistoryHandler.MarkAsRead)                        // Authenticated users
 			blogs.POST("/:id/bookmark", p.BookmarkHandler.Bookmark)
 			blogs.DELETE("/:id/bookmark", p.BookmarkHandler.Unbookmark)
 
@@ -161,6 +169,7 @@ func New(p Params) *gin.Engine {
 		tags := v1.Group("/tags")
 		{
 			tags.GET("", p.TagHandler.List)
+			tags.GET("/popular", p.RecommendationHandler.GetPopularTags) // Popular tags
 			tags.GET("/:id", p.TagHandler.GetByID)
 			tags.POST("", auth.RequireCreate("tags"), p.TagHandler.Create)       // Requires CREATE permission
 			tags.PUT("/:id", auth.RequireUpdate("tags"), p.TagHandler.Update)    // Requires UPDATE permission
@@ -181,6 +190,9 @@ func New(p Params) *gin.Engine {
 
 		// My bookmarks
 		v1.GET("/bookmarks", p.BookmarkHandler.List)
+
+		// My reading history
+		v1.GET("/me/history", p.ReadingHistoryHandler.GetHistory)
 
 		// Unified Subscription/Follow API (users can follow/subscribe to each other)
 		v1.GET("/users/:userId/followers", p.SubscriptionHandler.GetSubscribers)

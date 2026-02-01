@@ -35,6 +35,7 @@ type User struct {
 	Comments        []Comment      `gorm:"foreignKey:UserID" json:"comments,omitempty"`
 	Subscriptions   []Subscription `gorm:"foreignKey:SubscriberID" json:"subscriptions,omitempty"`
 	Subscribers     []Subscription `gorm:"foreignKey:AuthorID" json:"subscribers,omitempty"`
+	Interests       []Tag          `gorm:"many2many:user_interests" json:"interests,omitempty"`
 }
 
 // TableName returns the table name for User

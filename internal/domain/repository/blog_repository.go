@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/aiagent/boilerplate/internal/domain/entity"
 	"github.com/google/uuid"
@@ -9,12 +10,13 @@ import (
 
 // BlogFilter defines filter options for blog queries
 type BlogFilter struct {
-	AuthorID   *uuid.UUID
-	CategoryID *uuid.UUID
-	Status     *entity.BlogStatus
-	Visibility *entity.BlogVisibility
-	TagIDs     []uuid.UUID
-	Search     *string // search in title or content
+	AuthorID        *uuid.UUID
+	CategoryID      *uuid.UUID
+	Status          *entity.BlogStatus
+	Visibility      *entity.BlogVisibility
+	TagIDs          []uuid.UUID
+	Search          *string // search in title or content
+	PublishedBefore *time.Time
 }
 
 // BlogRepository defines the interface for blog data operations
@@ -37,4 +39,7 @@ type BlogRepository interface {
 	// React handles the reaction logic (insert/delete/swap) and returns the DELTA (change) in counts
 	// rather than the absolute totals, to allow for buffered updates.
 	React(ctx context.Context, blogID, userID uuid.UUID, reactionType entity.ReactionType) (upDelta, downDelta int, err error)
+
+	// Recommendation operations
+	FindRelated(ctx context.Context, blogID uuid.UUID, limit int) ([]entity.Blog, error)
 }

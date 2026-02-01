@@ -9,6 +9,8 @@ import (
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/health"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/profile"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/ranking"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/reading_history"
+	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/recommendation"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/role"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/series"
 	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/subscription"
@@ -31,6 +33,8 @@ var HandlerModule = fx.Module("handler",
 		role.NewRoleHandler,
 		series.NewSeriesHandler,
 		ranking.NewRankingHandler,
+		reading_history.NewReadingHistoryHandler,
 		fraud.NewFraudHandler,
+		recommendation.NewRecommendationHandler,
 	),
 )

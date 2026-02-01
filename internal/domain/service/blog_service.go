@@ -25,7 +25,7 @@ type BlogService interface {
 	List(ctx context.Context, filter repository.BlogFilter, pagination repository.Pagination, viewerID *uuid.UUID) (*repository.PaginatedResult[entity.Blog], error)
 	Update(ctx context.Context, blog *entity.Blog, tagIDs []uuid.UUID) error
 	Delete(ctx context.Context, id uuid.UUID, authorID uuid.UUID) error
-	Publish(ctx context.Context, id uuid.UUID, authorID uuid.UUID, visibility entity.BlogVisibility) (*entity.Blog, error)
+	Publish(ctx context.Context, id uuid.UUID, authorID uuid.UUID, visibility entity.BlogVisibility, publishedAt *time.Time) (*entity.Blog, error)
 	Unpublish(ctx context.Context, id uuid.UUID, authorID uuid.UUID) (*entity.Blog, error)
 	React(ctx context.Context, id uuid.UUID, userID uuid.UUID, reactionType entity.ReactionType) (upvotes, downvotes int, err error)
 	CheckAccess(ctx context.Context, blog *entity.Blog, viewerID *uuid.UUID) error
@@ -164,7 +164,7 @@ func (s *blogService) Delete(ctx context.Context, id uuid.UUID, authorID uuid.UU
 	return s.blogRepo.Delete(ctx, id)
 }
 
-func (s *blogService) Publish(ctx context.Context, id uuid.UUID, authorID uuid.UUID, visibility entity.BlogVisibility) (*entity.Blog, error) {
+func (s *blogService) Publish(ctx context.Context, id uuid.UUID, authorID uuid.UUID, visibility entity.BlogVisibility, publishedAt *time.Time) (*entity.Blog, error) {
 	blog, err := s.blogRepo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -178,7 +178,7 @@ func (s *blogService) Publish(ctx context.Context, id uuid.UUID, authorID uuid.U
 	}
 
 	blog.Visibility = visibility
-	blog.Publish()
+	blog.Publish(publishedAt)
 
 	if err := s.blogRepo.Update(ctx, blog); err != nil {
 		return nil, err
@@ -246,7 +246,7 @@ func (s *blogService) React(ctx context.Context, id uuid.UUID, userID uuid.UUID,
 }
 
 func (s *blogService) CheckAccess(ctx context.Context, blog *entity.Blog, viewerID *uuid.UUID) error {
-	if blog.IsDraft() {
+	if blog.IsDraft() || blog.IsScheduled() {
 		if viewerID == nil || *viewerID != blog.AuthorID {
 			return ErrBlogAccessDenied
 		}

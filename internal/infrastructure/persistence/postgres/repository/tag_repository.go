@@ -103,3 +103,15 @@ func (r *tagRepository) Update(ctx context.Context, tag *entity.Tag) error {
 func (r *tagRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return r.db.WithContext(ctx).Delete(&entity.Tag{}, "id = ?", id).Error
 }
+
+func (r *tagRepository) FindPopular(ctx context.Context, limit int) ([]entity.Tag, error) {
+	var tags []entity.Tag
+	err := r.db.WithContext(ctx).
+		Model(&entity.Tag{}).
+		Joins("JOIN blog_tags ON blog_tags.tag_id = tags.id").
+		Group("tags.id").
+		Order("COUNT(blog_tags.blog_id) DESC").
+		Limit(limit).
+		Find(&tags).Error
+	return tags, err
+}

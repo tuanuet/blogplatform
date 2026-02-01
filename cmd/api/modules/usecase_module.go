@@ -18,6 +18,8 @@ var UseCaseModule = fx.Module("usecase",
 		usecase.NewCommentUseCase,
 		usecase.NewBookmarkUseCase,
 		usecase.NewSeriesUseCase,
+		usecase.NewReadingHistoryUseCase,
 		usecase.NewRankingUseCase,
+		usecase.NewRecommendationUseCase,
 	),
 )

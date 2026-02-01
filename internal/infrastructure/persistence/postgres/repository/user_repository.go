@@ -50,3 +50,29 @@ func (r *userRepository) UpdateProfile(ctx context.Context, userID uuid.UUID, up
 		Where("id = ?", userID).
 		Updates(updates).Error
 }
+
+func (r *userRepository) GetInterests(ctx context.Context, userID uuid.UUID) ([]entity.Tag, error) {
+	var user entity.User
+	err := r.db.WithContext(ctx).
+		Preload("Interests").
+		Where("id = ?", userID).
+		First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return user.Interests, nil
+}
+
+func (r *userRepository) ReplaceInterests(ctx context.Context, userID uuid.UUID, tagIDs []uuid.UUID) error {
+	var user entity.User
+	user.ID = userID
+
+	var tags []entity.Tag
+	if len(tagIDs) > 0 {
+		if err := r.db.WithContext(ctx).Where("id IN ?", tagIDs).Find(&tags).Error; err != nil {
+			return err
+		}
+	}
+
+	return r.db.WithContext(ctx).Model(&user).Association("Interests").Replace(tags)
+}

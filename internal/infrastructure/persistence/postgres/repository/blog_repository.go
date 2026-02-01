@@ -78,6 +78,9 @@ func (r *blogRepository) FindAll(ctx context.Context, filter repository.BlogFilt
 		query = query.Joins("JOIN blog_tags ON blog_tags.blog_id = blogs.id").
 			Where("blog_tags.tag_id IN ?", filter.TagIDs)
 	}
+	if filter.PublishedBefore != nil {
+		query = query.Where("published_at <= ?", filter.PublishedBefore)
+	}
 
 	// Count total
 	if err := query.Count(&total).Error; err != nil {
@@ -235,4 +238,27 @@ func (r *blogRepository) UpdateCounts(ctx context.Context, blogID uuid.UUID, upD
 	}
 
 	return r.db.WithContext(ctx).Model(&entity.Blog{}).Where("id = ?", blogID).Updates(updates).Error
+}
+
+func (r *blogRepository) FindRelated(ctx context.Context, blogID uuid.UUID, limit int) ([]entity.Blog, error) {
+	var blogs []entity.Blog
+
+	// Subquery to find tags of the current blog
+	subQuery := r.db.Table("blog_tags").Select("tag_id").Where("blog_id = ?", blogID)
+
+	err := r.db.WithContext(ctx).
+		Model(&entity.Blog{}).
+		Preload("Author").
+		Preload("Category").
+		Preload("Tags").
+		Joins("JOIN blog_tags ON blog_tags.blog_id = blogs.id").
+		Where("blog_tags.tag_id IN (?)", subQuery).
+		Where("blogs.id != ?", blogID).
+		Where("blogs.status = ?", entity.BlogStatusPublished).
+		Group("blogs.id").
+		Order("COUNT(blog_tags.tag_id) DESC, blogs.published_at DESC").
+		Limit(limit).
+		Find(&blogs).Error
+
+	return blogs, err
 }

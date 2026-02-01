@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  dto.AddBlogToSeriesRequest:
+    properties:
+      blogId:
+        type: string
+    required:
+    - blogId
+    type: object
   dto.AssignRoleRequest:
     properties:
       roleId:
@@ -11,6 +18,43 @@ definitions:
     properties:
       avatarUrl:
         type: string
+    type: object
+  dto.BlogListResponse:
+    properties:
+      author:
+        $ref: '#/definitions/dto.UserBriefResponse'
+      authorId:
+        type: string
+      category:
+        $ref: '#/definitions/dto.CategoryResponse'
+      categoryId:
+        type: string
+      createdAt:
+        type: string
+      downvoteCount:
+        type: integer
+      excerpt:
+        type: string
+      id:
+        type: string
+      publishedAt:
+        type: string
+      slug:
+        type: string
+      status:
+        $ref: '#/definitions/entity.BlogStatus'
+      tags:
+        items:
+          $ref: '#/definitions/dto.TagResponse'
+        type: array
+      thumbnailUrl:
+        type: string
+      title:
+        type: string
+      upvoteCount:
+        type: integer
+      visibility:
+        $ref: '#/definitions/entity.BlogVisibility'
     type: object
   dto.BlogResponse:
     properties:
@@ -26,6 +70,8 @@ definitions:
         type: string
       createdAt:
         type: string
+      downvoteCount:
+        type: integer
       excerpt:
         type: string
       id:
@@ -46,6 +92,12 @@ definitions:
         type: string
       updatedAt:
         type: string
+      upvoteCount:
+        type: integer
+      userReaction:
+        allOf:
+        - $ref: '#/definitions/entity.ReactionType'
+        description: For the current viewer
       visibility:
         $ref: '#/definitions/entity.BlogVisibility'
     type: object
@@ -94,6 +146,8 @@ definitions:
       content:
         type: string
       excerpt:
+        type: string
+      publishedAt:
         type: string
       slug:
         maxLength: 255
@@ -152,6 +206,20 @@ definitions:
     required:
     - name
     type: object
+  dto.CreateSeriesRequest:
+    properties:
+      description:
+        type: string
+      slug:
+        maxLength: 255
+        type: string
+      title:
+        maxLength: 255
+        type: string
+    required:
+    - slug
+    - title
+    type: object
   dto.CreateTagRequest:
     properties:
       name:
@@ -198,11 +266,15 @@ definitions:
         type: string
       bio:
         type: string
+      birthday:
+        type: string
       createdAt:
         type: string
       displayName:
         type: string
       email:
+        type: string
+      gender:
         type: string
       githubHandle:
         type: string
@@ -242,6 +314,8 @@ definitions:
     type: object
   dto.PublishBlogRequest:
     properties:
+      publishedAt:
+        type: string
       visibility:
         enum:
         - public
@@ -249,6 +323,55 @@ definitions:
         type: string
     required:
     - visibility
+    type: object
+  dto.RankingHistoryEntry:
+    properties:
+      compositeScore:
+        type: number
+      followerCount:
+        type: integer
+      rankPosition:
+        type: integer
+      recordedAt:
+        type: string
+    type: object
+  dto.ReactionRequest:
+    properties:
+      reaction:
+        enum:
+        - upvote
+        - downvote
+        - none
+        type: string
+    required:
+    - reaction
+    type: object
+  dto.ReactionResponse:
+    properties:
+      blogId:
+        type: string
+      downvoteCount:
+        type: integer
+      upvoteCount:
+        type: integer
+      userReaction:
+        $ref: '#/definitions/entity.ReactionType'
+    type: object
+  dto.ReadingHistoryListResponse:
+    properties:
+      history:
+        items:
+          $ref: '#/definitions/dto.ReadingHistoryResponse'
+        type: array
+    type: object
+  dto.ReadingHistoryResponse:
+    properties:
+      blog:
+        $ref: '#/definitions/dto.BlogListResponse'
+      blogId:
+        type: string
+      lastReadAt:
+        type: string
     type: object
   dto.RoleResponse:
     properties:
@@ -264,6 +387,29 @@ definitions:
         items:
           $ref: '#/definitions/dto.PermissionResponse'
         type: array
+    type: object
+  dto.SeriesResponse:
+    properties:
+      author:
+        $ref: '#/definitions/dto.UserBriefResponse'
+      authorId:
+        type: string
+      blogs:
+        items:
+          $ref: '#/definitions/dto.BlogListResponse'
+        type: array
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      slug:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
     type: object
   dto.ServiceHealth:
     properties:
@@ -289,6 +435,8 @@ definitions:
       authorId:
         type: string
       subscriberCount:
+        type: integer
+      subscriptionCount:
         type: integer
     type: object
   dto.SubscriptionResponse:
@@ -324,6 +472,8 @@ definitions:
       content:
         type: string
       excerpt:
+        type: string
+      publishedAt:
         type: string
       slug:
         maxLength: 255
@@ -366,9 +516,17 @@ definitions:
       bio:
         maxLength: 500
         type: string
+      birthday:
+        type: string
       displayName:
         maxLength: 50
         minLength: 3
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        - other
         type: string
       githubHandle:
         maxLength: 50
@@ -396,6 +554,14 @@ definitions:
         minLength: 2
         type: string
     type: object
+  dto.UpdateSeriesRequest:
+    properties:
+      description:
+        type: string
+      title:
+        maxLength: 255
+        type: string
+    type: object
   dto.UpdateTagRequest:
     properties:
       name:
@@ -406,6 +572,15 @@ definitions:
         maxLength: 50
         minLength: 1
         type: string
+    type: object
+  dto.UpdateUserInterestsRequest:
+    properties:
+      tagIds:
+        items:
+          type: string
+        type: array
+    required:
+    - tagIds
     type: object
   dto.UserBriefResponse:
     properties:
@@ -433,6 +608,37 @@ definitions:
       userId:
         type: string
     type: object
+  dto.UserRankingDetailResponse:
+    properties:
+      avatarUrl:
+        type: string
+      blogPostVelocity:
+        type: number
+      calculationDate:
+        type: string
+      compositeScore:
+        type: number
+      displayName:
+        type: string
+      followerCount:
+        type: integer
+      followerGrowthRate:
+        type: number
+      history:
+        items:
+          $ref: '#/definitions/dto.RankingHistoryEntry'
+        type: array
+      previousRank:
+        type: integer
+      rank:
+        type: integer
+      rankChange:
+        type: integer
+      userId:
+        type: string
+      username:
+        type: string
+    type: object
   dto.UserRolesResponse:
     properties:
       roles:
@@ -458,6 +664,22 @@ definitions:
     x-enum-varnames:
     - BlogVisibilityPublic
     - BlogVisibilitySubscribersOnly
+  entity.ReactionType:
+    enum:
+    - upvote
+    - downvote
+    - none
+    type: string
+    x-enum-comments:
+      ReactionTypeNone: Used for requests to remove reaction
+    x-enum-descriptions:
+    - ""
+    - ""
+    - Used for requests to remove reaction
+    x-enum-varnames:
+    - ReactionTypeUpvote
+    - ReactionTypeDownvote
+    - ReactionTypeNone
   response.ErrorInfo:
     properties:
       code:
@@ -583,6 +805,30 @@ paths:
           schema:
             $ref: '#/definitions/dto.SubscriptionCountResponse'
       summary: Get subscriber count
+      tags:
+      - Subscriptions
+  /api/v1/authors/{authorId}/subscription-status:
+    get:
+      consumes:
+      - application/json
+      description: Check if the current user is subscribed to a specific author
+      parameters:
+      - description: Author ID
+        in: path
+        name: authorId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Check subscription status
       tags:
       - Subscriptions
   /api/v1/authors/{authorId}/unsubscribe:
@@ -851,6 +1097,63 @@ paths:
       summary: Update a blog
       tags:
       - Blogs
+  /api/v1/blogs/{id}/bookmark:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a blog from user's bookmarks
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Unbookmark a blog
+      tags:
+      - Bookmarks
+    post:
+      consumes:
+      - application/json
+      description: Add a blog to user's bookmarks
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Bookmark a blog
+      tags:
+      - Bookmarks
   /api/v1/blogs/{id}/publish:
     post:
       consumes:
@@ -888,6 +1191,103 @@ paths:
       summary: Publish a blog
       tags:
       - Blogs
+  /api/v1/blogs/{id}/reaction:
+    post:
+      consumes:
+      - application/json
+      description: Upvote, downvote, or remove reaction from a blog
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Reaction
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReactionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReactionResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: React to a blog
+      tags:
+      - Blogs
+  /api/v1/blogs/{id}/read:
+    post:
+      consumes:
+      - application/json
+      description: Record that a user viewed a blog post (Upsert)
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Record a blog view
+      tags:
+      - ReadingHistory
+  /api/v1/blogs/{id}/related:
+    get:
+      consumes:
+      - application/json
+      description: Get related blogs based on tags
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.BlogListResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get related blogs
+      tags:
+      - Recommendations
   /api/v1/blogs/{id}/unpublish:
     post:
       consumes:
@@ -919,6 +1319,70 @@ paths:
       summary: Unpublish a blog
       tags:
       - Blogs
+  /api/v1/blogs/feed:
+    get:
+      consumes:
+      - application/json
+      description: Get blogs based on user interests (fallback to recent if no interests)
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Get personalized feed
+      tags:
+      - Recommendations
+  /api/v1/bookmarks:
+    get:
+      consumes:
+      - application/json
+      description: Get list of bookmarked blogs
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Get my bookmarks
+      tags:
+      - Bookmarks
   /api/v1/categories:
     get:
       consumes:
@@ -1141,6 +1605,32 @@ paths:
       summary: Health Check
       tags:
       - Health
+  /api/v1/me/history:
+    get:
+      consumes:
+      - application/json
+      description: Get the list of recently viewed blogs
+      parameters:
+      - description: Limit number of records (default 20)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReadingHistoryListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Get reading history
+      tags:
+      - ReadingHistory
   /api/v1/permissions:
     get:
       consumes:
@@ -1279,6 +1769,108 @@ paths:
       summary: Upload avatar
       tags:
       - Profile
+  /api/v1/rankings/recalculate:
+    post:
+      consumes:
+      - application/json
+      description: Trigger a recalculation of all velocity scores (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Recalculate all scores
+      tags:
+      - Rankings
+  /api/v1/rankings/top:
+    get:
+      consumes:
+      - application/json
+      description: Get top users by total followers
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get top users
+      tags:
+      - Rankings
+  /api/v1/rankings/trending:
+    get:
+      consumes:
+      - application/json
+      description: Get users ranked by velocity score (follower growth + blog activity)
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get trending users
+      tags:
+      - Rankings
+  /api/v1/rankings/users/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed ranking information for a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserRankingDetailResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get user ranking
+      tags:
+      - Rankings
   /api/v1/roles:
     get:
       consumes:
@@ -1485,6 +2077,264 @@ paths:
       summary: Set permission for a role
       tags:
       - Roles
+  /api/v1/series:
+    get:
+      consumes:
+      - application/json
+      description: List series with optional filters
+      parameters:
+      - description: Filter by author ID
+        in: query
+        name: authorId
+        type: string
+      - description: Search in title or description
+        in: query
+        name: search
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List series
+      tags:
+      - Series
+    post:
+      consumes:
+      - application/json
+      description: Create a new series
+      parameters:
+      - description: Series data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateSeriesRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.SeriesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Create a new series
+      tags:
+      - Series
+  /api/v1/series/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a series (author only)
+      parameters:
+      - description: Series ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Delete a series
+      tags:
+      - Series
+    get:
+      consumes:
+      - application/json
+      description: Get a series by its ID
+      parameters:
+      - description: Series ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SeriesResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get series by ID
+      tags:
+      - Series
+    put:
+      consumes:
+      - application/json
+      description: Update an existing series (author only)
+      parameters:
+      - description: Series ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Series data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateSeriesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SeriesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Update a series
+      tags:
+      - Series
+  /api/v1/series/{id}/blogs:
+    post:
+      consumes:
+      - application/json
+      description: Add a blog to a series (author only)
+      parameters:
+      - description: Series ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Blog ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddBlogToSeriesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Add blog to series
+      tags:
+      - Series
+  /api/v1/series/{id}/blogs/{blogId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a blog from a series (author only)
+      parameters:
+      - description: Series ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Blog ID
+        in: path
+        name: blogId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Remove blog from series
+      tags:
+      - Series
+  /api/v1/series/slug/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: Get a series by its slug
+      parameters:
+      - description: Series Slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SeriesResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get series by slug
+      tags:
+      - Series
   /api/v1/subscriptions:
     get:
       consumes:
@@ -1655,6 +2505,27 @@ paths:
       summary: Update a tag
       tags:
       - Tags
+  /api/v1/tags/popular:
+    get:
+      consumes:
+      - application/json
+      description: Get top 10 most used tags
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.TagResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get popular tags
+      tags:
+      - Recommendations
   /api/v1/users/{id}/profile:
     get:
       consumes:
@@ -1787,6 +2658,94 @@ paths:
       summary: Remove role from user
       tags:
       - Roles
+  /api/v1/users/{userId}/subscription-counts:
+    get:
+      consumes:
+      - application/json
+      description: Get both subscriber count and subscription count for a user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SubscriptionCountResponse'
+      summary: Get subscription counts for a user
+      tags:
+      - Subscriptions
+  /api/v1/users/{userId}/subscriptions:
+    get:
+      consumes:
+      - application/json
+      description: Get list of authors that a specific user is subscribed to
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get user's subscriptions
+      tags:
+      - Subscriptions
+  /api/v1/users/me/interests:
+    post:
+      consumes:
+      - application/json
+      description: Update the logged-in user's interested tags
+      parameters:
+      - description: Tag IDs
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserInterestsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Update user interests
+      tags:
+      - Recommendations
   /ping:
     get:
       consumes:

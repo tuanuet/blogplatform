@@ -60,6 +60,11 @@ func (b *Blog) IsPublished() bool {
 	return b.Status == BlogStatusPublished
 }
 
+// IsScheduled checks if the blog is scheduled for future publication
+func (b *Blog) IsScheduled() bool {
+	return b.Status == BlogStatusPublished && b.PublishedAt != nil && b.PublishedAt.After(time.Now())
+}
+
 // IsDraft checks if the blog is a draft
 func (b *Blog) IsDraft() bool {
 	return b.Status == BlogStatusDraft
@@ -76,10 +81,14 @@ func (b *Blog) IsSubscribersOnly() bool {
 }
 
 // Publish publishes the blog
-func (b *Blog) Publish() {
-	now := time.Now()
+func (b *Blog) Publish(at *time.Time) {
+	if at != nil {
+		b.PublishedAt = at
+	} else {
+		now := time.Now()
+		b.PublishedAt = &now
+	}
 	b.Status = BlogStatusPublished
-	b.PublishedAt = &now
 }
 
 // Unpublish reverts the blog to draft
