@@ -11,6 +11,8 @@ type UpdateProfileRequest struct {
 	TwitterHandle *string `json:"twitterHandle" validate:"omitempty,max=50"`
 	GithubHandle  *string `json:"githubHandle" validate:"omitempty,max=50"`
 	LinkedinURL   *string `json:"linkedinUrl" validate:"omitempty,max=255,url"`
+	Gender        *string `json:"gender" validate:"omitempty,oneof=male female other"`
+	Birthday      *string `json:"birthday" validate:"omitempty,datetime=2006-01-02"`
 }
 
 // ProfileResponse represents the user profile response
@@ -26,6 +28,8 @@ type ProfileResponse struct {
 	TwitterHandle string    `json:"twitterHandle,omitempty"`
 	GithubHandle  string    `json:"githubHandle,omitempty"`
 	LinkedinURL   string    `json:"linkedinUrl,omitempty"`
+	Gender        string    `json:"gender,omitempty"`
+	Birthday      string    `json:"birthday,omitempty"`
 	CreatedAt     string    `json:"createdAt"`
 }
 

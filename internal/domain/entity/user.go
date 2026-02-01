@@ -18,14 +18,16 @@ type User struct {
 	DeletedAt    *time.Time `gorm:"index" json:"deletedAt,omitempty"`
 
 	// Profile fields
-	DisplayName   *string `gorm:"size:50" json:"displayName,omitempty"`
-	Bio           *string `gorm:"type:text" json:"bio,omitempty"`
-	AvatarURL     *string `gorm:"size:500" json:"avatarUrl,omitempty"`
-	Website       *string `gorm:"size:255" json:"website,omitempty"`
-	Location      *string `gorm:"size:100" json:"location,omitempty"`
-	TwitterHandle *string `gorm:"size:50" json:"twitterHandle,omitempty"`
-	GithubHandle  *string `gorm:"size:50" json:"githubHandle,omitempty"`
-	LinkedinURL   *string `gorm:"size:255" json:"linkedinUrl,omitempty"`
+	DisplayName   *string    `gorm:"size:50" json:"displayName,omitempty"`
+	Bio           *string    `gorm:"type:text" json:"bio,omitempty"`
+	AvatarURL     *string    `gorm:"size:500" json:"avatarUrl,omitempty"`
+	Website       *string    `gorm:"size:255" json:"website,omitempty"`
+	Location      *string    `gorm:"size:100" json:"location,omitempty"`
+	TwitterHandle *string    `gorm:"size:50" json:"twitterHandle,omitempty"`
+	GithubHandle  *string    `gorm:"size:50" json:"githubHandle,omitempty"`
+	LinkedinURL   *string    `gorm:"size:255" json:"linkedinUrl,omitempty"`
+	Gender        *string    `gorm:"size:10" json:"gender,omitempty"`
+	Birthday      *time.Time `gorm:"type:date" json:"birthday,omitempty"`
 
 	// Relationships
 	Blogs         []Blog         `gorm:"foreignKey:AuthorID" json:"blogs,omitempty"`

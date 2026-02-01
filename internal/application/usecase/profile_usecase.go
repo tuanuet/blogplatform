@@ -107,6 +107,19 @@ func (uc *profileUseCase) UpdateProfile(ctx context.Context, userID uuid.UUID, r
 	if req.LinkedinURL != nil {
 		updates["linkedin_url"] = *req.LinkedinURL
 	}
+	if req.Gender != nil {
+		updates["gender"] = *req.Gender
+	}
+	if req.Birthday != nil {
+		birthday, err := time.Parse("2006-01-02", *req.Birthday)
+		if err != nil {
+			return nil, fmt.Errorf("invalid birthday format: %w", err)
+		}
+		if birthday.After(time.Now()) {
+			return nil, errors.New("birthday cannot be in the future")
+		}
+		updates["birthday"] = birthday
+	}
 
 	if err := uc.userSvc.UpdateUser(ctx, userID, updates); err != nil {
 		return nil, err
@@ -212,6 +225,12 @@ func (uc *profileUseCase) toProfileResponse(user *entity.User) *dto.ProfileRespo
 	}
 	if user.LinkedinURL != nil {
 		resp.LinkedinURL = *user.LinkedinURL
+	}
+	if user.Gender != nil {
+		resp.Gender = *user.Gender
+	}
+	if user.Birthday != nil {
+		resp.Birthday = user.Birthday.Format("2006-01-02")
 	}
 
 	return resp
