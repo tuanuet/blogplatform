@@ -14,6 +14,7 @@ type Config struct {
 	Redis     RedisConfig
 	Logger    LoggerConfig
 	Telemetry TelemetryConfig
+	Scheduler SchedulerConfig
 }
 
 // ServerConfig holds server-related configuration
@@ -55,6 +56,13 @@ type LoggerConfig struct {
 type TelemetryConfig struct {
 	ServiceName string `mapstructure:"service_name"`
 	Enabled     bool   `mapstructure:"enabled"`
+}
+
+// SchedulerConfig holds scheduler-related configuration
+type SchedulerConfig struct {
+	Enabled                bool   `mapstructure:"enabled"`
+	DailyRecalculationHour int    `mapstructure:"daily_recalculation_hour"`
+	Timezone               string `mapstructure:"timezone"`
 }
 
 // Load loads the configuration from file and environment variables
@@ -113,4 +121,9 @@ func setDefaults() {
 	// Telemetry defaults
 	viper.SetDefault("telemetry.service_name", "go-boilerplate")
 	viper.SetDefault("telemetry.enabled", true)
+
+	// Scheduler defaults
+	viper.SetDefault("scheduler.enabled", true)
+	viper.SetDefault("scheduler.daily_recalculation_hour", 0)
+	viper.SetDefault("scheduler.timezone", "Local")
 }

@@ -1,107 +1,98 @@
 ---
-description: Brainstorming and ideation before development
+description: Discuss and define a feature before development
 ---
 
 # Brainstorming Workflow
 
-Structured idea exploration and solution design **BEFORE** entering the development pipeline.
+Collaborative feature discussion and requirement definition. This workflow serves as the **pre-cursor** to the development pipeline.
 
 ## When to Use
 
-- When exploring a new product idea or feature concept
-- When solving a complex problem with multiple possible solutions
-- When needing to evaluate trade-offs between approaches
-- When the requirement is vague and needs creative exploration
+- When you have a feature idea but need to flesh out the details
+- When you need to discuss requirements, edge cases, and user flows
+- When you want to prepare a clear feature specification for development
+- **Goal**: Turn a rough idea into a structured input for `/pipeline`
 
 ## Phases
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   IDEATE    │ ──▶ │   ANALYZE   │ ──▶ │   REFINE    │
-│  (Explore)  │     │  (Evaluate) │     │  (Document) │
+│   DISCUSS   │ ──▶ │   DEFINE    │ ──▶ │   PREPARE   │
+│  (Context)  │     │  (Specs)    │     │  (Output)   │
 └─────────────┘     └─────────────┘     └─────────────┘
 ```
 
-### Phase 1: IDEATE
+### Phase 1: DISCUSS (Context & Scope)
 
-Generate and explore ideas without judgment.
-
-```
-1. Define the problem statement clearly
-2. Use brainstorming techniques (SCAMPER, Six Hats, etc.)
-3. Generate at least 3-5 alternative approaches
-4. No filtering at this stage - quantity over quality
-```
-
-- Skills: `brainstorming`, `ideation`
-- Output: List of raw ideas and approaches
-
-### Phase 2: ANALYZE
-
-Evaluate and compare the generated ideas.
+Understand the "Why" and "What".
 
 ```
-1. Create decision matrix with weighted criteria
-2. Assess pros/cons for top candidates
-3. Identify risks and dependencies
-4. Check technical feasibility
+1. Discuss the feature's goal and user value
+2. Identify target users and use cases
+3. Explore potential technical approaches (high-level)
+4. Discuss constraints and non-functional requirements
 ```
 
-- Skills: `solution-evaluation`
-- Output: Ranked options with analysis
+- Skills: `brainstorming`, `ideation`, `requirement-analysis`
+- Output: Clear understanding of feature scope
 
-### Phase 3: REFINE
+### Phase 2: DEFINE (Specifics)
 
-Select and document the chosen solution.
-
-```
-1. Choose the best option based on analysis
-2. Document the design decision (ADR format)
-3. Create high-level design diagram
-4. Identify open questions for next phase
-```
-
-- Output: Design document ready for `/pipeline`
-
-## Output Checklist
-
-- [ ] Problem statement defined
-- [ ] Multiple alternatives explored
-- [ ] Decision matrix completed
-- [ ] Chosen solution documented
-- [ ] Design diagram created
-- [ ] Open questions listed
-
-## Integration with Other Workflows
+Flesh out the "How".
 
 ```
-/brainstorm  ──▶  /pipeline  ──▶  /new-feature
-                            ──▶  /bug-fix
-                            ──▶  /refactor
+1. Define user stories and acceptance criteria
+2. Outline key user flows (happy path & edge cases)
+3. Identify necessary data models/fields
+4. List required API endpoints or interface changes
 ```
 
-Use `/brainstorm` when you need to **explore** before you **build**.
+- Output: Detailed feature points
 
-## Example
+### Phase 3: PREPARE (Pipeline Input)
+
+Structure the output for the development pipeline.
 
 ```
-Problem: "How should we implement user notifications?"
-
-IDEATE output:
-1. Push notifications (Firebase)
-2. Email notifications (SendGrid)
-3. In-app notifications (WebSocket)
-4. SMS notifications (Twilio)
-
-ANALYZE output:
-| Option    | Cost | Speed | Reliability | Score |
-|-----------|------|-------|-------------|-------|
-| In-app    | 5    | 5     | 4           | 14    |
-| Push      | 4    | 4     | 4           | 12    |
-| Email     | 3    | 3     | 5           | 11    |
-
-REFINE output:
-→ Design doc: "ADR-001: In-app notifications with WebSocket"
-→ Diagram: Client ↔ WebSocket Server ↔ Redis Pub/Sub
-→ Ready for /pipeline
+1. Summarize the feature into a structured format
+2. Create a "Feature Request" document
+3. Ensure all inputs required by /pipeline (Gatekeeper) are present
 ```
+
+- Output: A structured **Feature Specification** ready for `/pipeline`
+
+## Output Format (for /pipeline)
+
+The final output should be a clear prompt/document containing:
+
+```markdown
+# Feature: [Feature Name]
+
+## Objective
+
+[Brief description of what we are building and why]
+
+## Requirements
+
+- [ ] Requirement 1
+- [ ] Requirement 2
+
+## Technical Context
+
+- Impacted Services: [List]
+- New Data/Fields: [Brief list]
+
+## Acceptance Criteria
+
+1. User can...
+2. System should...
+```
+
+## Integration
+
+```
+/brainstorm (This Workflow) ──▶ Output: Feature Spec ──▶ /pipeline (Gatekeeper Phase)
+```
+
+Use `/brainstorm` to **talk** about the feature.
+Use `/pipeline` to **build** the feature.

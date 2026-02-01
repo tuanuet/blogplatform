@@ -51,6 +51,9 @@ func main() {
 		// HTTP module (router, gin engine, HTTP server with lifecycle hooks)
 		modules.HTTPModule,
 
+		// Scheduler module (background jobs and cron tasks)
+		modules.SchedulerModule,
+
 		// FX options
 		fx.NopLogger, // Suppress FX's default logger (we use our own)
 	)

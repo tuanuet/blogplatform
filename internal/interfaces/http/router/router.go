@@ -27,6 +27,7 @@ type Params struct {
 	SubscriptionHandler *handler.SubscriptionHandler
 	ProfileHandler      *handler.ProfileHandler
 	RoleHandler         *handler.RoleHandler
+	RankingHandler      *handler.RankingHandler
 	RoleUseCase         usecase.RoleUseCase // For authorization middleware
 	Config              *config.Config
 }
@@ -155,6 +156,15 @@ func New(p Params) *gin.Engine {
 		v1.GET("/users/:userId/follow-counts", p.SubscriptionHandler.GetSubscriptionCounts)
 		v1.POST("/users/:userId/follow", p.SubscriptionHandler.Subscribe)
 		v1.DELETE("/users/:userId/follow", p.SubscriptionHandler.Unsubscribe)
+
+		// Rankings
+		rankings := v1.Group("/rankings")
+		{
+			rankings.GET("/trending", p.RankingHandler.GetTrending)
+			rankings.GET("/top", p.RankingHandler.GetTop)
+			rankings.GET("/users/:userId", p.RankingHandler.GetUserRanking)
+			rankings.POST("/recalculate", auth.RequireAdmin("rankings"), p.RankingHandler.RecalculateScores)
+		}
 	}
 
 	return engine

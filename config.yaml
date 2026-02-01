@@ -24,3 +24,8 @@ redis:
 logger:
   level: debug
   format: json # json, text
+
+scheduler:
+  enabled: true
+  daily_recalculation_hour: 0  # 0 = midnight (0 AM)
+  timezone: "Local"  # Use "UTC" or specific timezone like "America/New_York"

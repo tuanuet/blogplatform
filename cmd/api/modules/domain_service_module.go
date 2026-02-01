@@ -17,5 +17,6 @@ var DomainServiceModule = fx.Module("domain_service",
 		service.NewSubscriptionService,
 		service.NewCommentService,
 		service.NewBlogService,
+		service.NewRankingService,
 	),
 )

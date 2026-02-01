@@ -17,5 +17,6 @@ var HandlerModule = fx.Module("handler",
 		handler.NewSubscriptionHandler,
 		handler.NewProfileHandler,
 		handler.NewRoleHandler,
+		handler.NewRankingHandler,
 	),
 )
