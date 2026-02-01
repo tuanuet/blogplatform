@@ -1,0 +1,52 @@
+package repository
+
+import (
+	"context"
+
+	"github.com/aiagent/boilerplate/internal/domain/entity"
+	"github.com/aiagent/boilerplate/internal/domain/repository"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
+
+type userRepository struct {
+	db *gorm.DB
+}
+
+// NewUserRepository creates a new user repository
+func NewUserRepository(db *gorm.DB) repository.UserRepository {
+	return &userRepository{db: db}
+}
+
+func (r *userRepository) FindByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
+	var user entity.User
+	err := r.db.WithContext(ctx).
+		Where("id = ? AND deleted_at IS NULL", id).
+		First(&user).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	return &user, err
+}
+
+func (r *userRepository) FindByEmail(ctx context.Context, email string) (*entity.User, error) {
+	var user entity.User
+	err := r.db.WithContext(ctx).
+		Where("email = ? AND deleted_at IS NULL", email).
+		First(&user).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	return &user, err
+}
+
+func (r *userRepository) Update(ctx context.Context, user *entity.User) error {
+	return r.db.WithContext(ctx).Save(user).Error
+}
+
+func (r *userRepository) UpdateProfile(ctx context.Context, userID uuid.UUID, updates map[string]interface{}) error {
+	return r.db.WithContext(ctx).
+		Model(&entity.User{}).
+		Where("id = ?", userID).
+		Updates(updates).Error
+}

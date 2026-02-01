@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "createdAt": "2026-02-01T09:46:49.56063+07:00",
+  "commitHash": "",
+  "repoStateId": "",
+  "fileCount": 85,
+  "duration": "1.8s",
+  "indexer": "scip-go",
+  "indexerArgs": [
+    "scip-go"
+  ]
+}

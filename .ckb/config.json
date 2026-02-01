@@ -1,0 +1,199 @@
+{
+  "version": 5,
+  "repoRoot": ".",
+  "backends": {
+    "scip": {
+      "enabled": true,
+      "indexPath": "index.scip"
+    },
+    "lsp": {
+      "enabled": true,
+      "workspaceStrategy": "repo-root",
+      "servers": {
+        "dart": {
+          "command": "dart",
+          "args": [
+            "language-server"
+          ]
+        },
+        "go": {
+          "command": "gopls",
+          "args": []
+        },
+        "python": {
+          "command": "pylsp",
+          "args": []
+        },
+        "typescript": {
+          "command": "typescript-language-server",
+          "args": [
+            "--stdio"
+          ]
+        }
+      }
+    },
+    "git": {
+      "enabled": true
+    }
+  },
+  "queryPolicy": {
+    "backendPreferenceOrder": [
+      "scip",
+      "glean",
+      "lsp"
+    ],
+    "alwaysUse": [
+      "git"
+    ],
+    "maxInFlightPerBackend": {
+      "git": 5,
+      "lsp": 3,
+      "scip": 10
+    },
+    "coalesceWindowMs": 50,
+    "mergeMode": "prefer-first",
+    "supplementThreshold": 0.8,
+    "timeoutMs": {
+      "git": 5000,
+      "lsp": 15000,
+      "scip": 5000
+    }
+  },
+  "lspSupervisor": {
+    "maxTotalProcesses": 4,
+    "queueSizePerLanguage": 10,
+    "maxQueueWaitMs": 200
+  },
+  "modules": {
+    "detection": "auto",
+    "roots": [],
+    "ignore": [
+      "node_modules",
+      "build",
+      ".dart_tool",
+      "vendor"
+    ]
+  },
+  "importScan": {
+    "enabled": true,
+    "maxFileSizeBytes": 1000000,
+    "scanTimeoutMs": 30000,
+    "skipBinary": true,
+    "customPatterns": {}
+  },
+  "cache": {
+    "queryTtlSeconds": 300,
+    "viewTtlSeconds": 3600,
+    "negativeTtlSeconds": 60
+  },
+  "budget": {
+    "maxModules": 10,
+    "maxSymbolsPerModule": 5,
+    "maxImpactItems": 20,
+    "maxDrilldowns": 5,
+    "estimatedMaxTokens": 4000
+  },
+  "backendLimits": {
+    "maxRefsPerQuery": 10000,
+    "maxFilesScanned": 5000,
+    "maxUnionModeTimeMs": 60000
+  },
+  "privacy": {
+    "mode": "normal"
+  },
+  "logging": {
+    "format": "human",
+    "level": "info"
+  },
+  "daemon": {
+    "port": 9120,
+    "bind": "localhost",
+    "logLevel": "info",
+    "logFile": "",
+    "auth": {
+      "enabled": true,
+      "token": "",
+      "tokenFile": ""
+    },
+    "watch": {
+      "enabled": true,
+      "debounceMs": 5000,
+      "ignorePatterns": [
+        "*.log",
+        "node_modules/**",
+        ".git/**",
+        "**/*.tmp"
+      ],
+      "repos": []
+    },
+    "schedule": {
+      "refresh": "every 4h",
+      "federationSync": "every 1h",
+      "hotspotSnapshot": "daily"
+    }
+  },
+  "webhooks": [],
+  "telemetry": {
+    "enabled": false,
+    "serviceMap": {},
+    "servicePatterns": [],
+    "aggregation": {
+      "bucketSize": "weekly",
+      "retentionDays": 180,
+      "minCallsToStore": 1,
+      "storeCallers": false,
+      "maxCallersPerSymbol": 20
+    },
+    "deadCode": {
+      "enabled": true,
+      "minObservationDays": 90,
+      "excludePatterns": [
+        "**/test/**",
+        "**/testdata/**",
+        "**/*_test.go",
+        "**/*.test.ts",
+        "**/migrations/**",
+        "**/scripts/**"
+      ],
+      "excludeFunctions": [
+        "*Migration*",
+        "*Backup*",
+        "*Recover*",
+        "*Cleanup*",
+        "*Scheduled*",
+        "*Cron*"
+      ]
+    },
+    "privacy": {
+      "redactCallerNames": false,
+      "logUnmatchedEvents": true
+    },
+    "attributes": {
+      "functionKeys": [
+        "code.function",
+        "code.function.name",
+        "faas.name",
+        "span.name"
+      ],
+      "namespaceKeys": [
+        "code.namespace",
+        "code.module",
+        "package.name"
+      ],
+      "fileKeys": [
+        "code.filepath",
+        "code.filename",
+        "source.file"
+      ],
+      "lineKeys": [
+        "code.lineno",
+        "code.line_number"
+      ]
+    }
+  },
+  "coverage": {
+    "paths": [],
+    "autoDetect": true,
+    "maxAge": "168h"
+  }
+}

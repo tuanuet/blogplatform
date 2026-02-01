@@ -1,0 +1,1813 @@
+basePath: /
+definitions:
+  dto.AssignRoleRequest:
+    properties:
+      roleId:
+        type: string
+    required:
+    - roleId
+    type: object
+  dto.AvatarUploadResponse:
+    properties:
+      avatarUrl:
+        type: string
+    type: object
+  dto.BlogResponse:
+    properties:
+      author:
+        $ref: '#/definitions/dto.UserBriefResponse'
+      authorId:
+        type: string
+      category:
+        $ref: '#/definitions/dto.CategoryResponse'
+      categoryId:
+        type: string
+      content:
+        type: string
+      createdAt:
+        type: string
+      excerpt:
+        type: string
+      id:
+        type: string
+      publishedAt:
+        type: string
+      slug:
+        type: string
+      status:
+        $ref: '#/definitions/entity.BlogStatus'
+      tags:
+        items:
+          $ref: '#/definitions/dto.TagResponse'
+        type: array
+      thumbnailUrl:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+      visibility:
+        $ref: '#/definitions/entity.BlogVisibility'
+    type: object
+  dto.CategoryResponse:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  dto.CommentResponse:
+    properties:
+      blogId:
+        type: string
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      parentId:
+        type: string
+      replies:
+        items:
+          $ref: '#/definitions/dto.CommentResponse'
+        type: array
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/dto.UserBriefResponse'
+      userId:
+        type: string
+    type: object
+  dto.CreateBlogRequest:
+    properties:
+      categoryId:
+        type: string
+      content:
+        type: string
+      excerpt:
+        type: string
+      slug:
+        maxLength: 255
+        minLength: 1
+        type: string
+      tagIds:
+        items:
+          type: string
+        type: array
+      thumbnailUrl:
+        type: string
+      title:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - content
+    - slug
+    - title
+    type: object
+  dto.CreateCategoryRequest:
+    properties:
+      description:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 1
+        type: string
+      slug:
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - name
+    - slug
+    type: object
+  dto.CreateCommentRequest:
+    properties:
+      content:
+        minLength: 1
+        type: string
+      parentId:
+        type: string
+    required:
+    - content
+    type: object
+  dto.CreateRoleRequest:
+    properties:
+      description:
+        maxLength: 255
+        type: string
+      name:
+        maxLength: 50
+        minLength: 2
+        type: string
+    required:
+    - name
+    type: object
+  dto.CreateTagRequest:
+    properties:
+      name:
+        maxLength: 50
+        minLength: 1
+        type: string
+      slug:
+        maxLength: 50
+        minLength: 1
+        type: string
+    required:
+    - name
+    - slug
+    type: object
+  dto.HealthResponse:
+    properties:
+      services:
+        $ref: '#/definitions/dto.ServiceHealth'
+      status:
+        type: string
+      timestamp:
+        type: string
+      version:
+        type: string
+    type: object
+  dto.PermissionResponse:
+    properties:
+      canCreate:
+        type: boolean
+      canDelete:
+        type: boolean
+      canRead:
+        type: boolean
+      canUpdate:
+        type: boolean
+      permissions:
+        type: integer
+      resource:
+        type: string
+    type: object
+  dto.ProfileResponse:
+    properties:
+      avatarUrl:
+        type: string
+      bio:
+        type: string
+      createdAt:
+        type: string
+      displayName:
+        type: string
+      email:
+        type: string
+      githubHandle:
+        type: string
+      id:
+        type: string
+      linkedinUrl:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+      twitterHandle:
+        type: string
+      website:
+        type: string
+    type: object
+  dto.PublicProfileResponse:
+    properties:
+      avatarUrl:
+        type: string
+      bio:
+        type: string
+      displayName:
+        type: string
+      githubHandle:
+        type: string
+      id:
+        type: string
+      linkedinUrl:
+        type: string
+      location:
+        type: string
+      twitterHandle:
+        type: string
+      website:
+        type: string
+    type: object
+  dto.PublishBlogRequest:
+    properties:
+      visibility:
+        enum:
+        - public
+        - subscribers_only
+        type: string
+    required:
+    - visibility
+    type: object
+  dto.RoleResponse:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/dto.PermissionResponse'
+        type: array
+    type: object
+  dto.ServiceHealth:
+    properties:
+      database:
+        type: string
+      redis:
+        type: string
+    type: object
+  dto.SetPermissionRequest:
+    properties:
+      permissions:
+        maximum: 15
+        minimum: 0
+        type: integer
+      resource:
+        maxLength: 50
+        type: string
+    required:
+    - resource
+    type: object
+  dto.SubscriptionCountResponse:
+    properties:
+      authorId:
+        type: string
+      subscriberCount:
+        type: integer
+    type: object
+  dto.SubscriptionResponse:
+    properties:
+      author:
+        $ref: '#/definitions/dto.UserBriefResponse'
+      authorId:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      subscriber:
+        $ref: '#/definitions/dto.UserBriefResponse'
+      subscriberId:
+        type: string
+    type: object
+  dto.TagResponse:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+    type: object
+  dto.UpdateBlogRequest:
+    properties:
+      categoryId:
+        type: string
+      content:
+        type: string
+      excerpt:
+        type: string
+      slug:
+        maxLength: 255
+        minLength: 1
+        type: string
+      tagIds:
+        items:
+          type: string
+        type: array
+      thumbnailUrl:
+        type: string
+      title:
+        maxLength: 255
+        minLength: 1
+        type: string
+    type: object
+  dto.UpdateCategoryRequest:
+    properties:
+      description:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 1
+        type: string
+      slug:
+        maxLength: 100
+        minLength: 1
+        type: string
+    type: object
+  dto.UpdateCommentRequest:
+    properties:
+      content:
+        minLength: 1
+        type: string
+    required:
+    - content
+    type: object
+  dto.UpdateProfileRequest:
+    properties:
+      bio:
+        maxLength: 500
+        type: string
+      displayName:
+        maxLength: 50
+        minLength: 3
+        type: string
+      githubHandle:
+        maxLength: 50
+        type: string
+      linkedinUrl:
+        maxLength: 255
+        type: string
+      location:
+        maxLength: 100
+        type: string
+      twitterHandle:
+        maxLength: 50
+        type: string
+      website:
+        maxLength: 255
+        type: string
+    type: object
+  dto.UpdateRoleRequest:
+    properties:
+      description:
+        maxLength: 255
+        type: string
+      name:
+        maxLength: 50
+        minLength: 2
+        type: string
+    type: object
+  dto.UpdateTagRequest:
+    properties:
+      name:
+        maxLength: 50
+        minLength: 1
+        type: string
+      slug:
+        maxLength: 50
+        minLength: 1
+        type: string
+    type: object
+  dto.UserBriefResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.UserPermissionResponse:
+    properties:
+      canCreate:
+        type: boolean
+      canDelete:
+        type: boolean
+      canRead:
+        type: boolean
+      canUpdate:
+        type: boolean
+      permissions:
+        type: integer
+      resource:
+        type: string
+      userId:
+        type: string
+    type: object
+  dto.UserRolesResponse:
+    properties:
+      roles:
+        items:
+          $ref: '#/definitions/dto.RoleResponse'
+        type: array
+      userId:
+        type: string
+    type: object
+  entity.BlogStatus:
+    enum:
+    - draft
+    - published
+    type: string
+    x-enum-varnames:
+    - BlogStatusDraft
+    - BlogStatusPublished
+  entity.BlogVisibility:
+    enum:
+    - public
+    - subscribers_only
+    type: string
+    x-enum-varnames:
+    - BlogVisibilityPublic
+    - BlogVisibilitySubscribersOnly
+  response.ErrorInfo:
+    properties:
+      code:
+        type: string
+      details:
+        type: string
+      message:
+        type: string
+    type: object
+  response.Meta:
+    properties:
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      error:
+        $ref: '#/definitions/response.ErrorInfo'
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: Clean Architecture Go API with GORM, Gin, PostgreSQL, Redis
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Go Boilerplate API
+  version: "1.0"
+paths:
+  /api/v1/authors/{authorId}/subscribe:
+    post:
+      consumes:
+      - application/json
+      description: Subscribe to receive access to subscriber-only content
+      parameters:
+      - description: Author ID
+        in: path
+        name: authorId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.SubscriptionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Subscribe to an author
+      tags:
+      - Subscriptions
+  /api/v1/authors/{authorId}/subscribers:
+    get:
+      consumes:
+      - application/json
+      description: Get list of subscribers for an author
+      parameters:
+      - description: Author ID
+        in: path
+        name: authorId
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get author's subscribers
+      tags:
+      - Subscriptions
+  /api/v1/authors/{authorId}/subscribers/count:
+    get:
+      consumes:
+      - application/json
+      description: Get the number of subscribers for an author
+      parameters:
+      - description: Author ID
+        in: path
+        name: authorId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SubscriptionCountResponse'
+      summary: Get subscriber count
+      tags:
+      - Subscriptions
+  /api/v1/authors/{authorId}/unsubscribe:
+    post:
+      consumes:
+      - application/json
+      description: Remove subscription from an author
+      parameters:
+      - description: Author ID
+        in: path
+        name: authorId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Unsubscribe from an author
+      tags:
+      - Subscriptions
+  /api/v1/blogs:
+    get:
+      consumes:
+      - application/json
+      description: List blogs with optional filters
+      parameters:
+      - description: Filter by author ID
+        in: query
+        name: authorId
+        type: string
+      - description: Filter by category ID
+        in: query
+        name: categoryId
+        type: string
+      - description: Filter by status (draft, published)
+        in: query
+        name: status
+        type: string
+      - description: Filter by visibility (public, subscribers_only)
+        in: query
+        name: visibility
+        type: string
+      - description: Search in title or content
+        in: query
+        name: search
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List blogs
+      tags:
+      - Blogs
+    post:
+      consumes:
+      - application/json
+      description: Create a new blog post (draft by default)
+      parameters:
+      - description: Blog data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBlogRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.BlogResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Create a new blog
+      tags:
+      - Blogs
+  /api/v1/blogs/{blogId}/comments:
+    get:
+      consumes:
+      - application/json
+      description: Get all comments for a blog post
+      parameters:
+      - description: Blog ID
+        in: path
+        name: blogId
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get comments for a blog
+      tags:
+      - Comments
+    post:
+      consumes:
+      - application/json
+      description: Create a comment on a blog post
+      parameters:
+      - description: Blog ID
+        in: path
+        name: blogId
+        required: true
+        type: string
+      - description: Comment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.CommentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Create a comment
+      tags:
+      - Comments
+  /api/v1/blogs/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Soft delete a blog (author only)
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Delete a blog
+      tags:
+      - Blogs
+    get:
+      consumes:
+      - application/json
+      description: Get a blog post by its ID
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BlogResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get blog by ID
+      tags:
+      - Blogs
+    put:
+      consumes:
+      - application/json
+      description: Update an existing blog (author only)
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Blog data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBlogRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BlogResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Update a blog
+      tags:
+      - Blogs
+  /api/v1/blogs/{id}/publish:
+    post:
+      consumes:
+      - application/json
+      description: Publish a draft blog with visibility setting
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Visibility setting
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PublishBlogRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BlogResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Publish a blog
+      tags:
+      - Blogs
+  /api/v1/blogs/{id}/unpublish:
+    post:
+      consumes:
+      - application/json
+      description: Revert a published blog back to draft
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BlogResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Unpublish a blog
+      tags:
+      - Blogs
+  /api/v1/categories:
+    get:
+      consumes:
+      - application/json
+      description: Get all categories
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List categories
+      tags:
+      - Categories
+    post:
+      consumes:
+      - application/json
+      description: Create a new blog category
+      parameters:
+      - description: Category data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.CategoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Create a category
+      tags:
+      - Categories
+  /api/v1/categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Delete a category
+      tags:
+      - Categories
+    get:
+      consumes:
+      - application/json
+      description: Get a category by its ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CategoryResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get category by ID
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      description: Update an existing category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Category data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CategoryResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Update a category
+      tags:
+      - Categories
+  /api/v1/comments/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a comment (owner only)
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Delete a comment
+      tags:
+      - Comments
+    put:
+      consumes:
+      - application/json
+      description: Update a comment (owner only)
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Comment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CommentResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Update a comment
+      tags:
+      - Comments
+  /api/v1/health:
+    get:
+      consumes:
+      - application/json
+      description: Check the health status of all services
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.HealthResponse'
+      summary: Health Check
+      tags:
+      - Health
+  /api/v1/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get the current user's permission on a specific resource
+      parameters:
+      - description: Resource name (e.g., blogs, categories)
+        in: query
+        name: resource
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.UserPermissionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Get my permission on a resource
+      tags:
+      - Roles
+  /api/v1/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get the current user's profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ProfileResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Get my profile
+      tags:
+      - Profile
+    put:
+      consumes:
+      - application/json
+      description: Update the current user's profile
+      parameters:
+      - description: Profile update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ProfileResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Update my profile
+      tags:
+      - Profile
+  /api/v1/profile/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a new avatar image for the current user
+      parameters:
+      - description: Avatar image file (max 5MB, jpg/png/gif/webp)
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AvatarUploadResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Upload avatar
+      tags:
+      - Profile
+  /api/v1/roles:
+    get:
+      consumes:
+      - application/json
+      description: List all available roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.RoleResponse'
+                  type: array
+              type: object
+      security:
+      - Bearer: []
+      summary: List all roles
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      description: Create a new role (admin only)
+      parameters:
+      - description: Create role request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.RoleResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Create a new role
+      tags:
+      - Roles
+  /api/v1/roles/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a role (admin only)
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Delete a role
+      tags:
+      - Roles
+    get:
+      consumes:
+      - application/json
+      description: Get a role by ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.RoleResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Get a role by ID
+      tags:
+      - Roles
+    put:
+      consumes:
+      - application/json
+      description: Update a role (admin only)
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update role request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.RoleResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Update a role
+      tags:
+      - Roles
+  /api/v1/roles/{id}/permissions:
+    post:
+      consumes:
+      - application/json
+      description: Set permission for a role on a specific resource (admin only)
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Set permission request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SetPermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Set permission for a role
+      tags:
+      - Roles
+  /api/v1/subscriptions:
+    get:
+      consumes:
+      - application/json
+      description: Get list of authors the current user is subscribed to
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Get my subscriptions
+      tags:
+      - Subscriptions
+  /api/v1/tags:
+    get:
+      consumes:
+      - application/json
+      description: Get all tags
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List tags
+      tags:
+      - Tags
+    post:
+      consumes:
+      - application/json
+      description: Create a new blog tag
+      parameters:
+      - description: Tag data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTagRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.TagResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Create a tag
+      tags:
+      - Tags
+  /api/v1/tags/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a tag
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Delete a tag
+      tags:
+      - Tags
+    get:
+      consumes:
+      - application/json
+      description: Get a tag by its ID
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TagResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get tag by ID
+      tags:
+      - Tags
+    put:
+      consumes:
+      - application/json
+      description: Update an existing tag
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Tag data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateTagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TagResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Update a tag
+      tags:
+      - Tags
+  /api/v1/users/{id}/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get a user's public profile by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PublicProfileResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get public profile
+      tags:
+      - Profile
+  /api/v1/users/{userId}/roles:
+    get:
+      consumes:
+      - application/json
+      description: Get all roles assigned to a user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.UserRolesResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Get user roles
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      description: Assign a role to a user (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Assign role request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AssignRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Assign role to user
+      tags:
+      - Roles
+  /api/v1/users/{userId}/roles/{roleId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a role from a user (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Remove role from user
+      tags:
+      - Roles
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: Simple ping endpoint for load balancer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Ping
+      tags:
+      - Health
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and the access token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
