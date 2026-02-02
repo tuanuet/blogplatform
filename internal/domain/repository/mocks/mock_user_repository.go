@@ -42,6 +42,21 @@ func (m *MockUserRepository) EXPECT() *MockUserRepositoryMockRecorder {
 	return m.recorder
 }
 
+// CountByMonth mocks base method.
+func (m *MockUserRepository) CountByMonth(ctx context.Context, months int) ([]entity.MonthlyCount, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountByMonth", ctx, months)
+	ret0, _ := ret[0].([]entity.MonthlyCount)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountByMonth indicates an expected call of CountByMonth.
+func (mr *MockUserRepositoryMockRecorder) CountByMonth(ctx, months any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountByMonth", reflect.TypeOf((*MockUserRepository)(nil).CountByMonth), ctx, months)
+}
+
 // FindByEmail mocks base method.
 func (m *MockUserRepository) FindByEmail(ctx context.Context, email string) (*entity.User, error) {
 	m.ctrl.T.Helper()

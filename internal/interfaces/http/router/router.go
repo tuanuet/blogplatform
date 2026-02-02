@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/aiagent/internal/application/usecase"
 	"github.com/aiagent/internal/infrastructure/config"
+	"github.com/aiagent/internal/interfaces/http/handler/admin"
 	"github.com/aiagent/internal/interfaces/http/handler/blog"
 	"github.com/aiagent/internal/interfaces/http/handler/bookmark"
 	"github.com/aiagent/internal/interfaces/http/handler/category"
@@ -33,6 +34,7 @@ type Params struct {
 	fx.In
 
 	HealthHandler         health.HealthHandler
+	AdminHandler          admin.AdminHandler
 	BlogHandler           blog.BlogHandler
 	BookmarkHandler       bookmark.BookmarkHandler
 	CategoryHandler       category.CategoryHandler
@@ -209,6 +211,9 @@ func New(p Params) *gin.Engine {
 			rankings.GET("/users/:userId", p.RankingHandler.GetUserRanking)
 			rankings.POST("/recalculate", auth.RequireAdmin("rankings"), p.RankingHandler.RecalculateScores)
 		}
+
+		// Admin Dashboard
+		v1.GET("/admin/dashboard/stats", auth.RequireAdmin("analytics"), p.AdminHandler.GetDashboardStats)
 
 		// Fraud Detection & Risk Management
 		// User risk score and badge

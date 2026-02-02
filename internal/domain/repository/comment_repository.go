@@ -17,4 +17,7 @@ type CommentRepository interface {
 	FindReplies(ctx context.Context, parentID uuid.UUID) ([]entity.Comment, error)
 	Update(ctx context.Context, comment *entity.Comment) error
 	Delete(ctx context.Context, id uuid.UUID) error
+
+	// Admin stats
+	CountByMonth(ctx context.Context, months int) ([]entity.MonthlyCount, error)
 }

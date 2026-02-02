@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"github.com/aiagent/internal/interfaces/http/handler/admin"
 	"github.com/aiagent/internal/interfaces/http/handler/blog"
 	"github.com/aiagent/internal/interfaces/http/handler/bookmark"
 	"github.com/aiagent/internal/interfaces/http/handler/category"
@@ -23,6 +24,7 @@ import (
 var HandlerModule = fx.Module("handler",
 	fx.Provide(
 		health.NewHealthHandler,
+		admin.NewAdminHandler,
 		blog.NewBlogHandler,
 		bookmark.NewBookmarkHandler,
 		category.NewCategoryHandler,

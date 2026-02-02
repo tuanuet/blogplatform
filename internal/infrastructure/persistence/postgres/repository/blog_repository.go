@@ -262,3 +262,15 @@ func (r *blogRepository) FindRelated(ctx context.Context, blogID uuid.UUID, limi
 
 	return blogs, err
 }
+
+func (r *blogRepository) CountByMonth(ctx context.Context, months int) ([]entity.MonthlyCount, error) {
+	var results []entity.MonthlyCount
+	err := r.db.WithContext(ctx).
+		Model(&entity.Blog{}).
+		Select("TO_CHAR(created_at, 'YYYY-MM') as month, COUNT(*) as count").
+		Where("created_at >= NOW() - make_interval(months => ?)", months).
+		Group("month").
+		Order("month DESC").
+		Scan(&results).Error
+	return results, err
+}

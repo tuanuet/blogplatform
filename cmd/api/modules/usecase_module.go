@@ -8,6 +8,7 @@ import (
 // UseCaseModule provides application use case dependencies
 var UseCaseModule = fx.Module("usecase",
 	fx.Provide(
+		usecase.NewAdminUseCase,
 		usecase.NewRoleUseCase,
 		usecase.NewPermissionUseCase,
 		usecase.NewProfileUseCase,

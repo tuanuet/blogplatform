@@ -44,4 +44,7 @@ type BlogRepository interface {
 
 	// Recommendation operations
 	FindRelated(ctx context.Context, blogID uuid.UUID, limit int) ([]entity.Blog, error)
+
+	// Admin stats
+	CountByMonth(ctx context.Context, months int) ([]entity.MonthlyCount, error)
 }

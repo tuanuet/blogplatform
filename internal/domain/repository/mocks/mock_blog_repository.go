@@ -57,6 +57,21 @@ func (mr *MockBlogRepositoryMockRecorder) AddTags(ctx, blogID, tagIDs any) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTags", reflect.TypeOf((*MockBlogRepository)(nil).AddTags), ctx, blogID, tagIDs)
 }
 
+// CountByMonth mocks base method.
+func (m *MockBlogRepository) CountByMonth(ctx context.Context, months int) ([]entity.MonthlyCount, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountByMonth", ctx, months)
+	ret0, _ := ret[0].([]entity.MonthlyCount)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountByMonth indicates an expected call of CountByMonth.
+func (mr *MockBlogRepositoryMockRecorder) CountByMonth(ctx, months any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountByMonth", reflect.TypeOf((*MockBlogRepository)(nil).CountByMonth), ctx, months)
+}
+
 // Create mocks base method.
 func (m *MockBlogRepository) Create(ctx context.Context, blog *entity.Blog) error {
 	m.ctrl.T.Helper()

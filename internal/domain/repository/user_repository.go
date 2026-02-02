@@ -26,4 +26,7 @@ type UserRepository interface {
 	// Interest operations
 	GetInterests(ctx context.Context, userID uuid.UUID) ([]entity.Tag, error)
 	ReplaceInterests(ctx context.Context, userID uuid.UUID, tagIDs []uuid.UUID) error
+
+	// Admin stats
+	CountByMonth(ctx context.Context, months int) ([]entity.MonthlyCount, error)
 }
