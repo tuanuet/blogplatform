@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/aiagent/boilerplate/internal/domain/entity"
+	"github.com/aiagent/internal/domain/entity"
 	"github.com/google/uuid"
 )
 

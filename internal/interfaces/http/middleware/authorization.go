@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"github.com/aiagent/boilerplate/internal/application/usecase"
-	"github.com/aiagent/boilerplate/internal/domain/entity"
-	"github.com/aiagent/boilerplate/pkg/response"
+	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/internal/domain/entity"
+	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )

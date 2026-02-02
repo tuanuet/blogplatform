@@ -1,11 +1,13 @@
 package usecase
 
+//go:generate mockgen -source=$GOFILE -destination=mocks/mock_$GOFILE -package=mocks
+
 import (
 	"context"
 	"time"
 
-	"github.com/aiagent/boilerplate/internal/application/dto"
-	domainService "github.com/aiagent/boilerplate/internal/domain/service"
+	"github.com/aiagent/internal/application/dto"
+	domainService "github.com/aiagent/internal/domain/service"
 )
 
 // HealthUseCase handles health check application logic

@@ -3,11 +3,11 @@ package modules
 import (
 	"context"
 
-	"github.com/aiagent/boilerplate/internal/domain/entity"
-	"github.com/aiagent/boilerplate/internal/infrastructure/cache"
-	"github.com/aiagent/boilerplate/internal/infrastructure/config"
-	"github.com/aiagent/boilerplate/internal/infrastructure/persistence/postgres"
-	"github.com/aiagent/boilerplate/pkg/logger"
+	"github.com/aiagent/internal/domain/entity"
+	"github.com/aiagent/internal/infrastructure/cache"
+	"github.com/aiagent/internal/infrastructure/config"
+	"github.com/aiagent/internal/infrastructure/persistence/postgres"
+	"github.com/aiagent/pkg/logger"
 	"go.uber.org/fx"
 	"gorm.io/gorm"
 )

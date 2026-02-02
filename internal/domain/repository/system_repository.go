@@ -1,5 +1,7 @@
 package repository
 
+//go:generate mockgen -source=$GOFILE -destination=mocks/mock_$GOFILE -package=mocks
+
 import "context"
 
 // SystemRepository defines the interface for system health checks

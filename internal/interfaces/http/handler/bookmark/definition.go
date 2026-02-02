@@ -1,5 +1,7 @@
 package bookmark
 
+//go:generate mockgen -source=$GOFILE -destination=mocks/mock_$GOFILE -package=mocks
+
 import "github.com/gin-gonic/gin"
 
 // BookmarkHandler defines the interface for bookmark HTTP handlers

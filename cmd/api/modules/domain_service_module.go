@@ -1,7 +1,7 @@
 package modules
 
 import (
-	"github.com/aiagent/boilerplate/internal/domain/service"
+	"github.com/aiagent/internal/domain/service"
 	"go.uber.org/fx"
 )
 

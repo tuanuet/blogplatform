@@ -3,7 +3,7 @@ package entity_test
 import (
 	"testing"
 
-	"github.com/aiagent/boilerplate/internal/domain/entity"
+	"github.com/aiagent/internal/domain/entity"
 )
 
 func TestUser_GetDisplayName(t *testing.T) {

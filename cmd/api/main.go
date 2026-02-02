@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/aiagent/boilerplate/cmd/api/modules"
+	"github.com/aiagent/cmd/api/modules"
 	"go.uber.org/fx"
 )
 

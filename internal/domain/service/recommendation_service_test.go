@@ -2,170 +2,25 @@ package service_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
-	"github.com/aiagent/boilerplate/internal/domain/entity"
-	"github.com/aiagent/boilerplate/internal/domain/repository"
-	"github.com/aiagent/boilerplate/internal/domain/service"
+	"github.com/aiagent/internal/domain/entity"
+	"github.com/aiagent/internal/domain/repository"
+	"github.com/aiagent/internal/domain/repository/mocks"
+	"github.com/aiagent/internal/domain/service"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"go.uber.org/mock/gomock"
 )
 
-// Mocks
-type MockBlogRepo struct {
-	mock.Mock
-}
-
-func (m *MockBlogRepo) Create(ctx context.Context, blog *entity.Blog) error {
-	return m.Called(ctx, blog).Error(0)
-}
-func (m *MockBlogRepo) FindByID(ctx context.Context, id uuid.UUID) (*entity.Blog, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.Blog), args.Error(1)
-}
-func (m *MockBlogRepo) FindBySlug(ctx context.Context, authorID uuid.UUID, slug string) (*entity.Blog, error) {
-	args := m.Called(ctx, authorID, slug)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.Blog), args.Error(1)
-}
-func (m *MockBlogRepo) FindAll(ctx context.Context, filter repository.BlogFilter, pagination repository.Pagination) (*repository.PaginatedResult[entity.Blog], error) {
-	args := m.Called(ctx, filter, pagination)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*repository.PaginatedResult[entity.Blog]), args.Error(1)
-}
-func (m *MockBlogRepo) Update(ctx context.Context, blog *entity.Blog) error {
-	return m.Called(ctx, blog).Error(0)
-}
-func (m *MockBlogRepo) Delete(ctx context.Context, id uuid.UUID) error {
-	return m.Called(ctx, id).Error(0)
-}
-func (m *MockBlogRepo) AddTags(ctx context.Context, blogID uuid.UUID, tagIDs []uuid.UUID) error {
-	return m.Called(ctx, blogID, tagIDs).Error(0)
-}
-func (m *MockBlogRepo) RemoveTags(ctx context.Context, blogID uuid.UUID, tagIDs []uuid.UUID) error {
-	return m.Called(ctx, blogID, tagIDs).Error(0)
-}
-func (m *MockBlogRepo) ReplaceTags(ctx context.Context, blogID uuid.UUID, tagIDs []uuid.UUID) error {
-	return m.Called(ctx, blogID, tagIDs).Error(0)
-}
-func (m *MockBlogRepo) React(ctx context.Context, blogID, userID uuid.UUID, reactionType entity.ReactionType) (int, int, error) {
-	args := m.Called(ctx, blogID, userID, reactionType)
-	return args.Int(0), args.Int(1), args.Error(2)
-}
-func (m *MockBlogRepo) UpdateCounts(ctx context.Context, blogID uuid.UUID, upDelta, downDelta int) error {
-	return m.Called(ctx, blogID, upDelta, downDelta).Error(0)
-}
-func (m *MockBlogRepo) FindRelated(ctx context.Context, blogID uuid.UUID, limit int) ([]entity.Blog, error) {
-	args := m.Called(ctx, blogID, limit)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]entity.Blog), args.Error(1)
-}
-
-type MockTagRepo struct {
-	mock.Mock
-}
-
-func (m *MockTagRepo) Create(ctx context.Context, tag *entity.Tag) error {
-	return m.Called(ctx, tag).Error(0)
-}
-func (m *MockTagRepo) FindByID(ctx context.Context, id uuid.UUID) (*entity.Tag, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.Tag), args.Error(1)
-}
-func (m *MockTagRepo) FindBySlug(ctx context.Context, slug string) (*entity.Tag, error) {
-	args := m.Called(ctx, slug)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.Tag), args.Error(1)
-}
-func (m *MockTagRepo) FindByIDs(ctx context.Context, ids []uuid.UUID) ([]entity.Tag, error) {
-	args := m.Called(ctx, ids)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]entity.Tag), args.Error(1)
-}
-func (m *MockTagRepo) FindAll(ctx context.Context, pagination repository.Pagination) (*repository.PaginatedResult[entity.Tag], error) {
-	args := m.Called(ctx, pagination)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*repository.PaginatedResult[entity.Tag]), args.Error(1)
-}
-func (m *MockTagRepo) FindOrCreate(ctx context.Context, name, slug string) (*entity.Tag, error) {
-	args := m.Called(ctx, name, slug)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.Tag), args.Error(1)
-}
-func (m *MockTagRepo) Update(ctx context.Context, tag *entity.Tag) error {
-	return m.Called(ctx, tag).Error(0)
-}
-func (m *MockTagRepo) Delete(ctx context.Context, id uuid.UUID) error {
-	return m.Called(ctx, id).Error(0)
-}
-func (m *MockTagRepo) FindPopular(ctx context.Context, limit int) ([]entity.Tag, error) {
-	args := m.Called(ctx, limit)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]entity.Tag), args.Error(1)
-}
-
-type MockUserRepo struct {
-	mock.Mock
-}
-
-func (m *MockUserRepo) FindByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.User), args.Error(1)
-}
-func (m *MockUserRepo) FindByEmail(ctx context.Context, email string) (*entity.User, error) {
-	args := m.Called(ctx, email)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*entity.User), args.Error(1)
-}
-func (m *MockUserRepo) Update(ctx context.Context, user *entity.User) error {
-	return m.Called(ctx, user).Error(0)
-}
-func (m *MockUserRepo) UpdateProfile(ctx context.Context, userID uuid.UUID, updates map[string]interface{}) error {
-	return m.Called(ctx, userID, updates).Error(0)
-}
-func (m *MockUserRepo) GetInterests(ctx context.Context, userID uuid.UUID) ([]entity.Tag, error) {
-	args := m.Called(ctx, userID)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]entity.Tag), args.Error(1)
-}
-func (m *MockUserRepo) ReplaceInterests(ctx context.Context, userID uuid.UUID, tagIDs []uuid.UUID) error {
-	return m.Called(ctx, userID, tagIDs).Error(0)
-}
-
 func TestGetPersonalizedFeed_WithInterests(t *testing.T) {
-	mockBlogRepo := new(MockBlogRepo)
-	mockTagRepo := new(MockTagRepo)
-	mockUserRepo := new(MockUserRepo)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockBlogRepo := mocks.NewMockBlogRepository(ctrl)
+	mockTagRepo := mocks.NewMockTagRepository(ctrl)
+	mockUserRepo := mocks.NewMockUserRepository(ctrl)
 
 	svc := service.NewRecommendationService(mockBlogRepo, mockTagRepo, mockUserRepo)
 
@@ -173,13 +28,18 @@ func TestGetPersonalizedFeed_WithInterests(t *testing.T) {
 	tagID := uuid.New()
 
 	// Expectations
-	mockUserRepo.On("GetInterests", mock.Anything, userID).Return([]entity.Tag{
+	mockUserRepo.EXPECT().GetInterests(gomock.Any(), userID).Return([]entity.Tag{
 		{ID: tagID, Name: "Go", Slug: "go"},
 	}, nil)
 
-	mockBlogRepo.On("FindAll", mock.Anything, mock.MatchedBy(func(f repository.BlogFilter) bool {
-		return len(f.TagIDs) == 1 && f.TagIDs[0] == tagID
-	}), mock.Anything).Return(&repository.PaginatedResult[entity.Blog]{
+	// Construct expected filter
+	expectedFilter := repository.BlogFilter{
+		TagIDs: []uuid.UUID{tagID},
+	}
+	// We might need to ensure other fields match what the service produces (zero values).
+	// The service creates `filter := repository.BlogFilter{}` and sets TagIDs.
+
+	mockBlogRepo.EXPECT().FindAll(gomock.Any(), expectedFilter, gomock.Any()).Return(&repository.PaginatedResult[entity.Blog]{
 		Data:  []entity.Blog{{Title: "Go Blog"}},
 		Total: 1,
 	}, nil)
@@ -191,25 +51,27 @@ func TestGetPersonalizedFeed_WithInterests(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, "Go Blog", result.Data[0].Title)
-	mockUserRepo.AssertExpectations(t)
-	mockBlogRepo.AssertExpectations(t)
 }
 
 func TestGetPersonalizedFeed_NoInterests_Fallback(t *testing.T) {
-	mockBlogRepo := new(MockBlogRepo)
-	mockTagRepo := new(MockTagRepo)
-	mockUserRepo := new(MockUserRepo)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockBlogRepo := mocks.NewMockBlogRepository(ctrl)
+	mockTagRepo := mocks.NewMockTagRepository(ctrl)
+	mockUserRepo := mocks.NewMockUserRepository(ctrl)
 
 	svc := service.NewRecommendationService(mockBlogRepo, mockTagRepo, mockUserRepo)
 
 	userID := uuid.New()
 
 	// Expectations
-	mockUserRepo.On("GetInterests", mock.Anything, userID).Return([]entity.Tag{}, nil)
+	mockUserRepo.EXPECT().GetInterests(gomock.Any(), userID).Return([]entity.Tag{}, nil)
 
-	mockBlogRepo.On("FindAll", mock.Anything, mock.MatchedBy(func(f repository.BlogFilter) bool {
-		return len(f.TagIDs) == 0
-	}), mock.Anything).Return(&repository.PaginatedResult[entity.Blog]{
+	// Expected filter is empty (zero value)
+	expectedFilter := repository.BlogFilter{}
+
+	mockBlogRepo.EXPECT().FindAll(gomock.Any(), expectedFilter, gomock.Any()).Return(&repository.PaginatedResult[entity.Blog]{
 		Data:  []entity.Blog{{Title: "Recent Blog"}},
 		Total: 1,
 	}, nil)
@@ -224,15 +86,18 @@ func TestGetPersonalizedFeed_NoInterests_Fallback(t *testing.T) {
 }
 
 func TestGetRelatedBlogs(t *testing.T) {
-	mockBlogRepo := new(MockBlogRepo)
-	mockTagRepo := new(MockTagRepo)
-	mockUserRepo := new(MockUserRepo)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockBlogRepo := mocks.NewMockBlogRepository(ctrl)
+	mockTagRepo := mocks.NewMockTagRepository(ctrl)
+	mockUserRepo := mocks.NewMockUserRepository(ctrl)
 
 	svc := service.NewRecommendationService(mockBlogRepo, mockTagRepo, mockUserRepo)
 
 	blogID := uuid.New()
 
-	mockBlogRepo.On("FindRelated", mock.Anything, blogID, 3).Return([]entity.Blog{
+	mockBlogRepo.EXPECT().FindRelated(gomock.Any(), blogID, 3).Return([]entity.Blog{
 		{Title: "Related 1"},
 	}, nil)
 
@@ -244,9 +109,12 @@ func TestGetRelatedBlogs(t *testing.T) {
 }
 
 func TestUpdateInterests(t *testing.T) {
-	mockBlogRepo := new(MockBlogRepo)
-	mockTagRepo := new(MockTagRepo)
-	mockUserRepo := new(MockUserRepo)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockBlogRepo := mocks.NewMockBlogRepository(ctrl)
+	mockTagRepo := mocks.NewMockTagRepository(ctrl)
+	mockUserRepo := mocks.NewMockUserRepository(ctrl)
 
 	svc := service.NewRecommendationService(mockBlogRepo, mockTagRepo, mockUserRepo)
 
@@ -254,12 +122,55 @@ func TestUpdateInterests(t *testing.T) {
 	tagID := uuid.New()
 	tagIDs := []uuid.UUID{tagID}
 
-	mockTagRepo.On("FindByIDs", mock.Anything, tagIDs).Return([]entity.Tag{{ID: tagID}}, nil)
-	mockUserRepo.On("ReplaceInterests", mock.Anything, userID, tagIDs).Return(nil)
+	mockTagRepo.EXPECT().FindByIDs(gomock.Any(), tagIDs).Return([]entity.Tag{{ID: tagID}}, nil)
+	mockUserRepo.EXPECT().ReplaceInterests(gomock.Any(), userID, tagIDs).Return(nil)
 
 	err := svc.UpdateInterests(context.Background(), userID, tagIDs)
 
 	assert.NoError(t, err)
-	mockTagRepo.AssertExpectations(t)
-	mockUserRepo.AssertExpectations(t)
+}
+
+func TestUpdateInterests_TagNotFound(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockBlogRepo := mocks.NewMockBlogRepository(ctrl)
+	mockTagRepo := mocks.NewMockTagRepository(ctrl)
+	mockUserRepo := mocks.NewMockUserRepository(ctrl)
+
+	svc := service.NewRecommendationService(mockBlogRepo, mockTagRepo, mockUserRepo)
+
+	userID := uuid.New()
+	tagID := uuid.New()
+	tagIDs := []uuid.UUID{tagID}
+
+	// Mock returning empty list
+	mockTagRepo.EXPECT().FindByIDs(gomock.Any(), tagIDs).Return([]entity.Tag{}, nil)
+
+	err := svc.UpdateInterests(context.Background(), userID, tagIDs)
+
+	assert.Error(t, err)
+	assert.Equal(t, "one or more tags not found", err.Error())
+}
+
+func TestUpdateInterests_RepoError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockBlogRepo := mocks.NewMockBlogRepository(ctrl)
+	mockTagRepo := mocks.NewMockTagRepository(ctrl)
+	mockUserRepo := mocks.NewMockUserRepository(ctrl)
+
+	svc := service.NewRecommendationService(mockBlogRepo, mockTagRepo, mockUserRepo)
+
+	userID := uuid.New()
+	tagID := uuid.New()
+	tagIDs := []uuid.UUID{tagID}
+
+	mockTagRepo.EXPECT().FindByIDs(gomock.Any(), tagIDs).Return(nil, errors.New("db error"))
+
+	err := svc.UpdateInterests(context.Background(), userID, tagIDs)
+
+	assert.Error(t, err)
+	assert.Equal(t, "db error", err.Error())
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/aiagent/boilerplate/internal/infrastructure/config"
+	"github.com/aiagent/internal/infrastructure/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

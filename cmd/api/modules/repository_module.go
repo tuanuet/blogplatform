@@ -1,8 +1,8 @@
 package modules
 
 import (
-	"github.com/aiagent/boilerplate/internal/infrastructure/adapter"
-	pgRepo "github.com/aiagent/boilerplate/internal/infrastructure/persistence/postgres/repository"
+	"github.com/aiagent/internal/infrastructure/adapter"
+	pgRepo "github.com/aiagent/internal/infrastructure/persistence/postgres/repository"
 	"go.uber.org/fx"
 )
 

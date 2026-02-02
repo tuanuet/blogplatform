@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/aiagent/boilerplate/internal/domain/entity"
-	"github.com/aiagent/boilerplate/internal/domain/repository"
+	"github.com/aiagent/internal/domain/entity"
+	"github.com/aiagent/internal/domain/repository"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )

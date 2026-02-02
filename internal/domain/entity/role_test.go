@@ -3,7 +3,7 @@ package entity_test
 import (
 	"testing"
 
-	"github.com/aiagent/boilerplate/internal/domain/entity"
+	"github.com/aiagent/internal/domain/entity"
 )
 
 func TestPermission_Has(t *testing.T) {

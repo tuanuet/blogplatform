@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/aiagent/boilerplate/internal/domain/entity"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/dto"
-	"github.com/aiagent/boilerplate/pkg/logger"
+	"github.com/aiagent/internal/domain/entity"
+	"github.com/aiagent/internal/interfaces/http/dto"
+	"github.com/aiagent/pkg/logger"
 	"github.com/google/uuid"
 )
 

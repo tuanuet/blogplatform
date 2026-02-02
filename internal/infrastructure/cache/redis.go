@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiagent/boilerplate/internal/infrastructure/config"
+	"github.com/aiagent/internal/infrastructure/config"
 	"github.com/redis/go-redis/v9"
 )
 

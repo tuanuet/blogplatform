@@ -1,11 +1,13 @@
 package service
 
+//go:generate mockgen -source=$GOFILE -destination=mocks/mock_$GOFILE -package=mocks
+
 import (
 	"context"
 	"errors"
 
-	"github.com/aiagent/boilerplate/internal/domain/entity"
-	"github.com/aiagent/boilerplate/internal/domain/repository"
+	"github.com/aiagent/internal/domain/entity"
+	"github.com/aiagent/internal/domain/repository"
 	"github.com/google/uuid"
 )
 

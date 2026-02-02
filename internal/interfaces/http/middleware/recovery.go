@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/aiagent/boilerplate/pkg/logger"
-	"github.com/aiagent/boilerplate/pkg/response"
+	"github.com/aiagent/pkg/logger"
+	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 )
 

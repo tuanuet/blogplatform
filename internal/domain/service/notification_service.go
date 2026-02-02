@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiagent/boilerplate/internal/interfaces/http/dto"
+	"github.com/aiagent/internal/interfaces/http/dto"
 	"github.com/google/uuid"
 )
 

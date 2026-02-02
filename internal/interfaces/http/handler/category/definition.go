@@ -1,5 +1,7 @@
 package category
 
+//go:generate mockgen -source=$GOFILE -destination=mocks/mock_$GOFILE -package=mocks
+
 import "github.com/gin-gonic/gin"
 
 type CategoryHandler interface {

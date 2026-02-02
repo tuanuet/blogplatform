@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/aiagent/boilerplate/internal/application/dto"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/reading_history"
+	"github.com/aiagent/internal/application/dto"
+	"github.com/aiagent/internal/interfaces/http/handler/reading_history"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

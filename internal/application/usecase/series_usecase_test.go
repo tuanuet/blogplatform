@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aiagent/boilerplate/internal/application/dto"
-	"github.com/aiagent/boilerplate/internal/application/usecase"
-	"github.com/aiagent/boilerplate/internal/domain/entity"
+	"github.com/aiagent/internal/application/dto"
+	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/internal/domain/entity"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

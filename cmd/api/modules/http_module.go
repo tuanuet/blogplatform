@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/aiagent/boilerplate/internal/infrastructure/config"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/router"
-	"github.com/aiagent/boilerplate/pkg/logger"
+	"github.com/aiagent/internal/infrastructure/config"
+	"github.com/aiagent/internal/interfaces/http/router"
+	"github.com/aiagent/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 )

@@ -3,7 +3,7 @@ package logger
 import (
 	"os"
 
-	"github.com/aiagent/boilerplate/internal/infrastructure/config"
+	"github.com/aiagent/internal/infrastructure/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

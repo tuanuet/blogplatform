@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/aiagent/boilerplate/pkg/logger"
+	"github.com/aiagent/pkg/logger"
 )
 
 // RankingJob handles background jobs for ranking calculations

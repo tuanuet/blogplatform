@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aiagent/boilerplate/internal/domain/repository"
-	"github.com/aiagent/boilerplate/internal/infrastructure/cache"
+	"github.com/aiagent/internal/domain/repository"
+	"github.com/aiagent/internal/infrastructure/cache"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )

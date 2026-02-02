@@ -1,15 +1,17 @@
 package usecase
 
+//go:generate mockgen -source=$GOFILE -destination=mocks/mock_$GOFILE -package=mocks
+
 import (
 	"context"
 	"fmt"
 	"time"
 
-	"github.com/aiagent/boilerplate/internal/application/dto"
-	"github.com/aiagent/boilerplate/internal/domain/entity"
-	domainService "github.com/aiagent/boilerplate/internal/domain/service"
-	"github.com/aiagent/boilerplate/internal/infrastructure/cache"
-	"github.com/aiagent/boilerplate/pkg/logger"
+	"github.com/aiagent/internal/application/dto"
+	"github.com/aiagent/internal/domain/entity"
+	domainService "github.com/aiagent/internal/domain/service"
+	"github.com/aiagent/internal/infrastructure/cache"
+	"github.com/aiagent/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
@@ -38,13 +40,13 @@ type PermissionUseCase interface {
 
 type permissionUseCase struct {
 	permissionSvc domainService.PermissionService
-	cache         *cache.RedisClient
+	cache         cache.Cache
 }
 
 // NewPermissionUseCase creates a new permission use case
 func NewPermissionUseCase(
 	permissionSvc domainService.PermissionService,
-	cache *cache.RedisClient,
+	cache cache.Cache,
 ) PermissionUseCase {
 	return &permissionUseCase{
 		permissionSvc: permissionSvc,

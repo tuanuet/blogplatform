@@ -1,8 +1,8 @@
 package telemetry
 
 import (
-	"github.com/aiagent/boilerplate/internal/infrastructure/config"
-	"github.com/aiagent/boilerplate/pkg/logger"
+	"github.com/aiagent/internal/infrastructure/config"
+	"github.com/aiagent/pkg/logger"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"

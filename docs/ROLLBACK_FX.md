@@ -86,15 +86,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/aiagent/boilerplate/internal/application/service"
-	"github.com/aiagent/boilerplate/internal/infrastructure/cache"
-	"github.com/aiagent/boilerplate/internal/infrastructure/config"
-	"github.com/aiagent/boilerplate/internal/infrastructure/persistence/postgres"
-	pgRepo "github.com/aiagent/boilerplate/internal/infrastructure/persistence/postgres/repository"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/router"
-	"github.com/aiagent/boilerplate/pkg/logger"
-	"github.com/aiagent/boilerplate/pkg/validator"
+	"github.com/aiagent/internal/application/service"
+	"github.com/aiagent/internal/infrastructure/cache"
+	"github.com/aiagent/internal/infrastructure/config"
+	"github.com/aiagent/internal/infrastructure/persistence/postgres"
+	pgRepo "github.com/aiagent/internal/infrastructure/persistence/postgres/repository"
+	"github.com/aiagent/internal/interfaces/http/handler"
+	"github.com/aiagent/internal/interfaces/http/router"
+	"github.com/aiagent/pkg/logger"
+	"github.com/aiagent/pkg/validator"
 )
 
 func main() {
@@ -193,28 +193,34 @@ Implemented Follow/Following Model (Twitter-style social relationships) for the 
 ## Changes Made
 
 ### 1. Database Migration
+
 - **File**: `migrations/000005_follow_feature.up.sql`
 - **Table**: `follows` with unique constraint on (follower_id, following_id)
 - **Indexes**: follower_id, following_id, created_at
 - **Constraints**: Foreign keys to users table, prevents self-follows
 
 ### 2. Domain Layer
+
 - **Entity**: `internal/domain/entity/follow.go`
 - **Repository Interface**: `internal/domain/repository/follow_repository.go`
 - **Service**: `internal/domain/service/follow_service.go`
 
 ### 3. Infrastructure Layer
+
 - **Repository Implementation**: `internal/infrastructure/persistence/postgres/repository/follow_repository.go`
 
 ### 4. Application Layer
+
 - **DTOs**: `internal/application/dto/follow.go`
 - **UseCase**: `internal/application/usecase/follow_usecase.go`
 
 ### 5. Interface Layer
+
 - **Handler**: `internal/interfaces/http/handler/follow_handler.go`
 - **Routes**: Added to `internal/interfaces/http/router/router.go`
 
 ### 6. Dependency Injection
+
 - Updated: `cmd/api/modules/domain_service_module.go`
 - Updated: `cmd/api/modules/repository_module.go`
 - Updated: `cmd/api/modules/usecase_module.go`
@@ -222,14 +228,14 @@ Implemented Follow/Following Model (Twitter-style social relationships) for the 
 
 ## API Endpoints Added
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/v1/users/:userId/follow` | Follow a user | Yes |
-| DELETE | `/api/v1/users/:userId/follow` | Unfollow a user | Yes |
-| GET | `/api/v1/users/:userId/followers` | Get user's followers | No |
-| GET | `/api/v1/users/:userId/following` | Get users being followed | No |
-| GET | `/api/v1/users/:userId/follow-counts` | Get follower/following counts | No |
-| GET | `/api/v1/users/:userId/follow-status` | Check if current user follows target | Yes |
+| Method | Endpoint                              | Description                          | Auth |
+| ------ | ------------------------------------- | ------------------------------------ | ---- |
+| POST   | `/api/v1/users/:userId/follow`        | Follow a user                        | Yes  |
+| DELETE | `/api/v1/users/:userId/follow`        | Unfollow a user                      | Yes  |
+| GET    | `/api/v1/users/:userId/followers`     | Get user's followers                 | No   |
+| GET    | `/api/v1/users/:userId/following`     | Get users being followed             | No   |
+| GET    | `/api/v1/users/:userId/follow-counts` | Get follower/following counts        | No   |
+| GET    | `/api/v1/users/:userId/follow-status` | Check if current user follows target | Yes  |
 
 ## Rollback Instructions
 
@@ -241,6 +247,7 @@ psql -U your_db_user -d your_db_name -f migrations/000005_follow_feature.down.sq
 ```
 
 Or manually:
+
 ```sql
 DROP TABLE IF EXISTS follows;
 ```
@@ -271,20 +278,25 @@ rm migrations/000005_follow_feature.down.sql
 ### Step 3: Revert Dependency Injection
 
 Edit `cmd/api/modules/domain_service_module.go`:
+
 - Remove: `service.NewFollowService,`
 
 Edit `cmd/api/modules/repository_module.go`:
+
 - Remove: `pgRepo.NewFollowRepository,`
 
 Edit `cmd/api/modules/usecase_module.go`:
+
 - Remove: `usecase.NewFollowUseCase,`
 
 Edit `cmd/api/modules/handler_module.go`:
+
 - Remove: `handler.NewFollowHandler,`
 
 ### Step 4: Revert Router
 
 Edit `internal/interfaces/http/router/router.go`:
+
 1. Remove `FollowHandler *handler.FollowHandler` from Params struct
 2. Remove follow routes from v1 group:
    ```go

@@ -3,8 +3,8 @@ package modules
 import (
 	"context"
 
-	"github.com/aiagent/boilerplate/internal/infrastructure/telemetry"
-	"github.com/aiagent/boilerplate/pkg/logger"
+	"github.com/aiagent/internal/infrastructure/telemetry"
+	"github.com/aiagent/pkg/logger"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/fx"
 )

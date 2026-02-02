@@ -1,7 +1,7 @@
 package modules
 
 import (
-	"github.com/aiagent/boilerplate/internal/application/usecase"
+	"github.com/aiagent/internal/application/usecase"
 	"go.uber.org/fx"
 )
 

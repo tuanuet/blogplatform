@@ -3,9 +3,9 @@ package modules
 import (
 	"context"
 
-	"github.com/aiagent/boilerplate/internal/domain/service"
-	"github.com/aiagent/boilerplate/internal/infrastructure/config"
-	"github.com/aiagent/boilerplate/pkg/logger"
+	"github.com/aiagent/internal/domain/service"
+	"github.com/aiagent/internal/infrastructure/config"
+	"github.com/aiagent/pkg/logger"
 	"go.uber.org/fx"
 )
 

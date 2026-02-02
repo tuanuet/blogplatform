@@ -1,23 +1,23 @@
 package router
 
 import (
-	"github.com/aiagent/boilerplate/internal/application/usecase"
-	"github.com/aiagent/boilerplate/internal/infrastructure/config"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/blog"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/bookmark"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/category"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/comment"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/fraud"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/health"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/profile"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/ranking"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/reading_history"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/recommendation"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/role"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/series"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/subscription"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/handler/tag"
-	"github.com/aiagent/boilerplate/internal/interfaces/http/middleware"
+	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/internal/infrastructure/config"
+	"github.com/aiagent/internal/interfaces/http/handler/blog"
+	"github.com/aiagent/internal/interfaces/http/handler/bookmark"
+	"github.com/aiagent/internal/interfaces/http/handler/category"
+	"github.com/aiagent/internal/interfaces/http/handler/comment"
+	"github.com/aiagent/internal/interfaces/http/handler/fraud"
+	"github.com/aiagent/internal/interfaces/http/handler/health"
+	"github.com/aiagent/internal/interfaces/http/handler/profile"
+	"github.com/aiagent/internal/interfaces/http/handler/ranking"
+	"github.com/aiagent/internal/interfaces/http/handler/reading_history"
+	"github.com/aiagent/internal/interfaces/http/handler/recommendation"
+	"github.com/aiagent/internal/interfaces/http/handler/role"
+	"github.com/aiagent/internal/interfaces/http/handler/series"
+	"github.com/aiagent/internal/interfaces/http/handler/subscription"
+	"github.com/aiagent/internal/interfaces/http/handler/tag"
+	"github.com/aiagent/internal/interfaces/http/middleware"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -25,7 +25,7 @@ import (
 	"go.uber.org/fx"
 
 	// Import generated swagger docs
-	_ "github.com/aiagent/boilerplate/docs"
+	_ "github.com/aiagent/docs"
 )
 
 // Params groups all handler dependencies for the router (FX dependency injection)

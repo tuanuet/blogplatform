@@ -1,9 +1,9 @@
 package modules
 
 import (
-	"github.com/aiagent/boilerplate/internal/infrastructure/config"
-	"github.com/aiagent/boilerplate/pkg/logger"
-	"github.com/aiagent/boilerplate/pkg/validator"
+	"github.com/aiagent/internal/infrastructure/config"
+	"github.com/aiagent/pkg/logger"
+	"github.com/aiagent/pkg/validator"
 	"go.uber.org/fx"
 )
 

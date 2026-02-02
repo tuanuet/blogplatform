@@ -1,11 +1,13 @@
 package reading_history
 
+//go:generate mockgen -source=$GOFILE -destination=mocks/mock_$GOFILE -package=mocks
+
 import (
 	"net/http"
 	"strconv"
 
-	"github.com/aiagent/boilerplate/internal/application/usecase"
-	"github.com/aiagent/boilerplate/pkg/response"
+	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )

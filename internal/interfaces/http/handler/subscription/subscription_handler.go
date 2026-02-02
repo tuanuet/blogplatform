@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/aiagent/boilerplate/internal/application/usecase"
-	"github.com/aiagent/boilerplate/pkg/response"
+	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )

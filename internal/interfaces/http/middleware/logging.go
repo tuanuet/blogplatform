@@ -3,7 +3,7 @@ package middleware
 import (
 	"time"
 
-	"github.com/aiagent/boilerplate/pkg/logger"
+	"github.com/aiagent/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 

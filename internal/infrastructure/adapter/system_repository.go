@@ -3,9 +3,9 @@ package adapter
 import (
 	"context"
 
-	"github.com/aiagent/boilerplate/internal/domain/repository"
-	"github.com/aiagent/boilerplate/internal/infrastructure/cache"
-	"github.com/aiagent/boilerplate/internal/infrastructure/persistence/postgres"
+	"github.com/aiagent/internal/domain/repository"
+	"github.com/aiagent/internal/infrastructure/cache"
+	"github.com/aiagent/internal/infrastructure/persistence/postgres"
 	"gorm.io/gorm"
 )
 
