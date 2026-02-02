@@ -187,6 +187,97 @@ if (age >= MINIMUM_AGE) {
 }
 ```
 
+## Golang Specific Patterns
+
+### Error Handling
+
+Handle errors explicitly. Don't ignore them.
+
+```go
+// ❌ Bad
+f, _ := os.Open("filename.ext")
+
+// ✅ Good
+f, err := os.Open("filename.ext")
+if err != nil {
+    return err
+}
+```
+
+### Variable Naming
+
+Go prefers short, concise names for local variables.
+
+```go
+// ❌ Bad (Too verbose for local scope)
+for index := 0; index < len(users); index++ {
+    user := users[index]
+}
+
+// ✅ Good
+for i, u := range users {
+    // ...
+}
+```
+
+### Interface Segregation
+
+Keep interfaces small.
+
+```go
+// ❌ Bad (Large interface)
+type Processor interface {
+    Process()
+    Validate()
+    Save()
+    Log()
+}
+
+// ✅ Good (Small interfaces)
+type Validator interface {
+    Validate() error
+}
+
+type Saver interface {
+    Save() error
+}
+```
+
+### Struct Initialization
+
+Always use field names for clarity.
+
+```go
+// ❌ Bad
+u := User{"John", 30, true}
+
+// ✅ Good
+u := User{
+    Name: "John",
+    Age:  30,
+    Active: true,
+}
+```
+
+### Package Organization
+
+- Keep `main` package for entry points.
+- Use `internal` for private application code.
+- Avoid cyclical dependencies.
+
+### Concurrency
+
+Use channels for communication, not for locking.
+
+```go
+// Share memory by communicating
+func worker(jobs <-chan int, results chan<- int) {
+    for j := range jobs {
+        results <- process(j)
+    }
+}
+```
+
 ## Checklist
 
 - [ ] Names reveal intent
@@ -196,3 +287,6 @@ if (age >= MINIMUM_AGE) {
 - [ ] No duplicate code
 - [ ] No dead code
 - [ ] Comments explain WHY
+- [ ] (Go) Errors handled explicitly
+- [ ] (Go) Interfaces are small and focused
+- [ ] (Go) Structs initialized with field names
