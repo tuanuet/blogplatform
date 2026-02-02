@@ -14,8 +14,9 @@
 2. Delegate to **Gatekeeper** → Get Refined Spec
    - If ambiguous → Return questions → Loop
 3. Delegate to **Architect** → Get Schema + API Contract
-4. Delegate to **Builder** → Get Tests + Implementation
-5. Return final result
+4. Delegate to **Planner** → Get Todo List
+5. Delegate to **Builder** → Get Tests + Implementation
+6. Return final result
 
 ---
 
@@ -70,6 +71,28 @@
 
 ---
 
+### 📋 Planner Agent
+
+**Role**: Technical Lead
+
+**Location**: `.agent/agents/planner/AGENT.md`
+
+**Skills**:
+
+- `todowrite`
+- `ckb-code-scan`
+- `requirement-analysis`
+
+**Input**: Architect's Design OR Bug Report
+
+**Output**:
+
+- Atomic, sequential Todo List
+
+**Constraint**: Tasks must be implementable in one TDD cycle
+
+---
+
 ### 🔨 Builder Agent
 
 **Role**: Senior Developer
@@ -113,6 +136,9 @@
 │       │ Refined Spec ready                          │
 │       ↓                                             │
 │  [Architect] ──→ Schema + API Contract              │
+│       │                                             │
+│       ↓                                             │
+│  [Planner] ──→ Implementation Plan (Todo List)      │
 │       │                                             │
 │       ↓                                             │
 │  [Builder] ──→ TDD Implementation                   │

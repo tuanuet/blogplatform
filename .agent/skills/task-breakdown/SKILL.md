@@ -1,6 +1,7 @@
-## Skill: task-breakdown
-
-**Base directory**: .agent/skills/task-breakdown
+---
+name: task-breakdown
+description: Decompose high-level requirements into atomic, technical implementation tasks based on existing system architecture. Use when breaking down features, bug fixes, or refactors into sequential TDD-ready tasks, prioritizing dependencies and ensuring alignment with architectural design.
+---
 
 # Task Breakdown Skill
 

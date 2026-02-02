@@ -39,8 +39,9 @@ The **master workflow** for any development task. Other workflows extend this.
 
 ### Phase 2.5: PLANNER
 
-- Skill: `task-breakdown`
-- Action: Break down the approved Architect design into atomic tasks using `todowrite`.
+- Load: `.agent/agents/planner/AGENT.md`
+- Skills: `todowrite`, `ckb-code-scan`
+- Output: Atomic, sequential Todo List
 - **STOP CONDITION**: Present Task List to User. **WAIT** for approval before proceeding to Building.
 
 ### Phase 3: BUILDER
@@ -48,7 +49,7 @@ The **master workflow** for any development task. Other workflows extend this.
 - Load: `.agent/agents/builder/AGENT.md`
 - Skills: `tdd-workflow`, `clean-code`, `testing`
 - Output: Tests + Implementation
-- Input: Takes output of all previous phase
+- Input: Takes output of all previous phases
 
 ## Workflow Variants
 
