@@ -14,6 +14,7 @@ import (
 	"github.com/aiagent/internal/interfaces/http/handler/comment"
 	"github.com/aiagent/internal/interfaces/http/handler/fraud"
 	"github.com/aiagent/internal/interfaces/http/handler/health"
+	"github.com/aiagent/internal/interfaces/http/handler/payment"
 	"github.com/aiagent/internal/interfaces/http/handler/profile"
 	"github.com/aiagent/internal/interfaces/http/handler/ranking"
 	"github.com/aiagent/internal/interfaces/http/handler/reading_history"
@@ -53,6 +54,8 @@ type Params struct {
 	ReadingHistoryHandler reading_history.ReadingHistoryHandler
 	RecommendationHandler recommendation.RecommendationHandler
 	FraudHandler          fraud.FraudHandler
+	PaymentHandler        payment.PaymentHandler
+	WebhookHandler        payment.WebhookHandler
 	AuthHandler           auth.AuthHandler
 	SessionRepository     repository.SessionRepository
 	RedisClient           *redis.Client
@@ -260,6 +263,9 @@ func New(p Params) *gin.Engine {
 
 		// Notifications
 		v1.POST("/notifications/:id/read", sessionAuth, p.FraudHandler.MarkNotificationAsRead)
+
+		// Payment & Webhooks
+		RegisterPaymentRoutes(v1, p.PaymentHandler, p.WebhookHandler, sessionAuth)
 	}
 
 	return engine

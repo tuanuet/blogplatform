@@ -57,7 +57,7 @@ type Transaction struct {
 	TargetID       *uuid.UUID             `gorm:"type:uuid" json:"targetId,omitempty"`
 	PlanID         *string                `gorm:"size:50" json:"planId,omitempty"`
 	Content        string                 `gorm:"type:text" json:"content,omitempty"`
-	SePayID        string                 `gorm:"size:255;not null;unique;index" json:"sepayId"`
+	SePayID        string                 `gorm:"column:sepay_id;size:255;unique;index" json:"sepayId"`
 	ReferenceCode  string                 `gorm:"size:255;not null;index" json:"referenceCode"`
 	OrderID        string                 `gorm:"size:255;not null;index" json:"orderId"`
 	WebhookPayload map[string]interface{} `gorm:"type:jsonb;serializer:json;default:'{}'" json:"webhookPayload"`
