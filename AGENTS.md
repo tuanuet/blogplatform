@@ -34,7 +34,9 @@
 - Refined Spec (User Stories + Edge Cases)
 - OR Clarifying Questions (if ambiguous)
 
-**Stop Condition**: DO NOT proceed if request is vague
+**⚠️ MANDATORY**: Must ask user clarifying questions and loop until ALL requirements are clear. User must explicitly approve the Refined Spec before proceeding.
+
+**Stop Condition**: DO NOT proceed if request is vague or user hasn't confirmed spec
 
 ---
 
@@ -58,6 +60,8 @@
 
 - Database Schema (auto-detect format from codebase)
 - API Contract (OpenAPI/Interface)
+
+**⚠️ MANDATORY**: Must ask user about design decisions and loop until ALL architectural choices are confirmed. User must explicitly approve the design before proceeding.
 
 **Constraint**: DO NOT write function bodies
 
@@ -153,10 +157,18 @@
 │       │                                             │
 │       ↓                                             │
 │  [Gatekeeper] ──→ Refined Spec or Questions         │
-│       │                                             │
+│       │         ⚠️ MANDATORY LOOP:                  │
+│       │         - Ask clarifying questions          │
+│       │         - Wait for user response            │
+│       │         - Loop until ALL clear              │
+│       │         - User MUST approve spec            │
 │       ↓                                             │
 │  [Architect] ──→ Schema + API Contract              │
-│       │         (STOP: wait for approval)           │
+│       │         ⚠️ MANDATORY LOOP:                  │
+│       │         - Ask design questions              │
+│       │         - Wait for user response            │
+│       │         - Loop until ALL confirmed          │
+│       │         - User MUST approve design          │
 │       ↓                                             │
 │  [Planner] ──→ Implementation Plan (Todo List)      │
 │       │         (STOP: wait for approval)           │
