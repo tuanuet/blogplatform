@@ -5,17 +5,17 @@ import (
 	"strconv"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase"
+	tagUsecase "github.com/aiagent/internal/application/usecase/tag"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type tagHandler struct {
-	tagUseCase usecase.TagUseCase
+	tagUseCase tagUsecase.TagUseCase
 }
 
-func NewTagHandler(tagUseCase usecase.TagUseCase) TagHandler {
+func NewTagHandler(tagUseCase tagUsecase.TagUseCase) TagHandler {
 	return &tagHandler{
 		tagUseCase: tagUseCase,
 	}
@@ -42,7 +42,7 @@ func (h *tagHandler) Create(c *gin.Context) {
 
 	tag, err := h.tagUseCase.Create(c.Request.Context(), &req)
 	if err != nil {
-		if err == usecase.ErrTagSlugExists {
+		if err == tagUsecase.ErrTagSlugExists {
 			response.Conflict(c, err.Error())
 			return
 		}
@@ -72,7 +72,7 @@ func (h *tagHandler) GetByID(c *gin.Context) {
 
 	tag, err := h.tagUseCase.GetByID(c.Request.Context(), id)
 	if err != nil {
-		if err == usecase.ErrTagNotFound {
+		if err == tagUsecase.ErrTagNotFound {
 			response.NotFound(c, err.Error())
 			return
 		}
@@ -151,9 +151,9 @@ func (h *tagHandler) Update(c *gin.Context) {
 	tag, err := h.tagUseCase.Update(c.Request.Context(), id, &req)
 	if err != nil {
 		switch err {
-		case usecase.ErrTagNotFound:
+		case tagUsecase.ErrTagNotFound:
 			response.NotFound(c, err.Error())
-		case usecase.ErrTagSlugExists:
+		case tagUsecase.ErrTagSlugExists:
 			response.Conflict(c, err.Error())
 		default:
 			response.InternalServerError(c, err.Error())
@@ -183,7 +183,7 @@ func (h *tagHandler) Delete(c *gin.Context) {
 	}
 
 	if err := h.tagUseCase.Delete(c.Request.Context(), id); err != nil {
-		if err == usecase.ErrTagNotFound {
+		if err == tagUsecase.ErrTagNotFound {
 			response.NotFound(c, err.Error())
 			return
 		}

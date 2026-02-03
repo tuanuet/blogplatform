@@ -4,17 +4,17 @@ import (
 	"net/http"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase"
+	bookmarkUsecase "github.com/aiagent/internal/application/usecase/bookmark"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type bookmarkHandler struct {
-	bookmarkUseCase usecase.BookmarkUseCase
+	bookmarkUseCase bookmarkUsecase.BookmarkUseCase
 }
 
-func NewBookmarkHandler(bookmarkUseCase usecase.BookmarkUseCase) BookmarkHandler {
+func NewBookmarkHandler(bookmarkUseCase bookmarkUsecase.BookmarkUseCase) BookmarkHandler {
 	return &bookmarkHandler{
 		bookmarkUseCase: bookmarkUseCase,
 	}

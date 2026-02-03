@@ -8,7 +8,7 @@ import (
 	"github.com/aiagent/internal/domain/entity"
 	"github.com/aiagent/internal/domain/service"
 	"github.com/aiagent/internal/domain/service/mocks"
-	"github.com/aiagent/internal/interfaces/http/dto"
+	"github.com/aiagent/internal/domain/valueobject"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -87,8 +87,9 @@ func TestFraudDetectionService_GetFraudDashboard(t *testing.T) {
 	mockBatch := mocks.NewMockBatchJobService(ctrl)
 	svc := service.NewFraudDetectionService(mockRepo, mockNotif, mockBatch)
 
-	req := dto.FraudDashboardRequest{
-		MinRiskScore: 70,
+	minScore := 70
+	req := valueobject.FraudDashboardFilter{
+		MinRiskScore: &minScore,
 		Page:         1,
 		PageSize:     10,
 	}
@@ -138,7 +139,7 @@ func TestFraudDetectionService_ReviewUser(t *testing.T) {
 
 	adminID := uuid.New()
 	userID := uuid.New()
-	req := dto.ReviewUserRequest{
+	req := valueobject.ReviewUserCommand{
 		Notes: "Reviewed user profile, looks suspicious",
 	}
 
@@ -174,7 +175,7 @@ func TestFraudDetectionService_BanUser(t *testing.T) {
 
 	adminID := uuid.New()
 	userID := uuid.New()
-	req := dto.BanUserRequest{
+	req := valueobject.BanUserCommand{
 		Reason: "Multiple bot detection signals confirmed",
 		Notes:  "Banned after thorough investigation",
 	}
@@ -209,7 +210,7 @@ func TestFraudDetectionService_GetFraudTrends(t *testing.T) {
 	mockBatch := mocks.NewMockBatchJobService(ctrl)
 	svc := service.NewFraudDetectionService(mockRepo, mockNotif, mockBatch)
 
-	req := dto.FraudTrendsRequest{
+	req := valueobject.FraudTrendsFilter{
 		Period: "7d",
 	}
 
@@ -220,7 +221,7 @@ func TestFraudDetectionService_GetFraudTrends(t *testing.T) {
 		"ip_cluster":    8,
 	}
 
-	dailyStats := []dto.DailyFraudStat{
+	dailyStats := []valueobject.DailyFraudStat{
 		{Date: now.AddDate(0, 0, -1).Format("2006-01-02"), NewSignals: 5, NewSuspiciousAccounts: 2},
 		{Date: now.AddDate(0, 0, -2).Format("2006-01-02"), NewSignals: 3, NewSuspiciousAccounts: 1},
 	}
@@ -255,7 +256,7 @@ func TestFraudDetectionService_TriggerBatchAnalysis(t *testing.T) {
 	mockBatch := mocks.NewMockBatchJobService(ctrl)
 	svc := service.NewFraudDetectionService(mockRepo, mockNotif, mockBatch)
 
-	req := dto.BatchAnalyzeRequest{}
+	req := valueobject.BatchAnalyzeCommand{}
 	expectedJobID := uuid.New()
 
 	mockBatch.EXPECT().StartBatchAnalysis(gomock.Any(), gomock.Any(), gomock.Any()).Return(expectedJobID, nil)

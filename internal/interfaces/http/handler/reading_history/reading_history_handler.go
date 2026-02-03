@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/aiagent/internal/application/usecase"
+	readingHistoryUsecase "github.com/aiagent/internal/application/usecase/reading_history"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -18,10 +18,10 @@ type ReadingHistoryHandler interface {
 }
 
 type readingHistoryHandler struct {
-	historyUseCase usecase.ReadingHistoryUseCase
+	historyUseCase readingHistoryUsecase.ReadingHistoryUseCase
 }
 
-func NewReadingHistoryHandler(historyUseCase usecase.ReadingHistoryUseCase) ReadingHistoryHandler {
+func NewReadingHistoryHandler(historyUseCase readingHistoryUsecase.ReadingHistoryUseCase) ReadingHistoryHandler {
 	return &readingHistoryHandler{
 		historyUseCase: historyUseCase,
 	}

@@ -3,7 +3,7 @@ package router
 import (
 	"time"
 
-	"github.com/aiagent/internal/application/usecase"
+	roleUseCase "github.com/aiagent/internal/application/usecase/role"
 	"github.com/aiagent/internal/domain/repository"
 	"github.com/aiagent/internal/infrastructure/config"
 	"github.com/aiagent/internal/interfaces/http/handler/admin"
@@ -56,7 +56,7 @@ type Params struct {
 	AuthHandler           auth.AuthHandler
 	SessionRepository     repository.SessionRepository
 	RedisClient           *redis.Client
-	RoleUseCase           usecase.RoleUseCase // For authorization middleware
+	RoleUseCase           roleUseCase.RoleUseCase // For authorization middleware
 	Config                *config.Config
 }
 

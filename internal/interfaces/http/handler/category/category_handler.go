@@ -5,17 +5,17 @@ import (
 	"strconv"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase"
+	categoryUsecase "github.com/aiagent/internal/application/usecase/category"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type categoryHandler struct {
-	categoryUseCase usecase.CategoryUseCase
+	categoryUseCase categoryUsecase.CategoryUseCase
 }
 
-func NewCategoryHandler(categoryUseCase usecase.CategoryUseCase) CategoryHandler {
+func NewCategoryHandler(categoryUseCase categoryUsecase.CategoryUseCase) CategoryHandler {
 	return &categoryHandler{
 		categoryUseCase: categoryUseCase,
 	}
@@ -42,7 +42,7 @@ func (h *categoryHandler) Create(c *gin.Context) {
 
 	category, err := h.categoryUseCase.Create(c.Request.Context(), &req)
 	if err != nil {
-		if err == usecase.ErrCategorySlugExists {
+		if err == categoryUsecase.ErrCategorySlugExists {
 			response.Conflict(c, err.Error())
 			return
 		}
@@ -72,7 +72,7 @@ func (h *categoryHandler) GetByID(c *gin.Context) {
 
 	category, err := h.categoryUseCase.GetByID(c.Request.Context(), id)
 	if err != nil {
-		if err == usecase.ErrCategoryNotFound {
+		if err == categoryUsecase.ErrCategoryNotFound {
 			response.NotFound(c, err.Error())
 			return
 		}
@@ -151,9 +151,9 @@ func (h *categoryHandler) Update(c *gin.Context) {
 	category, err := h.categoryUseCase.Update(c.Request.Context(), id, &req)
 	if err != nil {
 		switch err {
-		case usecase.ErrCategoryNotFound:
+		case categoryUsecase.ErrCategoryNotFound:
 			response.NotFound(c, err.Error())
-		case usecase.ErrCategorySlugExists:
+		case categoryUsecase.ErrCategorySlugExists:
 			response.Conflict(c, err.Error())
 		default:
 			response.InternalServerError(c, err.Error())
@@ -183,7 +183,7 @@ func (h *categoryHandler) Delete(c *gin.Context) {
 	}
 
 	if err := h.categoryUseCase.Delete(c.Request.Context(), id); err != nil {
-		if err == usecase.ErrCategoryNotFound {
+		if err == categoryUsecase.ErrCategoryNotFound {
 			response.NotFound(c, err.Error())
 			return
 		}

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/internal/application/usecase/role"
 	"github.com/aiagent/pkg/response"
 	"github.com/aiagent/pkg/validator"
 	"github.com/gin-gonic/gin"
@@ -14,10 +14,10 @@ import (
 )
 
 type roleHandler struct {
-	roleUseCase usecase.RoleUseCase
+	roleUseCase role.RoleUseCase
 }
 
-func NewRoleHandler(roleUseCase usecase.RoleUseCase) RoleHandler {
+func NewRoleHandler(roleUseCase role.RoleUseCase) RoleHandler {
 	return &roleHandler{
 		roleUseCase: roleUseCase,
 	}
@@ -52,9 +52,9 @@ func (h *roleHandler) Create(c *gin.Context) {
 		}
 	}
 
-	role, err := h.roleUseCase.CreateRole(c.Request.Context(), req)
+	roleResp, err := h.roleUseCase.CreateRole(c.Request.Context(), req)
 	if err != nil {
-		if errors.Is(err, usecase.ErrRoleAlreadyExists) {
+		if errors.Is(err, role.ErrRoleAlreadyExists) {
 			response.Conflict(c, "Role already exists")
 			return
 		}
@@ -62,7 +62,7 @@ func (h *roleHandler) Create(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusCreated, role)
+	response.Success(c, http.StatusCreated, roleResp)
 }
 
 // GetRole godoc
@@ -85,9 +85,9 @@ func (h *roleHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	role, err := h.roleUseCase.GetRole(c.Request.Context(), id)
+	roleResp, err := h.roleUseCase.GetRole(c.Request.Context(), id)
 	if err != nil {
-		if errors.Is(err, usecase.ErrRoleNotFound) {
+		if errors.Is(err, role.ErrRoleNotFound) {
 			response.NotFound(c, "Role not found")
 			return
 		}
@@ -95,7 +95,7 @@ func (h *roleHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusOK, role)
+	response.Success(c, http.StatusOK, roleResp)
 }
 
 // ListRoles godoc
@@ -144,9 +144,9 @@ func (h *roleHandler) Update(c *gin.Context) {
 		return
 	}
 
-	role, err := h.roleUseCase.UpdateRole(c.Request.Context(), id, req)
+	roleResp, err := h.roleUseCase.UpdateRole(c.Request.Context(), id, req)
 	if err != nil {
-		if errors.Is(err, usecase.ErrRoleNotFound) {
+		if errors.Is(err, role.ErrRoleNotFound) {
 			response.NotFound(c, "Role not found")
 			return
 		}
@@ -154,7 +154,7 @@ func (h *roleHandler) Update(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusOK, role)
+	response.Success(c, http.StatusOK, roleResp)
 }
 
 // DeleteRole godoc
@@ -178,7 +178,7 @@ func (h *roleHandler) Delete(c *gin.Context) {
 	}
 
 	if err := h.roleUseCase.DeleteRole(c.Request.Context(), id); err != nil {
-		if errors.Is(err, usecase.ErrRoleNotFound) {
+		if errors.Is(err, role.ErrRoleNotFound) {
 			response.NotFound(c, "Role not found")
 			return
 		}
@@ -226,7 +226,7 @@ func (h *roleHandler) SetPermission(c *gin.Context) {
 	}
 
 	if err := h.roleUseCase.SetPermission(c.Request.Context(), id, req); err != nil {
-		if errors.Is(err, usecase.ErrRoleNotFound) {
+		if errors.Is(err, role.ErrRoleNotFound) {
 			response.NotFound(c, "Role not found")
 			return
 		}
@@ -293,7 +293,7 @@ func (h *roleHandler) AssignRole(c *gin.Context) {
 	}
 
 	if err := h.roleUseCase.AssignRole(c.Request.Context(), userID, req.RoleID); err != nil {
-		if errors.Is(err, usecase.ErrRoleNotFound) {
+		if errors.Is(err, role.ErrRoleNotFound) {
 			response.NotFound(c, "Role not found")
 			return
 		}

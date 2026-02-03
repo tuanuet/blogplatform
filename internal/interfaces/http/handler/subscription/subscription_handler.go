@@ -4,17 +4,17 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/internal/application/usecase/subscription"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type subscriptionHandler struct {
-	subscriptionUseCase usecase.SubscriptionUseCase
+	subscriptionUseCase subscription.SubscriptionUseCase
 }
 
-func NewSubscriptionHandler(subscriptionUseCase usecase.SubscriptionUseCase) SubscriptionHandler {
+func NewSubscriptionHandler(subscriptionUseCase subscription.SubscriptionUseCase) SubscriptionHandler {
 	return &subscriptionHandler{
 		subscriptionUseCase: subscriptionUseCase,
 	}
@@ -45,12 +45,12 @@ func (h *subscriptionHandler) Subscribe(c *gin.Context) {
 		return
 	}
 
-	subscription, err := h.subscriptionUseCase.Subscribe(c.Request.Context(), subscriberID.(uuid.UUID), authorID)
+	sub, err := h.subscriptionUseCase.Subscribe(c.Request.Context(), subscriberID.(uuid.UUID), authorID)
 	if err != nil {
 		switch err {
-		case usecase.ErrCannotSubscribeToSelf:
+		case subscription.ErrCannotSubscribeToSelf:
 			response.BadRequest(c, err.Error())
-		case usecase.ErrAlreadySubscribed:
+		case subscription.ErrAlreadySubscribed:
 			response.Conflict(c, err.Error())
 		default:
 			response.InternalServerError(c, err.Error())
@@ -58,7 +58,7 @@ func (h *subscriptionHandler) Subscribe(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusCreated, subscription)
+	response.Success(c, http.StatusCreated, sub)
 }
 
 // Unsubscribe godoc
@@ -86,7 +86,7 @@ func (h *subscriptionHandler) Unsubscribe(c *gin.Context) {
 	}
 
 	if err := h.subscriptionUseCase.Unsubscribe(c.Request.Context(), subscriberID.(uuid.UUID), authorID); err != nil {
-		if err == usecase.ErrSubscriptionNotFound {
+		if err == subscription.ErrSubscriptionNotFound {
 			response.NotFound(c, err.Error())
 			return
 		}

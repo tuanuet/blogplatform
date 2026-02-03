@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/aiagent/internal/domain/entity"
-	"github.com/aiagent/internal/interfaces/http/dto"
+	"github.com/aiagent/internal/domain/valueobject"
 	"github.com/google/uuid"
 )
 
@@ -54,7 +54,7 @@ func NewFraudDetectionService(repo FraudDetectionRepository, notifier Notificati
 }
 
 // GetUserRiskScore retrieves the risk score for a specific user
-func (s *fraudDetectionService) GetUserRiskScore(ctx context.Context, userID uuid.UUID) (*dto.RiskScoreResponse, error) {
+func (s *fraudDetectionService) GetUserRiskScore(ctx context.Context, userID uuid.UUID) (*valueobject.RiskScoreResult, error) {
 	score, err := s.repo.GetRiskScoreByUser(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (s *fraudDetectionService) GetUserRiskScore(ctx context.Context, userID uui
 		badgeStatus = badge.Status
 	}
 
-	return &dto.RiskScoreResponse{
+	return &valueobject.RiskScoreResult{
 		ID:                        score.ID,
 		UserID:                    score.UserID,
 		OverallScore:              score.OverallScore,
@@ -87,28 +87,31 @@ func (s *fraudDetectionService) GetUserRiskScore(ctx context.Context, userID uui
 }
 
 // GetFraudDashboard retrieves paginated list of users for admin dashboard
-func (s *fraudDetectionService) GetFraudDashboard(ctx context.Context, req dto.FraudDashboardRequest) (*dto.FraudDashboardResponse, error) {
-	minScore := req.MinRiskScore
-	maxScore := req.MaxRiskScore
-	if maxScore == 0 {
-		maxScore = maxRiskScore
+func (s *fraudDetectionService) GetFraudDashboard(ctx context.Context, filter valueobject.FraudDashboardFilter) (*valueobject.FraudDashboardResult, error) {
+	minScore := 0
+	if filter.MinRiskScore != nil {
+		minScore = *filter.MinRiskScore
+	}
+	maxScore := maxRiskScore
+	if filter.MaxRiskScore != nil {
+		maxScore = *filter.MaxRiskScore
 	}
 
-	scores, totalCount, err := s.repo.GetUsersByRiskScoreRange(ctx, minScore, maxScore, req.Page, req.PageSize)
+	scores, totalCount, err := s.repo.GetUsersByRiskScoreRange(ctx, minScore, maxScore, filter.Page, filter.PageSize)
 	if err != nil {
 		return nil, err
 	}
 
-	users := make([]dto.FraudDashboardUser, 0, len(scores))
+	users := make([]valueobject.FraudDashboardUser, 0, len(scores))
 	for _, score := range scores {
 		signals, err := s.repo.GetBotSignalsByUser(ctx, score.UserID, false)
 		if err != nil {
 			continue
 		}
 
-		signalSummaries := make([]dto.BotSignalSummary, 0, len(signals))
+		signalSummaries := make([]valueobject.BotSignalSummary, 0, len(signals))
 		for _, signal := range signals {
-			signalSummaries = append(signalSummaries, dto.BotSignalSummary{
+			signalSummaries = append(signalSummaries, valueobject.BotSignalSummary{
 				SignalType:      signal.SignalType,
 				ConfidenceScore: signal.ConfidenceScore,
 				DetectedAt:      signal.DetectedAt,
@@ -123,7 +126,7 @@ func (s *fraudDetectionService) GetFraudDashboard(ctx context.Context, req dto.F
 			lastReviewedAt = &lastReview.ReviewedAt
 		}
 
-		users = append(users, dto.FraudDashboardUser{
+		users = append(users, valueobject.FraudDashboardUser{
 			UserID:                score.UserID,
 			OverallScore:          score.OverallScore,
 			ActiveSignals:         signalSummaries,
@@ -133,13 +136,13 @@ func (s *fraudDetectionService) GetFraudDashboard(ctx context.Context, req dto.F
 		})
 	}
 
-	totalPages := (totalCount + req.PageSize - 1) / req.PageSize
+	totalPages := (totalCount + filter.PageSize - 1) / filter.PageSize
 
-	return &dto.FraudDashboardResponse{
+	return &valueobject.FraudDashboardResult{
 		Users:      users,
 		TotalCount: totalCount,
-		Page:       req.Page,
-		PageSize:   req.PageSize,
+		Page:       filter.Page,
+		PageSize:   filter.PageSize,
 		TotalPages: totalPages,
 	}, nil
 }
@@ -177,18 +180,18 @@ func (s *fraudDetectionService) createAdminReview(ctx context.Context, adminID, 
 }
 
 // ReviewUser marks a user as reviewed by an admin
-func (s *fraudDetectionService) ReviewUser(ctx context.Context, adminID, userID uuid.UUID, req dto.ReviewUserRequest) (*dto.ReviewUserResponse, error) {
+func (s *fraudDetectionService) ReviewUser(ctx context.Context, adminID, userID uuid.UUID, cmd valueobject.ReviewUserCommand) (*valueobject.ReviewUserResult, error) {
 	riskScoreValue, err := s.getRiskScoreValue(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	review, err := s.createAdminReview(ctx, adminID, userID, actionReviewed, riskScoreValue, req.Notes)
+	review, err := s.createAdminReview(ctx, adminID, userID, actionReviewed, riskScoreValue, cmd.Notes)
 	if err != nil {
 		return nil, err
 	}
 
-	return &dto.ReviewUserResponse{
+	return &valueobject.ReviewUserResult{
 		ReviewID:   review.ID,
 		UserID:     review.UserID,
 		AdminID:    review.AdminID,
@@ -204,25 +207,25 @@ func buildBanNotes(reason, notes string) string {
 }
 
 // BanUser bans a user account due to fraudulent activity
-func (s *fraudDetectionService) BanUser(ctx context.Context, adminID, userID uuid.UUID, req dto.BanUserRequest) (*dto.BanUserResponse, error) {
+func (s *fraudDetectionService) BanUser(ctx context.Context, adminID, userID uuid.UUID, cmd valueobject.BanUserCommand) (*valueobject.BanUserResult, error) {
 	riskScoreValue, err := s.getRiskScoreValue(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	notes := buildBanNotes(req.Reason, req.Notes)
+	notes := buildBanNotes(cmd.Reason, cmd.Notes)
 	review, err := s.createAdminReview(ctx, adminID, userID, actionBanned, riskScoreValue, notes)
 	if err != nil {
 		return nil, err
 	}
 
-	return &dto.BanUserResponse{
+	return &valueobject.BanUserResult{
 		ReviewID: review.ID,
 		UserID:   review.UserID,
 		AdminID:  review.AdminID,
 		Action:   review.Action,
-		Reason:   req.Reason,
-		Notes:    req.Notes,
+		Reason:   cmd.Reason,
+		Notes:    cmd.Notes,
 		BannedAt: review.ReviewedAt,
 	}, nil
 }
@@ -248,8 +251,8 @@ func calculatePeriodDates(period string) (from, to time.Time) {
 }
 
 // GetFraudTrends retrieves analytics data about fraud trends
-func (s *fraudDetectionService) GetFraudTrends(ctx context.Context, req dto.FraudTrendsRequest) (*dto.FraudTrendsResponse, error) {
-	from, to := calculatePeriodDates(req.Period)
+func (s *fraudDetectionService) GetFraudTrends(ctx context.Context, filter valueobject.FraudTrendsFilter) (*valueobject.FraudTrendsResult, error) {
+	from, to := calculatePeriodDates(filter.Period)
 
 	signalsByType, err := s.repo.GetSignalsCountByType(ctx, from, to)
 	if err != nil {
@@ -291,8 +294,8 @@ func (s *fraudDetectionService) GetFraudTrends(ctx context.Context, req dto.Frau
 		return nil, err
 	}
 
-	return &dto.FraudTrendsResponse{
-		Period:                req.Period,
+	return &valueobject.FraudTrendsResult{
+		Period:                filter.Period,
 		FromDate:              from,
 		ToDate:                to,
 		TotalBotSignals:       totalSignals,
@@ -307,13 +310,13 @@ func (s *fraudDetectionService) GetFraudTrends(ctx context.Context, req dto.Frau
 }
 
 // TriggerBatchAnalysis starts a batch job to analyze followers for bot detection
-func (s *fraudDetectionService) TriggerBatchAnalysis(ctx context.Context, req dto.BatchAnalyzeRequest) (*dto.BatchAnalyzeResponse, error) {
-	jobID, err := s.batchJob.StartBatchAnalysis(ctx, req.DateFrom, req.DateTo)
+func (s *fraudDetectionService) TriggerBatchAnalysis(ctx context.Context, cmd valueobject.BatchAnalyzeCommand) (*valueobject.BatchAnalyzeResult, error) {
+	jobID, err := s.batchJob.StartBatchAnalysis(ctx, cmd.DateFrom, cmd.DateTo)
 	if err != nil {
 		return nil, err
 	}
 
-	return &dto.BatchAnalyzeResponse{
+	return &valueobject.BatchAnalyzeResult{
 		JobID:     jobID,
 		Status:    jobStatusStarted,
 		StartedAt: time.Now(),
@@ -322,7 +325,7 @@ func (s *fraudDetectionService) TriggerBatchAnalysis(ctx context.Context, req dt
 }
 
 // GetUserBadgeStatus retrieves the badge status for a user
-func (s *fraudDetectionService) GetUserBadgeStatus(ctx context.Context, userID uuid.UUID) (*dto.UserBadgeResponse, error) {
+func (s *fraudDetectionService) GetUserBadgeStatus(ctx context.Context, userID uuid.UUID) (*valueobject.UserBadgeResult, error) {
 	badge, err := s.repo.GetBadgeStatusByUser(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -332,7 +335,7 @@ func (s *fraudDetectionService) GetUserBadgeStatus(ctx context.Context, userID u
 		return nil, nil
 	}
 
-	return &dto.UserBadgeResponse{
+	return &valueobject.UserBadgeResult{
 		UserID:        badge.UserID,
 		BadgeType:     badge.BadgeType,
 		Status:        badge.Status,
@@ -342,15 +345,15 @@ func (s *fraudDetectionService) GetUserBadgeStatus(ctx context.Context, userID u
 }
 
 // GetUserBotNotifications retrieves notifications about flagged bot followers
-func (s *fraudDetectionService) GetUserBotNotifications(ctx context.Context, userID uuid.UUID, unreadOnly bool) ([]dto.BotFollowerNotificationResponse, error) {
+func (s *fraudDetectionService) GetUserBotNotifications(ctx context.Context, userID uuid.UUID, unreadOnly bool) ([]valueobject.BotFollowerNotificationResult, error) {
 	notifications, err := s.repo.GetBotNotificationsByUser(ctx, userID, unreadOnly)
 	if err != nil {
 		return nil, err
 	}
 
-	response := make([]dto.BotFollowerNotificationResponse, 0, len(notifications))
+	response := make([]valueobject.BotFollowerNotificationResult, 0, len(notifications))
 	for _, notif := range notifications {
-		response = append(response, dto.BotFollowerNotificationResponse{
+		response = append(response, valueobject.BotFollowerNotificationResult{
 			ID:            notif.ID,
 			BotFollowerID: notif.BotFollowerID,
 			SentAt:        notif.SentAt,

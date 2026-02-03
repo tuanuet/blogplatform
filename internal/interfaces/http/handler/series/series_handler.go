@@ -5,18 +5,18 @@ import (
 	"net/http"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase"
+	seriesUsecase "github.com/aiagent/internal/application/usecase/series"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type seriesHandler struct {
-	seriesUseCase usecase.SeriesUseCase
+	seriesUseCase seriesUsecase.SeriesUseCase
 }
 
 // NewSeriesHandler creates a new instance of SeriesHandler
-func NewSeriesHandler(seriesUseCase usecase.SeriesUseCase) SeriesHandler {
+func NewSeriesHandler(seriesUseCase seriesUsecase.SeriesUseCase) SeriesHandler {
 	return &seriesHandler{
 		seriesUseCase: seriesUseCase,
 	}

@@ -6,7 +6,7 @@ import (
 
 	"github.com/aiagent/internal/domain/entity"
 	"github.com/aiagent/internal/domain/service"
-	"github.com/aiagent/internal/interfaces/http/dto"
+	"github.com/aiagent/internal/domain/valueobject"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -308,19 +308,22 @@ func (r *fraudDetectionRepository) GetRiskScoreDistribution(ctx context.Context,
 }
 
 // GetDailyFraudStats retrieves daily fraud statistics
-func (r *fraudDetectionRepository) GetDailyFraudStats(ctx context.Context, from, to time.Time) ([]dto.DailyFraudStat, error) {
-	var results []dto.DailyFraudStat
+func (r *fraudDetectionRepository) GetDailyFraudStats(ctx context.Context, from, to time.Time) ([]valueobject.DailyFraudStat, error) {
+	var results []valueobject.DailyFraudStat
 
 	// Query for daily stats - this is a simplified version
 	// In production, you might want to pre-aggregate this data
+	// Note: GORM will scan into struct fields based on column names.
+	// Postgres DATE(detected_at) returns a date type, but our struct has string.
+	// We might need to cast to text in SQL to ensure it scans correctly into string field.
 	err := r.db.WithContext(ctx).Raw(`
 		SELECT 
-			DATE(detected_at) as date,
+			TO_CHAR(detected_at, 'YYYY-MM-DD') as date,
 			COUNT(*) as new_signals,
 			COUNT(DISTINCT user_id) as new_suspicious_accounts
 		FROM bot_detection_signals
 		WHERE detected_at >= ? AND detected_at <= ?
-		GROUP BY DATE(detected_at)
+		GROUP BY DATE(detected_at), TO_CHAR(detected_at, 'YYYY-MM-DD')
 		ORDER BY date
 	`, from, to).Scan(&results).Error
 

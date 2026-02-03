@@ -1,4 +1,5 @@
 package service_test
+
 import (
 	"context"
 	"errors"
@@ -23,7 +24,7 @@ func TestNotificationDispatcher_Notify_Success(t *testing.T) {
 	notifType := entity.NotificationTypeNewFollower
 	targetID := uuid.New()
 	actorID := uuid.New()
-	
+
 	data := map[string]interface{}{
 		"target_id":  targetID.String(),
 		"actor_id":   actorID.String(),
@@ -78,7 +79,7 @@ func TestNotificationDispatcher_Notify_RateLimitExceeded_SkipsNotification(t *te
 	userID := uuid.New()
 	notifType := entity.NotificationTypeNewFollower
 	targetID := uuid.New()
-	
+
 	data := map[string]interface{}{"target_id": targetID.String()}
 
 	mockNotifRepo := mocks.NewMockNotificationRepository(ctrl)
@@ -103,7 +104,7 @@ func TestNotificationDispatcher_Notify_AggregationUpdatesExisting(t *testing.T) 
 	notifType := entity.NotificationTypeBlogLike
 	targetID := uuid.New()
 	actorID := uuid.New()
-	
+
 	data := map[string]interface{}{
 		"target_id":  targetID.String(),
 		"actor_id":   actorID.String(),
@@ -148,7 +149,7 @@ func TestNotificationDispatcher_Notify_NoDeviceTokens_NoPush(t *testing.T) {
 	userID := uuid.New()
 	notifType := entity.NotificationTypeNewFollower
 	targetID := uuid.New()
-	
+
 	data := map[string]interface{}{"target_id": targetID.String()}
 
 	mockNotifRepo := mocks.NewMockNotificationRepository(ctrl)
@@ -176,7 +177,7 @@ func TestNotificationDispatcher_Notify_SaveError_ReturnsError(t *testing.T) {
 	userID := uuid.New()
 	notifType := entity.NotificationTypeNewFollower
 	targetID := uuid.New()
-	
+
 	data := map[string]interface{}{"target_id": targetID.String()}
 
 	mockNotifRepo := mocks.NewMockNotificationRepository(ctrl)
@@ -205,7 +206,7 @@ func TestNotificationDispatcher_Notify_TokenRepoError_LogsAndContinues(t *testin
 	notifType := entity.NotificationTypeNewFollower
 	targetID := uuid.New()
 	actorID := uuid.New()
-	
+
 	data := map[string]interface{}{
 		"target_id":  targetID.String(),
 		"actor_id":   actorID.String(),
@@ -238,7 +239,7 @@ func TestNotificationDispatcher_Notify_FirebaseError_LogsAndContinues(t *testing
 	notifType := entity.NotificationTypeNewFollower
 	targetID := uuid.New()
 	actorID := uuid.New()
-	
+
 	data := map[string]interface{}{
 		"target_id":  targetID.String(),
 		"actor_id":   actorID.String(),
@@ -274,7 +275,7 @@ func TestNotificationDispatcher_Notify_AggregatorError_ContinuesAnyway(t *testin
 	notifType := entity.NotificationTypeNewFollower
 	targetID := uuid.New()
 	actorID := uuid.New()
-	
+
 	data := map[string]interface{}{
 		"target_id":  targetID.String(),
 		"actor_id":   actorID.String(),
@@ -310,7 +311,7 @@ func TestNotificationDispatcher_Notify_RateLimitError_ContinuesAnyway(t *testing
 	notifType := entity.NotificationTypeNewFollower
 	targetID := uuid.New()
 	actorID := uuid.New()
-	
+
 	data := map[string]interface{}{
 		"target_id":  targetID.String(),
 		"actor_id":   actorID.String(),
@@ -347,7 +348,7 @@ func TestNotificationDispatcher_Notify_GeneratesProperNotification(t *testing.T)
 	actorID := uuid.New()
 	targetID := uuid.New()
 	actorName := "Test User"
-	
+
 	data := map[string]interface{}{
 		"target_id":  targetID.String(),
 		"actor_id":   actorID.String(),
@@ -366,7 +367,7 @@ func TestNotificationDispatcher_Notify_GeneratesProperNotification(t *testing.T)
 	mockPrefRepo.EXPECT().IsEnabled(ctx, userID, notifType, "push").Return(true, nil)
 	mockAggregator.EXPECT().CheckRateLimit(ctx, userID, notifType).Return(true, nil)
 	mockAggregator.EXPECT().ShouldAggregate(ctx, userID, notifType, targetID).Return(nil, nil)
-	
+
 	mockNotifRepo.EXPECT().Save(ctx, gomock.Any()).Do(func(_ context.Context, notif *entity.Notification) { savedNotif = notif }).Return(nil)
 	mockAggregator.EXPECT().IncrementRateLimit(ctx, userID, notifType).Return(nil)
 
@@ -376,7 +377,7 @@ func TestNotificationDispatcher_Notify_GeneratesProperNotification(t *testing.T)
 
 	dispatcher := service.NewNotificationDispatcher(mockNotifRepo, mockPrefRepo, mockTokenRepo, mockAggregator, mockFirebase)
 	assert.NoError(t, dispatcher.Notify(ctx, userID, notifType, data))
-	
+
 	assert.NotNil(t, savedNotif)
 	assert.Equal(t, userID, savedNotif.UserID)
 	assert.Equal(t, notifType, savedNotif.Type)

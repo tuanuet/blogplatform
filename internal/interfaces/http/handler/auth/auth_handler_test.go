@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase/mocks"
+	"github.com/aiagent/internal/application/usecase/auth/mocks"
 	"github.com/aiagent/internal/interfaces/http/handler/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/internal/application/usecase/auth"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 )
@@ -18,10 +18,10 @@ type AuthHandler interface {
 }
 
 type authHandler struct {
-	authUseCase usecase.AuthUseCase
+	authUseCase auth.AuthUseCase
 }
 
-func NewAuthHandler(authUseCase usecase.AuthUseCase) AuthHandler {
+func NewAuthHandler(authUseCase auth.AuthUseCase) AuthHandler {
 	return &authHandler{
 		authUseCase: authUseCase,
 	}

@@ -4,17 +4,17 @@ import (
 	"net/http"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase"
+	blogUsecase "github.com/aiagent/internal/application/usecase/blog"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type blogHandler struct {
-	blogUseCase usecase.BlogUseCase
+	blogUseCase blogUsecase.BlogUseCase
 }
 
-func NewBlogHandler(blogUseCase usecase.BlogUseCase) BlogHandler {
+func NewBlogHandler(blogUseCase blogUsecase.BlogUseCase) BlogHandler {
 	return &blogHandler{
 		blogUseCase: blogUseCase,
 	}
@@ -48,7 +48,7 @@ func (h *blogHandler) Create(c *gin.Context) {
 
 	blog, err := h.blogUseCase.Create(c.Request.Context(), authorID.(uuid.UUID), &req)
 	if err != nil {
-		if err == usecase.ErrSlugAlreadyExists {
+		if err == blogUsecase.ErrSlugAlreadyExists {
 			response.Conflict(c, err.Error())
 			return
 		}
@@ -85,11 +85,11 @@ func (h *blogHandler) GetByID(c *gin.Context) {
 
 	blog, err := h.blogUseCase.GetByID(c.Request.Context(), id, viewerID)
 	if err != nil {
-		if err == usecase.ErrBlogNotFound {
+		if err == blogUsecase.ErrBlogNotFound {
 			response.NotFound(c, err.Error())
 			return
 		}
-		if err == usecase.ErrBlogAccessDenied {
+		if err == blogUsecase.ErrBlogAccessDenied {
 			response.Forbidden(c, err.Error())
 			return
 		}
@@ -187,11 +187,11 @@ func (h *blogHandler) Update(c *gin.Context) {
 	blog, err := h.blogUseCase.Update(c.Request.Context(), id, authorID.(uuid.UUID), &req)
 	if err != nil {
 		switch err {
-		case usecase.ErrBlogNotFound:
+		case blogUsecase.ErrBlogNotFound:
 			response.NotFound(c, err.Error())
-		case usecase.ErrBlogAccessDenied:
+		case blogUsecase.ErrBlogAccessDenied:
 			response.Forbidden(c, err.Error())
-		case usecase.ErrSlugAlreadyExists:
+		case blogUsecase.ErrSlugAlreadyExists:
 			response.Conflict(c, err.Error())
 		default:
 			response.InternalServerError(c, err.Error())
@@ -229,9 +229,9 @@ func (h *blogHandler) Delete(c *gin.Context) {
 
 	if err := h.blogUseCase.Delete(c.Request.Context(), id, authorID.(uuid.UUID)); err != nil {
 		switch err {
-		case usecase.ErrBlogNotFound:
+		case blogUsecase.ErrBlogNotFound:
 			response.NotFound(c, err.Error())
-		case usecase.ErrBlogAccessDenied:
+		case blogUsecase.ErrBlogAccessDenied:
 			response.Forbidden(c, err.Error())
 		default:
 			response.InternalServerError(c, err.Error())
@@ -277,9 +277,9 @@ func (h *blogHandler) Publish(c *gin.Context) {
 	blog, err := h.blogUseCase.Publish(c.Request.Context(), id, authorID.(uuid.UUID), &req)
 	if err != nil {
 		switch err {
-		case usecase.ErrBlogNotFound:
+		case blogUsecase.ErrBlogNotFound:
 			response.NotFound(c, err.Error())
-		case usecase.ErrBlogAccessDenied:
+		case blogUsecase.ErrBlogAccessDenied:
 			response.Forbidden(c, err.Error())
 		default:
 			response.InternalServerError(c, err.Error())
@@ -318,9 +318,9 @@ func (h *blogHandler) Unpublish(c *gin.Context) {
 	blog, err := h.blogUseCase.Unpublish(c.Request.Context(), id, authorID.(uuid.UUID))
 	if err != nil {
 		switch err {
-		case usecase.ErrBlogNotFound:
+		case blogUsecase.ErrBlogNotFound:
 			response.NotFound(c, err.Error())
-		case usecase.ErrBlogAccessDenied:
+		case blogUsecase.ErrBlogAccessDenied:
 			response.Forbidden(c, err.Error())
 		default:
 			response.InternalServerError(c, err.Error())
@@ -366,9 +366,9 @@ func (h *blogHandler) React(c *gin.Context) {
 	res, err := h.blogUseCase.React(c.Request.Context(), id, userID.(uuid.UUID), &req)
 	if err != nil {
 		switch err {
-		case usecase.ErrBlogNotFound:
+		case blogUsecase.ErrBlogNotFound:
 			response.NotFound(c, err.Error())
-		case usecase.ErrBlogAccessDenied:
+		case blogUsecase.ErrBlogAccessDenied:
 			response.Forbidden(c, err.Error())
 		default:
 			response.InternalServerError(c, err.Error())

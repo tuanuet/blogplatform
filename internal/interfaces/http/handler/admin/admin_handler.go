@@ -3,7 +3,7 @@ package admin
 import (
 	"net/http"
 
-	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/internal/application/usecase/admin"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 )
@@ -13,10 +13,10 @@ type AdminHandler interface {
 }
 
 type adminHandler struct {
-	useCase usecase.AdminUseCase
+	useCase admin.AdminUseCase
 }
 
-func NewAdminHandler(useCase usecase.AdminUseCase) AdminHandler {
+func NewAdminHandler(useCase admin.AdminUseCase) AdminHandler {
 	return &adminHandler{
 		useCase: useCase,
 	}

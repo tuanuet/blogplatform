@@ -5,17 +5,17 @@ import (
 	"strconv"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase"
+	recommendationUsecase "github.com/aiagent/internal/application/usecase/recommendation"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type recommendationHandler struct {
-	recUseCase usecase.RecommendationUseCase
+	recUseCase recommendationUsecase.RecommendationUseCase
 }
 
-func NewRecommendationHandler(recUseCase usecase.RecommendationUseCase) RecommendationHandler {
+func NewRecommendationHandler(recUseCase recommendationUsecase.RecommendationUseCase) RecommendationHandler {
 	return &recommendationHandler{
 		recUseCase: recUseCase,
 	}

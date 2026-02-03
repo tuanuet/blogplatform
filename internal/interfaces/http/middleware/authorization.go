@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/internal/application/usecase/role"
 	"github.com/aiagent/internal/domain/entity"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
@@ -10,11 +10,11 @@ import (
 
 // Authorization middleware for role-based access control
 type Authorization struct {
-	roleUseCase usecase.RoleUseCase
+	roleUseCase role.RoleUseCase
 }
 
 // NewAuthorization creates a new authorization middleware
-func NewAuthorization(roleUseCase usecase.RoleUseCase) *Authorization {
+func NewAuthorization(roleUseCase role.RoleUseCase) *Authorization {
 	return &Authorization{
 		roleUseCase: roleUseCase,
 	}

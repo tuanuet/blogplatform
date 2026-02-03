@@ -5,17 +5,17 @@ import (
 	"strconv"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase"
+	commentUsecase "github.com/aiagent/internal/application/usecase/comment"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type commentHandler struct {
-	commentUseCase usecase.CommentUseCase
+	commentUseCase commentUsecase.CommentUseCase
 }
 
-func NewCommentHandler(commentUseCase usecase.CommentUseCase) CommentHandler {
+func NewCommentHandler(commentUseCase commentUsecase.CommentUseCase) CommentHandler {
 	return &commentHandler{
 		commentUseCase: commentUseCase,
 	}
@@ -146,9 +146,9 @@ func (h *commentHandler) Update(c *gin.Context) {
 	comment, err := h.commentUseCase.Update(c.Request.Context(), id, userID.(uuid.UUID), &req)
 	if err != nil {
 		switch err {
-		case usecase.ErrCommentNotFound:
+		case commentUsecase.ErrCommentNotFound:
 			response.NotFound(c, err.Error())
-		case usecase.ErrCommentAccessDenied:
+		case commentUsecase.ErrCommentAccessDenied:
 			response.Forbidden(c, err.Error())
 		default:
 			response.InternalServerError(c, err.Error())
@@ -186,9 +186,9 @@ func (h *commentHandler) Delete(c *gin.Context) {
 
 	if err := h.commentUseCase.Delete(c.Request.Context(), id, userID.(uuid.UUID)); err != nil {
 		switch err {
-		case usecase.ErrCommentNotFound:
+		case commentUsecase.ErrCommentNotFound:
 			response.NotFound(c, err.Error())
-		case usecase.ErrCommentAccessDenied:
+		case commentUsecase.ErrCommentAccessDenied:
 			response.Forbidden(c, err.Error())
 		default:
 			response.InternalServerError(c, err.Error())

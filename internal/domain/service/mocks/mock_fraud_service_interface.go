@@ -15,7 +15,7 @@ import (
 	time "time"
 
 	entity "github.com/aiagent/internal/domain/entity"
-	dto "github.com/aiagent/internal/interfaces/http/dto"
+	valueobject "github.com/aiagent/internal/domain/valueobject"
 	uuid "github.com/google/uuid"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -45,10 +45,10 @@ func (m *MockFraudDetectionService) EXPECT() *MockFraudDetectionServiceMockRecor
 }
 
 // BanUser mocks base method.
-func (m *MockFraudDetectionService) BanUser(ctx context.Context, adminID, userID uuid.UUID, req dto.BanUserRequest) (*dto.BanUserResponse, error) {
+func (m *MockFraudDetectionService) BanUser(ctx context.Context, adminID, userID uuid.UUID, cmd valueobject.BanUserCommand) (*valueobject.BanUserResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "BanUser", ctx, adminID, userID, req)
-	ret0, _ := ret[0].(*dto.BanUserResponse)
+	ret := m.ctrl.Call(m, "BanUser", ctx, adminID, userID, cmd)
+	ret0, _ := ret[0].(*valueobject.BanUserResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -60,10 +60,10 @@ func (mr *MockFraudDetectionServiceMockRecorder) BanUser(ctx, adminID, userID, r
 }
 
 // GetFraudDashboard mocks base method.
-func (m *MockFraudDetectionService) GetFraudDashboard(ctx context.Context, req dto.FraudDashboardRequest) (*dto.FraudDashboardResponse, error) {
+func (m *MockFraudDetectionService) GetFraudDashboard(ctx context.Context, filter valueobject.FraudDashboardFilter) (*valueobject.FraudDashboardResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFraudDashboard", ctx, req)
-	ret0, _ := ret[0].(*dto.FraudDashboardResponse)
+	ret := m.ctrl.Call(m, "GetFraudDashboard", ctx, filter)
+	ret0, _ := ret[0].(*valueobject.FraudDashboardResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -75,10 +75,10 @@ func (mr *MockFraudDetectionServiceMockRecorder) GetFraudDashboard(ctx, req any)
 }
 
 // GetFraudTrends mocks base method.
-func (m *MockFraudDetectionService) GetFraudTrends(ctx context.Context, req dto.FraudTrendsRequest) (*dto.FraudTrendsResponse, error) {
+func (m *MockFraudDetectionService) GetFraudTrends(ctx context.Context, filter valueobject.FraudTrendsFilter) (*valueobject.FraudTrendsResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFraudTrends", ctx, req)
-	ret0, _ := ret[0].(*dto.FraudTrendsResponse)
+	ret := m.ctrl.Call(m, "GetFraudTrends", ctx, filter)
+	ret0, _ := ret[0].(*valueobject.FraudTrendsResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -90,10 +90,10 @@ func (mr *MockFraudDetectionServiceMockRecorder) GetFraudTrends(ctx, req any) *g
 }
 
 // GetUserBadgeStatus mocks base method.
-func (m *MockFraudDetectionService) GetUserBadgeStatus(ctx context.Context, userID uuid.UUID) (*dto.UserBadgeResponse, error) {
+func (m *MockFraudDetectionService) GetUserBadgeStatus(ctx context.Context, userID uuid.UUID) (*valueobject.UserBadgeResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserBadgeStatus", ctx, userID)
-	ret0, _ := ret[0].(*dto.UserBadgeResponse)
+	ret0, _ := ret[0].(*valueobject.UserBadgeResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -105,10 +105,10 @@ func (mr *MockFraudDetectionServiceMockRecorder) GetUserBadgeStatus(ctx, userID 
 }
 
 // GetUserBotNotifications mocks base method.
-func (m *MockFraudDetectionService) GetUserBotNotifications(ctx context.Context, userID uuid.UUID, unreadOnly bool) ([]dto.BotFollowerNotificationResponse, error) {
+func (m *MockFraudDetectionService) GetUserBotNotifications(ctx context.Context, userID uuid.UUID, unreadOnly bool) ([]valueobject.BotFollowerNotificationResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserBotNotifications", ctx, userID, unreadOnly)
-	ret0, _ := ret[0].([]dto.BotFollowerNotificationResponse)
+	ret0, _ := ret[0].([]valueobject.BotFollowerNotificationResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -120,10 +120,10 @@ func (mr *MockFraudDetectionServiceMockRecorder) GetUserBotNotifications(ctx, us
 }
 
 // GetUserRiskScore mocks base method.
-func (m *MockFraudDetectionService) GetUserRiskScore(ctx context.Context, userID uuid.UUID) (*dto.RiskScoreResponse, error) {
+func (m *MockFraudDetectionService) GetUserRiskScore(ctx context.Context, userID uuid.UUID) (*valueobject.RiskScoreResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserRiskScore", ctx, userID)
-	ret0, _ := ret[0].(*dto.RiskScoreResponse)
+	ret0, _ := ret[0].(*valueobject.RiskScoreResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -135,10 +135,10 @@ func (mr *MockFraudDetectionServiceMockRecorder) GetUserRiskScore(ctx, userID an
 }
 
 // ReviewUser mocks base method.
-func (m *MockFraudDetectionService) ReviewUser(ctx context.Context, adminID, userID uuid.UUID, req dto.ReviewUserRequest) (*dto.ReviewUserResponse, error) {
+func (m *MockFraudDetectionService) ReviewUser(ctx context.Context, adminID, userID uuid.UUID, cmd valueobject.ReviewUserCommand) (*valueobject.ReviewUserResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ReviewUser", ctx, adminID, userID, req)
-	ret0, _ := ret[0].(*dto.ReviewUserResponse)
+	ret := m.ctrl.Call(m, "ReviewUser", ctx, adminID, userID, cmd)
+	ret0, _ := ret[0].(*valueobject.ReviewUserResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -150,10 +150,10 @@ func (mr *MockFraudDetectionServiceMockRecorder) ReviewUser(ctx, adminID, userID
 }
 
 // TriggerBatchAnalysis mocks base method.
-func (m *MockFraudDetectionService) TriggerBatchAnalysis(ctx context.Context, req dto.BatchAnalyzeRequest) (*dto.BatchAnalyzeResponse, error) {
+func (m *MockFraudDetectionService) TriggerBatchAnalysis(ctx context.Context, cmd valueobject.BatchAnalyzeCommand) (*valueobject.BatchAnalyzeResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TriggerBatchAnalysis", ctx, req)
-	ret0, _ := ret[0].(*dto.BatchAnalyzeResponse)
+	ret := m.ctrl.Call(m, "TriggerBatchAnalysis", ctx, cmd)
+	ret0, _ := ret[0].(*valueobject.BatchAnalyzeResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -363,10 +363,10 @@ func (mr *MockFraudDetectionRepositoryMockRecorder) GetBotSignalsByUser(ctx, use
 }
 
 // GetDailyFraudStats mocks base method.
-func (m *MockFraudDetectionRepository) GetDailyFraudStats(ctx context.Context, from, to time.Time) ([]dto.DailyFraudStat, error) {
+func (m *MockFraudDetectionRepository) GetDailyFraudStats(ctx context.Context, from, to time.Time) ([]valueobject.DailyFraudStat, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDailyFraudStats", ctx, from, to)
-	ret0, _ := ret[0].([]dto.DailyFraudStat)
+	ret0, _ := ret[0].([]valueobject.DailyFraudStat)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -664,7 +664,7 @@ func (mr *MockNotificationServiceMockRecorder) SendBadgeStatusUpdate(ctx, userID
 }
 
 // SendBotFollowerNotification mocks base method.
-func (m *MockNotificationService) SendBotFollowerNotification(ctx context.Context, userID uuid.UUID, notifications []dto.BotFollowerNotificationResponse) error {
+func (m *MockNotificationService) SendBotFollowerNotification(ctx context.Context, userID uuid.UUID, notifications []valueobject.BotFollowerNotificationResult) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendBotFollowerNotification", ctx, userID, notifications)
 	ret0, _ := ret[0].(error)
@@ -702,10 +702,10 @@ func (m *MockBatchJobService) EXPECT() *MockBatchJobServiceMockRecorder {
 }
 
 // GetBatchJobStatus mocks base method.
-func (m *MockBatchJobService) GetBatchJobStatus(ctx context.Context, jobID uuid.UUID) (*dto.BatchAnalyzeResponse, error) {
+func (m *MockBatchJobService) GetBatchJobStatus(ctx context.Context, jobID uuid.UUID) (*valueobject.BatchAnalyzeResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetBatchJobStatus", ctx, jobID)
-	ret0, _ := ret[0].(*dto.BatchAnalyzeResponse)
+	ret0, _ := ret[0].(*valueobject.BatchAnalyzeResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

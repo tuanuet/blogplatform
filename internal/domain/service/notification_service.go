@@ -4,17 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiagent/internal/interfaces/http/dto"
+	"github.com/aiagent/internal/domain/valueobject"
 	"github.com/google/uuid"
 )
 
 // notificationService implements the NotificationService interface
-type notificationService struct {
-	// In a real implementation, you'd have:
-	// - Email client
-	// - Push notification client
-	// - In-app notification repository
-}
+type notificationService struct{}
 
 // NewNotificationService creates a new notification service instance
 func NewNotificationService() NotificationService {
@@ -22,7 +17,7 @@ func NewNotificationService() NotificationService {
 }
 
 // SendBotFollowerNotification sends notification to user about flagged bot followers
-func (s *notificationService) SendBotFollowerNotification(ctx context.Context, userID uuid.UUID, notifications []dto.BotFollowerNotificationResponse) error {
+func (s *notificationService) SendBotFollowerNotification(ctx context.Context, userID uuid.UUID, notifications []valueobject.BotFollowerNotificationResult) error {
 	// This is a placeholder implementation
 	// In production, you'd:
 	// 1. Send email notification

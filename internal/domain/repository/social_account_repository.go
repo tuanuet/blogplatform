@@ -7,6 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
+//go:generate mockgen -source=$GOFILE -destination=mocks/mock_$GOFILE -package=mocks
+
 // SocialAccountRepository defines the interface for social account persistence
 type SocialAccountRepository interface {
 	Create(ctx context.Context, socialAccount *entity.SocialAccount) error

@@ -7,35 +7,35 @@ import (
 	"time"
 
 	"github.com/aiagent/internal/domain/entity"
-	"github.com/aiagent/internal/interfaces/http/dto"
+	"github.com/aiagent/internal/domain/valueobject"
 	"github.com/google/uuid"
 )
 
 // FraudDetectionService defines the interface for fraud detection operations
 type FraudDetectionService interface {
 	// GetUserRiskScore retrieves the risk score for a specific user
-	GetUserRiskScore(ctx context.Context, userID uuid.UUID) (*dto.RiskScoreResponse, error)
+	GetUserRiskScore(ctx context.Context, userID uuid.UUID) (*valueobject.RiskScoreResult, error)
 
 	// GetFraudDashboard retrieves paginated list of users for admin dashboard
-	GetFraudDashboard(ctx context.Context, req dto.FraudDashboardRequest) (*dto.FraudDashboardResponse, error)
+	GetFraudDashboard(ctx context.Context, filter valueobject.FraudDashboardFilter) (*valueobject.FraudDashboardResult, error)
 
 	// ReviewUser marks a user as reviewed by an admin
-	ReviewUser(ctx context.Context, adminID, userID uuid.UUID, req dto.ReviewUserRequest) (*dto.ReviewUserResponse, error)
+	ReviewUser(ctx context.Context, adminID, userID uuid.UUID, cmd valueobject.ReviewUserCommand) (*valueobject.ReviewUserResult, error)
 
 	// BanUser bans a user account due to fraudulent activity
-	BanUser(ctx context.Context, adminID, userID uuid.UUID, req dto.BanUserRequest) (*dto.BanUserResponse, error)
+	BanUser(ctx context.Context, adminID, userID uuid.UUID, cmd valueobject.BanUserCommand) (*valueobject.BanUserResult, error)
 
 	// GetFraudTrends retrieves analytics data about fraud trends
-	GetFraudTrends(ctx context.Context, req dto.FraudTrendsRequest) (*dto.FraudTrendsResponse, error)
+	GetFraudTrends(ctx context.Context, filter valueobject.FraudTrendsFilter) (*valueobject.FraudTrendsResult, error)
 
 	// TriggerBatchAnalysis starts a batch job to analyze followers for bot detection
-	TriggerBatchAnalysis(ctx context.Context, req dto.BatchAnalyzeRequest) (*dto.BatchAnalyzeResponse, error)
+	TriggerBatchAnalysis(ctx context.Context, cmd valueobject.BatchAnalyzeCommand) (*valueobject.BatchAnalyzeResult, error)
 
 	// GetUserBadgeStatus retrieves the badge status for a user
-	GetUserBadgeStatus(ctx context.Context, userID uuid.UUID) (*dto.UserBadgeResponse, error)
+	GetUserBadgeStatus(ctx context.Context, userID uuid.UUID) (*valueobject.UserBadgeResult, error)
 
 	// GetUserBotNotifications retrieves notifications about flagged bot followers
-	GetUserBotNotifications(ctx context.Context, userID uuid.UUID, unreadOnly bool) ([]dto.BotFollowerNotificationResponse, error)
+	GetUserBotNotifications(ctx context.Context, userID uuid.UUID, unreadOnly bool) ([]valueobject.BotFollowerNotificationResult, error)
 }
 
 // FraudDetectionRepository defines the interface for fraud detection data access
@@ -77,7 +77,7 @@ type FraudDetectionRepository interface {
 	GetReviewedAccountsCount(ctx context.Context, from, to time.Time) (int, error)
 	GetAverageRiskScore(ctx context.Context, from, to time.Time) (float64, error)
 	GetRiskScoreDistribution(ctx context.Context, from, to time.Time) (map[string]int, error)
-	GetDailyFraudStats(ctx context.Context, from, to time.Time) ([]dto.DailyFraudStat, error)
+	GetDailyFraudStats(ctx context.Context, from, to time.Time) ([]valueobject.DailyFraudStat, error)
 }
 
 // BotDetectionAlgorithm defines the interface for bot detection algorithms
@@ -95,7 +95,7 @@ type BotDetectionAlgorithm interface {
 // NotificationService defines the interface for sending notifications
 type NotificationService interface {
 	// SendBotFollowerNotification sends notification to user about flagged bot followers
-	SendBotFollowerNotification(ctx context.Context, userID uuid.UUID, notifications []dto.BotFollowerNotificationResponse) error
+	SendBotFollowerNotification(ctx context.Context, userID uuid.UUID, notifications []valueobject.BotFollowerNotificationResult) error
 
 	// SendBadgeStatusUpdate notifies user about badge status changes
 	SendBadgeStatusUpdate(ctx context.Context, userID uuid.UUID, status string, reason string) error
@@ -107,5 +107,5 @@ type BatchJobService interface {
 	StartBatchAnalysis(ctx context.Context, dateFrom, dateTo *time.Time) (uuid.UUID, error)
 
 	// GetBatchJobStatus retrieves the status of a batch job
-	GetBatchJobStatus(ctx context.Context, jobID uuid.UUID) (*dto.BatchAnalyzeResponse, error)
+	GetBatchJobStatus(ctx context.Context, jobID uuid.UUID) (*valueobject.BatchAnalyzeResult, error)
 }

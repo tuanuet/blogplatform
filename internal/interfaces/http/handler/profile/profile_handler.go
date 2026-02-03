@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/internal/application/usecase/profile"
 	"github.com/aiagent/pkg/response"
 	"github.com/aiagent/pkg/validator"
 	"github.com/gin-gonic/gin"
@@ -14,10 +14,10 @@ import (
 )
 
 type profileHandler struct {
-	profileUseCase usecase.ProfileUseCase
+	profileUseCase profile.ProfileUseCase
 }
 
-func NewProfileHandler(profileUseCase usecase.ProfileUseCase) ProfileHandler {
+func NewProfileHandler(profileUseCase profile.ProfileUseCase) ProfileHandler {
 	return &profileHandler{
 		profileUseCase: profileUseCase,
 	}
@@ -47,9 +47,9 @@ func (h *profileHandler) GetMyProfile(c *gin.Context) {
 		return
 	}
 
-	profile, err := h.profileUseCase.GetProfile(c.Request.Context(), uid)
+	prof, err := h.profileUseCase.GetProfile(c.Request.Context(), uid)
 	if err != nil {
-		if errors.Is(err, usecase.ErrUserNotFound) {
+		if errors.Is(err, profile.ErrUserNotFound) {
 			response.NotFound(c, "User not found")
 			return
 		}
@@ -57,7 +57,7 @@ func (h *profileHandler) GetMyProfile(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusOK, profile)
+	response.Success(c, http.StatusOK, prof)
 }
 
 // UpdateMyProfile godoc
@@ -103,9 +103,9 @@ func (h *profileHandler) UpdateMyProfile(c *gin.Context) {
 		return
 	}
 
-	profile, err := h.profileUseCase.UpdateProfile(c.Request.Context(), uid, req)
+	prof, err := h.profileUseCase.UpdateProfile(c.Request.Context(), uid, req)
 	if err != nil {
-		if errors.Is(err, usecase.ErrUserNotFound) {
+		if errors.Is(err, profile.ErrUserNotFound) {
 			response.NotFound(c, "User not found")
 			return
 		}
@@ -113,7 +113,7 @@ func (h *profileHandler) UpdateMyProfile(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusOK, profile)
+	response.Success(c, http.StatusOK, prof)
 }
 
 // UploadAvatar godoc
@@ -150,11 +150,11 @@ func (h *profileHandler) UploadAvatar(c *gin.Context) {
 	result, err := h.profileUseCase.UploadAvatar(c.Request.Context(), uid, file)
 	if err != nil {
 		switch {
-		case errors.Is(err, usecase.ErrFileTooLarge):
+		case errors.Is(err, profile.ErrFileTooLarge):
 			response.BadRequest(c, "File too large, max 5MB allowed")
-		case errors.Is(err, usecase.ErrInvalidFileType):
+		case errors.Is(err, profile.ErrInvalidFileType):
 			response.BadRequest(c, "Invalid file type, allowed: jpg, jpeg, png, gif, webp")
-		case errors.Is(err, usecase.ErrUserNotFound):
+		case errors.Is(err, profile.ErrUserNotFound):
 			response.NotFound(c, "User not found")
 		default:
 			response.InternalServerError(c, "Failed to upload avatar")
@@ -184,9 +184,9 @@ func (h *profileHandler) GetPublicProfile(c *gin.Context) {
 		return
 	}
 
-	profile, err := h.profileUseCase.GetPublicProfile(c.Request.Context(), id)
+	prof, err := h.profileUseCase.GetPublicProfile(c.Request.Context(), id)
 	if err != nil {
-		if errors.Is(err, usecase.ErrUserNotFound) {
+		if errors.Is(err, profile.ErrUserNotFound) {
 			response.NotFound(c, "User not found")
 			return
 		}
@@ -194,5 +194,5 @@ func (h *profileHandler) GetPublicProfile(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusOK, profile)
+	response.Success(c, http.StatusOK, prof)
 }

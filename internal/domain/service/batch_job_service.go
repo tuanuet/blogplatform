@@ -2,10 +2,11 @@ package service
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/aiagent/internal/domain/entity"
-	"github.com/aiagent/internal/interfaces/http/dto"
+	"github.com/aiagent/internal/domain/valueobject"
 	"github.com/aiagent/pkg/logger"
 	"github.com/google/uuid"
 )
@@ -38,6 +39,8 @@ type batchJobService struct {
 	repo      FraudDetectionRepository
 	algorithm BotDetectionAlgorithm
 	notifier  NotificationService
+	jobs      map[uuid.UUID]*valueobject.BatchAnalyzeResult
+	mu        sync.RWMutex
 }
 
 // NewBatchJobService creates a new batch job service instance
@@ -46,6 +49,7 @@ func NewBatchJobService(repo FraudDetectionRepository, algorithm BotDetectionAlg
 		repo:      repo,
 		algorithm: algorithm,
 		notifier:  notifier,
+		jobs:      make(map[uuid.UUID]*valueobject.BatchAnalyzeResult),
 	}
 }
 
@@ -69,6 +73,16 @@ func (s *batchJobService) StartBatchAnalysis(ctx context.Context, dateFrom, date
 	} else {
 		to = now
 	}
+
+	// Initialize job status
+	s.mu.Lock()
+	s.jobs[jobID] = &valueobject.BatchAnalyzeResult{
+		JobID:     jobID,
+		Status:    "running", // "started" was defined as const but string is used in struct. Using "running" or const.
+		StartedAt: time.Now(),
+		Message:   "Analysis in progress",
+	}
+	s.mu.Unlock()
 
 	// Run analysis in background (non-blocking)
 	go s.runAnalysis(context.Background(), jobID, from, to)
@@ -156,6 +170,19 @@ func (s *batchJobService) runAnalysis(ctx context.Context, jobID uuid.UUID, from
 		"new_signals":         newSignals,
 		"users_scored":        len(usersScored),
 	})
+
+	// Update job status
+	s.mu.Lock()
+	if job, exists := s.jobs[jobID]; exists {
+		now := time.Now()
+		job.Status = "completed"
+		job.CompletedAt = &now
+		job.ProcessedFollowers = processedFollowers
+		job.NewSignalsDetected = newSignals
+		job.UsersScored = len(usersScored)
+		job.Message = "Analysis completed successfully"
+	}
+	s.mu.Unlock()
 }
 
 // updateBadgeStatus updates the badge status based on risk score
@@ -210,7 +237,7 @@ func (s *batchJobService) updateBadgeStatus(ctx context.Context, userID uuid.UUI
 // sendBotNotifications sends notifications to users about flagged bot followers
 func (s *batchJobService) sendBotNotifications(ctx context.Context, userID uuid.UUID, signals []entity.BotDetectionSignal) error {
 	// Create notification records
-	notifications := make([]dto.BotFollowerNotificationResponse, 0, len(signals))
+	notifications := make([]valueobject.BotFollowerNotificationResult, 0, len(signals))
 
 	for _, signal := range signals {
 		notification := &entity.BotFollowerNotification{
@@ -226,7 +253,7 @@ func (s *batchJobService) sendBotNotifications(ctx context.Context, userID uuid.
 			return err
 		}
 
-		notifications = append(notifications, dto.BotFollowerNotificationResponse{
+		notifications = append(notifications, valueobject.BotFollowerNotificationResult{
 			ID:              notification.ID,
 			BotFollowerID:   signal.UserID,
 			SignalType:      signal.SignalType,
@@ -244,12 +271,21 @@ func (s *batchJobService) sendBotNotifications(ctx context.Context, userID uuid.
 }
 
 // GetBatchJobStatus retrieves the status of a batch job
-func (s *batchJobService) GetBatchJobStatus(ctx context.Context, jobID uuid.UUID) (*dto.BatchAnalyzeResponse, error) {
-	// In a real implementation, you'd track job status in a database
-	// For now, return a placeholder response
-	return &dto.BatchAnalyzeResponse{
-		JobID:   jobID,
-		Status:  "completed",
-		Message: "Job status tracking not implemented",
-	}, nil
+func (s *batchJobService) GetBatchJobStatus(ctx context.Context, jobID uuid.UUID) (*valueobject.BatchAnalyzeResult, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	job, exists := s.jobs[jobID]
+	if !exists {
+		return &valueobject.BatchAnalyzeResult{
+			JobID:   jobID,
+			Status:  "unknown",
+			Message: "Job not found",
+		}, nil
+	}
+
+	// Return a copy to avoid race conditions if caller modifies it (though returning pointer... technically safe if we don't modify the struct fields in place after returning, but struct has value semantics mostly)
+	// Be safe and return a copy or new struct
+	result := *job
+	return &result, nil
 }

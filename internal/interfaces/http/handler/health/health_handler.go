@@ -3,16 +3,16 @@ package health
 import (
 	"net/http"
 
-	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/internal/application/usecase/health"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 )
 
 type healthHandler struct {
-	healthUseCase usecase.HealthUseCase
+	healthUseCase health.HealthUseCase
 }
 
-func NewHealthHandler(healthUseCase usecase.HealthUseCase) HealthHandler {
+func NewHealthHandler(healthUseCase health.HealthUseCase) HealthHandler {
 	return &healthHandler{
 		healthUseCase: healthUseCase,
 	}

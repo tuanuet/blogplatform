@@ -4,17 +4,18 @@ import (
 	"net/http"
 
 	"github.com/aiagent/internal/application/dto"
-	"github.com/aiagent/internal/application/usecase"
+	"github.com/aiagent/internal/application/usecase/ranking"
+	domainService "github.com/aiagent/internal/domain/service"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type rankingHandler struct {
-	rankingUseCase usecase.RankingUseCase
+	rankingUseCase ranking.RankingUseCase
 }
 
-func NewRankingHandler(rankingUseCase usecase.RankingUseCase) RankingHandler {
+func NewRankingHandler(rankingUseCase ranking.RankingUseCase) RankingHandler {
 	return &rankingHandler{
 		rankingUseCase: rankingUseCase,
 	}
@@ -117,7 +118,7 @@ func (h *rankingHandler) GetUserRanking(c *gin.Context) {
 
 	ranking, err := h.rankingUseCase.GetUserRanking(c.Request.Context(), userID)
 	if err != nil {
-		if err == usecase.ErrUserNotFound {
+		if err == domainService.ErrUserNotFound {
 			response.NotFound(c, "user not found")
 			return
 		}
