@@ -189,13 +189,3 @@ func (a *firebaseAdapter) validateDataPayload(data map[string]interface{}) error
 
 	return nil
 }
-
-// NewMockFirebaseAdapter creates a mock Firebase adapter for testing
-// This function is needed because the entity package defines UserDeviceToken
-// and tests need to use entity.UserDeviceToken instead of repository.UserDeviceToken
-func NewMockFirebaseAdapter(deviceRepo repository.DeviceTokenRepository, firebase FirebaseClient) *firebaseAdapter {
-	return &firebaseAdapter{
-		deviceRepo: deviceRepo,
-		firebase:   firebase,
-	}
-}

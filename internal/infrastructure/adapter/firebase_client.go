@@ -12,6 +12,10 @@ import (
 	"google.golang.org/api/option"
 )
 
+// FirebaseBatchSize is the maximum number of messages to send in a batch
+// This limit is imposed by the Firebase API
+const FirebaseBatchSize = 500
+
 // firebaseClient implements FirebaseClient using Firebase FCM SDK
 type firebaseClient struct {
 	app    *firebase.App
@@ -111,11 +115,10 @@ func (f *firebaseClient) Send(ctx context.Context, tokens []string, title, body 
 
 	// Send messages individually (Firebase doesn't support sending to multiple tokens in one call for legacy tokens)
 	// Use batch sending for better performance when sending to many tokens
-	batchSize := 500 // Firebase API limit
 	var errors []error
 
-	for i := 0; i < len(messages); i += batchSize {
-		end := i + batchSize
+	for i := 0; i < len(messages); i += FirebaseBatchSize {
+		end := i + FirebaseBatchSize
 		if end > len(messages) {
 			end = len(messages)
 		}
