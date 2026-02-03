@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "createdAt": "2026-02-03T19:53:45.92979+07:00",
-  "commitHash": "8981ee21ee28baf8605237f9acc064eba1c36307",
-  "repoStateId": "f35a39c5dd13821b0dcd70fba151eb381890361127f1975d12c126afa13331cd",
-  "fileCount": 276,
-  "duration": "2.7s",
+  "createdAt": "2026-02-03T20:13:47.41249+07:00",
+  "commitHash": "14100dc1845b657ca9699eac283b9d46b5f01c7a",
+  "repoStateId": "613142d551ce7d8707c2f0d8c9e9151ec73efd84572847680ce8a871831005cb",
+  "fileCount": 285,
+  "duration": "2.4s",
   "indexer": "scip-go",
   "indexerArgs": [
     "scip-go"

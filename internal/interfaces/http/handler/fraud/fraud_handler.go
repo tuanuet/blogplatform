@@ -3,9 +3,9 @@ package fraud
 import (
 	"net/http"
 
+	"github.com/aiagent/internal/application/dto"
 	"github.com/aiagent/internal/domain/service"
 	"github.com/aiagent/internal/domain/valueobject"
-	"github.com/aiagent/internal/interfaces/http/dto"
 	"github.com/aiagent/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
