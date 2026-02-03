@@ -47,4 +47,7 @@ type BlogRepository interface {
 
 	// Admin stats
 	CountByMonth(ctx context.Context, months int) ([]entity.MonthlyCount, error)
+
+	// ExistsByAuthorAndTag checks if any blog by the author has the specified tag
+	ExistsByAuthorAndTag(ctx context.Context, authorID, tagID uuid.UUID) (bool, error)
 }

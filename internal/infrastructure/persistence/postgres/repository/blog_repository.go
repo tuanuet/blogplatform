@@ -274,3 +274,14 @@ func (r *blogRepository) CountByMonth(ctx context.Context, months int) ([]entity
 		Scan(&results).Error
 	return results, err
 }
+
+func (r *blogRepository) ExistsByAuthorAndTag(ctx context.Context, authorID, tagID uuid.UUID) (bool, error) {
+	var count int64
+	err := r.db.WithContext(ctx).
+		Table("blog_tags").
+		Joins("JOIN blogs ON blogs.id = blog_tags.blog_id").
+		Where("blog_tags.tag_id = ? AND blogs.author_id = ?", tagID, authorID).
+		Where("blogs.deleted_at IS NULL").
+		Count(&count).Error
+	return count > 0, err
+}
