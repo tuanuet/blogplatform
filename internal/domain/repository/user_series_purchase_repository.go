@@ -12,4 +12,7 @@ type UserSeriesPurchaseRepository interface {
 	Create(ctx context.Context, purchase *entity.UserSeriesPurchase) error
 	HasPurchased(ctx context.Context, userID, seriesID uuid.UUID) (bool, error)
 	GetUserPurchases(ctx context.Context, userID uuid.UUID) ([]*entity.UserSeriesPurchase, error)
+
+	// WithTx returns a new repository with the given transaction
+	WithTx(tx interface{}) UserSeriesPurchaseRepository
 }

@@ -28,6 +28,8 @@ var RepositoryModule = fx.Module("repository",
 		pgRepo.NewSocialAccountRepository,
 		redisRepo.NewSessionRepository,
 		adapter.NewSystemRepository,
+		adapter.NewSePayAdapter,
 		pgRepo.NewFraudDetectionRepository,
+		pgRepo.NewUserSeriesPurchaseRepository,
 	),
 )

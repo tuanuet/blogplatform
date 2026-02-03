@@ -4,6 +4,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/aiagent/internal/domain/entity"
 	"github.com/google/uuid"
@@ -18,4 +19,9 @@ type SubscriptionRepository interface {
 	FindByAuthor(ctx context.Context, authorID uuid.UUID, pagination Pagination) (*PaginatedResult[entity.Subscription], error)
 	CountSubscribers(ctx context.Context, authorID uuid.UUID) (int64, error)
 	CountBySubscriber(ctx context.Context, subscriberID uuid.UUID) (int64, error)
+	UpdateExpiry(ctx context.Context, userID, authorID uuid.UUID, expiresAt time.Time, tier string) error
+	FindActiveSubscription(ctx context.Context, userID, authorID uuid.UUID) (*entity.Subscription, error)
+
+	// WithTx returns a new repository with the given transaction
+	WithTx(tx interface{}) SubscriptionRepository
 }

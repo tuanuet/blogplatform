@@ -55,6 +55,11 @@ func (r *transactionRepository) UpdateStatus(ctx context.Context, id uuid.UUID, 
 		Update("status", status).Error
 }
 
+// Update updates a transaction
+func (r *transactionRepository) Update(ctx context.Context, tx *entity.Transaction) error {
+	return r.db.WithContext(ctx).Save(tx).Error
+}
+
 // FindByUserID finds all transactions for a user
 func (r *transactionRepository) FindByUserID(ctx context.Context, userID uuid.UUID) ([]*entity.Transaction, error) {
 	var transactions []*entity.Transaction
@@ -63,4 +68,12 @@ func (r *transactionRepository) FindByUserID(ctx context.Context, userID uuid.UU
 		Order("created_at DESC").
 		Find(&transactions).Error
 	return transactions, err
+}
+
+// WithTx returns a new repository with the given transaction
+func (r *transactionRepository) WithTx(tx interface{}) repository.TransactionRepository {
+	if gormDB, ok := tx.(*gorm.DB); ok {
+		return &transactionRepository{db: gormDB}
+	}
+	return r
 }

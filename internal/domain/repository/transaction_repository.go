@@ -23,6 +23,12 @@ type TransactionRepository interface {
 	// UpdateStatus updates the status of a transaction
 	UpdateStatus(ctx context.Context, id uuid.UUID, status entity.TransactionStatus) error
 
+	// Update updates a transaction
+	Update(ctx context.Context, tx *entity.Transaction) error
+
 	// FindByUserID finds all transactions for a user
 	FindByUserID(ctx context.Context, userID uuid.UUID) ([]*entity.Transaction, error)
+
+	// WithTx returns a new repository with the given transaction
+	WithTx(tx interface{}) TransactionRepository
 }

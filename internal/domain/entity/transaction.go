@@ -60,7 +60,7 @@ type Transaction struct {
 	SePayID        string                 `gorm:"size:255;not null;unique;index" json:"sepayId"`
 	ReferenceCode  string                 `gorm:"size:255;not null;index" json:"referenceCode"`
 	OrderID        string                 `gorm:"size:255;not null;index" json:"orderId"`
-	WebhookPayload map[string]interface{} `gorm:"type:jsonb;default:'{}'" json:"webhookPayload"`
+	WebhookPayload map[string]interface{} `gorm:"type:jsonb;serializer:json;default:'{}'" json:"webhookPayload"`
 	CreatedAt      time.Time              `gorm:"not null;default:now()" json:"createdAt"`
 	UpdatedAt      time.Time              `gorm:"not null;default:now()" json:"updatedAt"`
 }

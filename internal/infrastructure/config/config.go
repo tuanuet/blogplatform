@@ -16,6 +16,17 @@ type Config struct {
 	Telemetry TelemetryConfig
 	Scheduler SchedulerConfig
 	Firebase  FirebaseConfig
+	SePay     SePayConfig
+}
+
+// SePayConfig holds SePay-related configuration
+type SePayConfig struct {
+	APIKey       string `mapstructure:"api_key"`
+	WebhookToken string `mapstructure:"webhook_token"`
+	BankName     string `mapstructure:"bank_name"`
+	BankAccount  string `mapstructure:"bank_account"`
+	BankOwner    string `mapstructure:"bank_owner"`
+	BankBranch   string `mapstructure:"bank_branch"`
 }
 
 // ServerConfig holds server-related configuration
@@ -141,4 +152,12 @@ func setDefaults() {
 	viper.SetDefault("firebase.project_id", "")
 	viper.SetDefault("firebase.api_key", "")
 	viper.SetDefault("firebase.service_account_path", "")
+
+	// SePay defaults
+	viper.SetDefault("sepay.api_key", "")
+	viper.SetDefault("sepay.webhook_token", "")
+	viper.SetDefault("sepay.bank_name", "")
+	viper.SetDefault("sepay.bank_account", "")
+	viper.SetDefault("sepay.bank_owner", "")
+	viper.SetDefault("sepay.bank_branch", "")
 }

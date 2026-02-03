@@ -47,3 +47,11 @@ func (r *userSeriesPurchaseRepository) GetUserPurchases(ctx context.Context, use
 	}
 	return purchases, nil
 }
+
+// WithTx returns a new repository with the given transaction
+func (r *userSeriesPurchaseRepository) WithTx(tx interface{}) repository.UserSeriesPurchaseRepository {
+	if gormDB, ok := tx.(*gorm.DB); ok {
+		return &userSeriesPurchaseRepository{db: gormDB}
+	}
+	return r
+}

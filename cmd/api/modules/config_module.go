@@ -19,6 +19,7 @@ var ConfigModule = fx.Module("config",
 		func(c *config.Config) *config.DatabaseConfig { return &c.Database },
 		func(c *config.Config) *config.RedisConfig { return &c.Redis },
 		func(c *config.Config) *config.LoggerConfig { return &c.Logger },
+		func(c *config.Config) *config.SePayConfig { return &c.SePay },
 	),
 	fx.Invoke(initLogger, initValidator),
 )

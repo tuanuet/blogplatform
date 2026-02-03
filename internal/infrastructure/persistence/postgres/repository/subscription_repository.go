@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"math"
+	"time"
 
 	"github.com/aiagent/internal/domain/entity"
 	"github.com/aiagent/internal/domain/repository"
@@ -122,4 +123,50 @@ func (r *subscriptionRepository) CountBySubscriber(ctx context.Context, subscrib
 		Where("subscriber_id = ?", subscriberID).
 		Count(&count).Error
 	return count, err
+}
+
+func (r *subscriptionRepository) UpdateExpiry(ctx context.Context, userID, authorID uuid.UUID, expiresAt time.Time, tier string) error {
+	result := r.db.WithContext(ctx).
+		Model(&entity.Subscription{}).
+		Where("subscriber_id = ? AND author_id = ?", userID, authorID).
+		Updates(map[string]interface{}{
+			"expires_at": expiresAt,
+			"tier":       tier,
+			"updated_at": time.Now(),
+		})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
+}
+
+func (r *subscriptionRepository) FindActiveSubscription(ctx context.Context, userID, authorID uuid.UUID) (*entity.Subscription, error) {
+	var subscription entity.Subscription
+	err := r.db.WithContext(ctx).
+		Where("subscriber_id = ? AND author_id = ?", userID, authorID).
+		Where("expires_at > ? OR expires_at IS NULL", time.Now()).
+		First(&subscription).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &subscription, nil
+}
+
+// WithTx returns a new repository with the given transaction
+func (r *subscriptionRepository) WithTx(tx interface{}) repository.SubscriptionRepository {
+	if gormDB, ok := tx.(*gorm.DB); ok {
+		return &subscriptionRepository{db: gormDB}
+	}
+	return r
 }
