@@ -4,6 +4,8 @@ description: Discuss and define a feature before development
 
 # Brainstorming Workflow
 
+User Request: $1
+
 Collaborative feature discussion and requirement definition. This workflow serves as the **pre-cursor** to the development pipeline.
 
 ## When to Use

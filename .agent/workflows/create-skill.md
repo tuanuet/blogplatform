@@ -4,6 +4,8 @@ description: Create a new skill using the skill-creator
 
 # Create Skill Workflow
 
+User Request: $1
+
 Uses the `skill-creator` skill to guide the creation of high-quality, effective new skills for the agent system.
 
 ## When to Use

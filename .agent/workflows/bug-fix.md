@@ -4,6 +4,8 @@ description: Bug fix with regression test (skips Architect phase)
 
 # Bug Fix Workflow
 
+User Request: $1
+
 Simplified workflow: **Skip Architect**, focus on reproducing and fixing.
 
 ## When to Use

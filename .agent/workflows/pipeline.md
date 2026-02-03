@@ -4,6 +4,8 @@ description: Master orchestrator for multi-phase development with parallel execu
 
 # Development Pipeline Orchestrator
 
+User Request: $1
+
 > **Core Principle**: Delegate, don't do. Load agent files and follow their instructions.
 
 ## Pipeline Flow

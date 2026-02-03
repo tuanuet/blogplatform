@@ -4,6 +4,8 @@ description: Safe refactoring (Builder phase only)
 
 # Refactor Workflow
 
+User Request: $1
+
 Minimal workflow: **Builder only**, focus on safety.
 
 ## When to Use

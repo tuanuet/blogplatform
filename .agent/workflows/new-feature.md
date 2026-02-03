@@ -4,6 +4,8 @@ description: New feature with migration, feature flags, and rollback plan
 
 # New Feature Workflow
 
+User Request: $1
+
 Full pipeline **PLUS** production-ready extras: migration, feature flags, rollback.
 
 ## When to Use
