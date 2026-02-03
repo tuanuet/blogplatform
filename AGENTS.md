@@ -2,6 +2,8 @@
 
 ## Orchestration
 
+### Pipeline Workflow
+
 **Location**: `.agent/workflows/pipeline.md`
 
 **Trigger**: `/pipeline` command or auto-detected for multi-phase development
@@ -10,9 +12,44 @@
 
 **Flow**: Gatekeeper → Architect → Planner → Builder ⇄ Reviewer
 
+### Brainstorm Workflow
+
+**Location**: `.agent/workflows/brainstorm.md`
+
+**Trigger**: `/brainstorm` command
+
+**Responsibility**: Collaborative feature discussion and requirement definition. Pre-cursor to `/pipeline`.
+
+**Flow**: Discuss → Define → Prepare → Output Feature Spec for `/pipeline`
+
 ---
 
 ## Agents
+
+### Brainstormer Agent
+
+**Role**: Creative Facilitator
+
+**Location**: `.agent/agents/brainstormer/AGENT.md`
+
+**Skills**:
+
+- `brainstorming`
+- `ideation`
+- `requirement-analysis`
+- `ckb-code-scan`
+
+**Input**: Raw feature idea (may be vague)
+
+**Output**:
+
+- Feature Specification (ready for `/pipeline`)
+
+**Workflow**: DISCUSS (context) → DEFINE (specs) → PREPARE (output)
+
+**Integration**: `/brainstorm` → Feature Spec → `/pipeline` (Gatekeeper)
+
+---
 
 ### Gatekeeper Agent
 
