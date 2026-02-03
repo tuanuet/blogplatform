@@ -1,28 +1,20 @@
-# Agent Registry
+# Agent & Skill Registry
 
-## Orchestrator (Lead Agent)
+## Orchestration
 
-**Role**: Pipeline Controller
+**Location**: `.agent/workflows/pipeline.md`
 
-**Location**: `.agent/agents/orchestrator/AGENT.md`
+**Trigger**: `/pipeline` command or auto-detected for multi-phase development
 
-**Responsibility**: Orchestrates the entire 3-Phase Pipeline, delegating tasks to sub-agents in proper sequence.
+**Responsibility**: Coordinates the 5-Phase Pipeline by loading and following agent instructions in sequence.
 
-**Workflow**:
-
-1. Receive user request
-2. Delegate to **Gatekeeper** → Get Refined Spec
-   - If ambiguous → Return questions → Loop
-3. Delegate to **Architect** → Get Schema + API Contract
-4. Delegate to **Planner** → Get Todo List
-5. Delegate to **Builder** → Get Tests + Implementation
-6. Return final result
+**Flow**: Gatekeeper → Architect → Planner → Builder ⇄ Reviewer
 
 ---
 
-## Sub-Agents
+## Agents
 
-### 🚪 Gatekeeper Agent
+### Gatekeeper Agent
 
 **Role**: Technical Product Manager
 
@@ -46,7 +38,7 @@
 
 ---
 
-### 📐 Architect Agent
+### Architect Agent
 
 **Role**: System Architect
 
@@ -71,7 +63,7 @@
 
 ---
 
-### 📋 Planner Agent
+### Planner Agent
 
 **Role**: Technical Lead
 
@@ -79,7 +71,7 @@
 
 **Skills**:
 
-- `todowrite`
+- `task-breakdown`
 - `ckb-code-scan`
 - `requirement-analysis`
 
@@ -93,7 +85,7 @@
 
 ---
 
-### 🔨 Builder Agent
+### Builder Agent
 
 **Role**: Senior Developer
 
@@ -104,12 +96,13 @@
 - `tdd-workflow`
 - `clean-code`
 - `testing`
+- `mock-testing`
 - `refactoring`
 - `code-review`
 - `ckb-code-scan`
 - `documentation`
 
-**Input**: API Contract from Architect
+**Input**: API Contract from Architect + Todo List from Planner
 
 **Output**:
 
@@ -119,29 +112,72 @@
 
 **Workflow**: TDD cycle - RED → GREEN → REFACTOR
 
+**Handoff**: Pass to Reviewer for verification
+
 ---
 
-## Delegation Rules
+### Reviewer Agent
+
+**Role**: Code Reviewer
+
+**Location**: `.agent/agents/reviewer/AGENT.md`
+
+**Skills**:
+
+- `code-review`
+- `testing`
+- `clean-code`
+- `design-patterns`
+- `ckb-code-scan`
+
+**Input**: Builder's implementation + API Contract + Refined Spec
+
+**Output**:
+
+- APPROVED (task complete)
+- NEEDS_CHANGES (feedback to Builder)
+
+**Workflow**: Review → Feedback Loop → Until Approved
+
+**Constraint**: Max 3 review rounds, then escalate to user
+
+---
+
+## Pipeline Flow
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │  User Request                                       │
 │       ↓                                             │
-│  [Orchestrator] ──→ Is request clear?               │
-│       │                   │                         │
-│       │ No                │ Yes                     │
-│       ↓                   ↓                         │
-│  [Gatekeeper] ←──── Ask questions                   │
+│  [/pipeline workflow] ──→ Load appropriate agent    │
 │       │                                             │
-│       │ Refined Spec ready                          │
+│       ↓                                             │
+│  [Gatekeeper] ──→ Refined Spec or Questions         │
+│       │                                             │
 │       ↓                                             │
 │  [Architect] ──→ Schema + API Contract              │
-│       │                                             │
+│       │         (STOP: wait for approval)           │
 │       ↓                                             │
 │  [Planner] ──→ Implementation Plan (Todo List)      │
-│       │                                             │
+│       │         (STOP: wait for approval)           │
 │       ↓                                             │
-│  [Builder] ──→ TDD Implementation                   │
+│  ┌─────────────────────────────────────────────┐    │
+│  │ FOR EACH TASK:                              │    │
+│  │                                             │    │
+│  │  [Builder] ──→ TDD Implementation           │    │
+│  │       │                                     │    │
+│  │       ↓                                     │    │
+│  │  [Reviewer] ──→ APPROVED or NEEDS_CHANGES   │    │
+│  │       │              │                      │    │
+│  │       │         NEEDS_CHANGES               │    │
+│  │       │              ↓                      │    │
+│  │       │         Back to Builder (loop)      │    │
+│  │       │                                     │    │
+│  │       ↓ APPROVED                            │    │
+│  │  Mark task complete                         │    │
+│  │       ↓                                     │    │
+│  │  Next task...                               │    │
+│  └─────────────────────────────────────────────┘    │
 │       │                                             │
 │       ↓                                             │
 │  Return to User                                     │

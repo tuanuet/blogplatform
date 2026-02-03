@@ -20,8 +20,9 @@ description: Senior Developer - Implements features using Test-Driven Developmen
 - `tdd-workflow` - TDD cycle enforcement
 - `clean-code` - Code quality standards
 - `testing` - Testing strategies
+- `mock-testing` - Generate mocks for unit testing isolation (Go: mockgen)
 - `refactoring` - Safe refactoring
-- `code-review` - Self-review checklist
+- `code-review` - Self-review checklist before handoff
 - `ckb-code-scan` - Use CKB for impact analysis, understanding code before implementation
 - `documentation` - Code documentation
 
@@ -154,4 +155,27 @@ func Test[Feature]_[Scenario](t *testing.T) {
 
 ## Handoff
 
-When implementation is complete and tests pass → Return to **Orchestrator**
+When implementation is complete and tests pass → Pass to **Reviewer Agent** for verification
+
+## Mocking Guidelines (Go)
+
+When writing unit tests that require isolation:
+
+1. **Use `mock-testing` skill** for generating mocks
+2. **Generate mocks** via `go generate ./...`
+3. **Mock interfaces, not structs**
+4. **Use `gomock.Any()`** for arguments you don't care about
+5. **Always `defer ctrl.Finish()`** to verify expectations
+
+```go
+// Example: Testing with mock
+ctrl := gomock.NewController(t)
+defer ctrl.Finish()
+
+mockRepo := mocks.NewMockUserRepository(ctrl)
+mockRepo.EXPECT().FindById("123").Return(&user, nil)
+
+// Test the service with mocked repo
+svc := NewUserService(mockRepo)
+result, err := svc.GetUser("123")
+```
