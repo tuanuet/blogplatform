@@ -8,14 +8,15 @@ import (
 
 // User represents a user entity
 type User struct {
-	ID           uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
-	Email        string     `gorm:"size:255;not null;unique;index" json:"email"`
-	Name         string     `gorm:"size:255;not null" json:"name"`
-	PasswordHash string     `gorm:"size:255;not null" json:"-"`
-	IsActive     bool       `gorm:"not null;default:true" json:"isActive"`
-	CreatedAt    time.Time  `gorm:"not null;default:now()" json:"createdAt"`
-	UpdatedAt    time.Time  `gorm:"not null;default:now()" json:"updatedAt"`
-	DeletedAt    *time.Time `gorm:"index" json:"deletedAt,omitempty"`
+	ID              uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	Email           string     `gorm:"size:255;not null;unique;index" json:"email"`
+	EmailVerifiedAt *time.Time `json:"emailVerifiedAt,omitempty"`
+	Name            string     `gorm:"size:255;not null" json:"name"`
+	PasswordHash    string     `gorm:"size:255;not null" json:"-"`
+	IsActive        bool       `gorm:"not null;default:true" json:"isActive"`
+	CreatedAt       time.Time  `gorm:"not null;default:now()" json:"createdAt"`
+	UpdatedAt       time.Time  `gorm:"not null;default:now()" json:"updatedAt"`
+	DeletedAt       *time.Time `gorm:"index" json:"deletedAt,omitempty"`
 
 	// Profile fields
 	DisplayName   *string    `gorm:"size:50" json:"displayName,omitempty"`
@@ -30,12 +31,13 @@ type User struct {
 	Birthday      *time.Time `gorm:"type:date" json:"birthday,omitempty"`
 
 	// Relationships
-	Blogs           []Blog         `gorm:"foreignKey:AuthorID" json:"blogs,omitempty"`
-	BookmarkedBlogs []Blog         `gorm:"many2many:user_bookmarks;joinForeignKey:user_id;joinReferences:blog_id" json:"bookmarkedBlogs,omitempty"`
-	Comments        []Comment      `gorm:"foreignKey:UserID" json:"comments,omitempty"`
-	Subscriptions   []Subscription `gorm:"foreignKey:SubscriberID" json:"subscriptions,omitempty"`
-	Subscribers     []Subscription `gorm:"foreignKey:AuthorID" json:"subscribers,omitempty"`
-	Interests       []Tag          `gorm:"many2many:user_interests" json:"interests,omitempty"`
+	SocialAccounts  []SocialAccount `gorm:"foreignKey:UserID" json:"socialAccounts,omitempty"`
+	Blogs           []Blog          `gorm:"foreignKey:AuthorID" json:"blogs,omitempty"`
+	BookmarkedBlogs []Blog          `gorm:"many2many:user_bookmarks;joinForeignKey:user_id;joinReferences:blog_id" json:"bookmarkedBlogs,omitempty"`
+	Comments        []Comment       `gorm:"foreignKey:UserID" json:"comments,omitempty"`
+	Subscriptions   []Subscription  `gorm:"foreignKey:SubscriberID" json:"subscriptions,omitempty"`
+	Subscribers     []Subscription  `gorm:"foreignKey:AuthorID" json:"subscribers,omitempty"`
+	Interests       []Tag           `gorm:"many2many:user_interests" json:"interests,omitempty"`
 }
 
 // TableName returns the table name for User

@@ -64,13 +64,14 @@ USER REQUEST
 │  PHASE 2.5: PLANNER                                                 │
 │  ├─ Load: .agent/agents/planner/AGENT.md                            │
 │  ├─ Input: Schema + API Contract                                    │
-│  ├─ Purpose: Break down into atomic tasks                           │
-│  └─ Output: Todo List (via todowrite)                               │
+│  ├─ Purpose: Break down into atomic tasks with dependencies         │
+│  └─ Output: Todo List with Waves + Parallelization Plan             │
 │                          │                                          │
 │                          ▼                                          │
 │             ┌────────────────────────┐                              │
 │             │  APPROVAL GATE         │                              │
 │             │  Present task list     │                              │
+│             │  Show dependency graph │                              │
 │             │  WAIT for user confirm │                              │
 │             └────────────────────────┘                              │
 │                          │                                          │
@@ -82,33 +83,38 @@ USER REQUEST
                                             │
                                             ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  PHASE 3: BUILDER (per task)                                        │
-│  ├─ Load: .agent/agents/builder/AGENT.md                            │
-│  ├─ Input: Current Task + API Contract                              │
-│  ├─ Purpose: TDD implementation (RED → GREEN → REFACTOR)            │
-│  └─ Output: Tests + Implementation                                  │
-│                          │                                          │
-│                          ▼                                          │
+│  PHASE 3 & 4: BUILD + REVIEW (per wave)                             │
+│                                                                     │
+│  FOR EACH WAVE:                                                     │
 │  ┌───────────────────────────────────────────────────────────────┐  │
-│  │  PHASE 4: REVIEWER (per task)                                 │  │
-│  │  ├─ Load: .agent/agents/reviewer/AGENT.md                     │  │
-│  │  ├─ Input: Builder's implementation                           │  │
-│  │  ├─ Purpose: Verify quality, run tests, check criteria        │  │
-│  │  └─ Output: APPROVED or NEEDS_CHANGES                         │  │
-│  │                       │                                       │  │
-│  │      ┌────────────────┴────────────────┐                      │  │
-│  │      ▼                                 ▼                      │  │
-│  │ [NEEDS_CHANGES]                   [APPROVED]                  │  │
-│  │      │                                 │                      │  │
-│  │      ▼                                 ▼                      │  │
-│  │ Return to Builder              Mark task complete             │  │
-│  │ with feedback                         │                       │  │
-│  │      │                                │                       │  │
-│  │      └──────► (loop max 3x) ◄─────────┘                       │  │
-│  └───────────────────────────────────────────────────────────────┘  │
-│                          │                                          │
-│                          ▼                                          │
-│              [More tasks?] ──Yes──► Next task (Phase 3)             │
+│  │  PARALLEL BUILDERS (max 3)                                    │  │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐                        │  │
+│  │  │Builder 1│  │Builder 2│  │Builder 3│  ← Spawn in parallel   │  │
+│  │  │ Task A  │  │ Task B  │  │ Task C  │                        │  │
+│  │  └────┬────┘  └────┬────┘  └────┬────┘                        │  │
+│  │       │            │            │                             │  │
+│  │       ▼            ▼            ▼                             │  │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐                        │  │
+│  │  │Reviewer │  │Reviewer │  │Reviewer │  ← MANDATORY per task  │  │
+│  │  │ Task A  │  │ Task B  │  │ Task C  │                        │  │
+│  │  └────┬────┘  └────┬────┘  └────┬────┘                        │  │
+│  │       │            │            │                             │  │
+│  │       ▼            ▼            ▼                             │  │
+│  │  [APPROVED?]  [APPROVED?]  [APPROVED?]                        │  │
+│  │       │            │            │                             │  │
+│  │       └────────────┴────────────┘                             │  │
+│  │                    │                                          │  │
+│  │        ALL tasks in wave APPROVED?                            │  │
+│  │                    │                                          │  │
+│  │       ┌────────────┴────────────┐                             │  │
+│  │       ▼                         ▼                             │  │
+│  │   [NO: Loop]            [YES: Next Wave]                      │  │
+│  │   Return to Builder            │                              │  │
+│  │   with feedback                │                              │  │
+│  └────────────────────────────────┼──────────────────────────────┘  │
+│                                   │                                 │
+│                                   ▼                                 │
+│              [More waves?] ──Yes──► Process next wave               │
 │                          │                                          │
 │                          No                                         │
 │                          ▼                                          │
@@ -184,21 +190,49 @@ WAIT for explicit approval before Phase 2.5
 2. Decompose using `task-breakdown` skill:
    - 1 task = 1 TDD cycle (RED-GREEN-REFACTOR)
    - Order: Model → Repository → Service → Controller → UI
-3. Write tasks via `todowrite` tool
+3. **Dependency Graph Analysis**:
+   - Identify which tasks depend on others (e.g., Repository depends on Entity)
+   - Group independent tasks that can run in parallel
+   - Create execution waves (tasks in same wave can be parallelized)
+4. **Determine Builder Concurrency**:
+   - Count tasks per wave
+   - Recommend number of parallel Builders (max 3 for safety)
+   - Document: "Wave 1: Tasks A, B (parallel) → Wave 2: Task C (depends on A, B)"
+5. Write tasks via `todowrite` tool with dependency metadata
 
 **Task Format**:
 ```
-[Priority] Task description
-- High: Core functionality, blocking others
-- Medium: Important but non-blocking
-- Low: Nice-to-have, polish
+[Priority] [Wave N] Task description
+- Priority: High/Medium/Low
+- Wave: Execution order (Wave 1 runs first, Wave 2 after Wave 1 completes)
+- Depends On: [Task IDs] (empty if independent)
+```
+
+**Parallelization Strategy**:
+```
+┌─────────────────────────────────────────────────────────────┐
+│  WAVE 1 (Independent - can parallelize)                    │
+│  ├─ Task A: Entity definition                              │
+│  ├─ Task B: DTO definition                                 │
+│  └─ Task C: Migration script                               │
+│           ↓ (all complete)                                 │
+│  WAVE 2 (Depends on Wave 1)                                │
+│  ├─ Task D: Repository (depends on A)                      │
+│  └─ Task E: Service interface (depends on A, B)            │
+│           ↓ (all complete)                                 │
+│  WAVE 3 (Depends on Wave 2)                                │
+│  └─ Task F: Handler (depends on D, E)                      │
+└─────────────────────────────────────────────────────────────┘
+
+Recommended Builders: min(tasks_in_wave, 3)
 ```
 
 **APPROVAL GATE**:
 ```
 Present to user:
-  - Numbered task list
-  - Dependencies noted
+  - Numbered task list with waves
+  - Dependency graph (text or ASCII)
+  - Recommended parallel builders per wave
   - Estimated scope
 
 Ask: "Does this plan look correct? Approve to start building or adjust."
@@ -211,6 +245,17 @@ WAIT for explicit approval before Phase 3
 ### Phase 3: BUILDER
 
 **Load**: `.agent/agents/builder/AGENT.md`
+
+**Execution Strategy** (based on Planner output):
+```
+FOR each Wave in execution plan:
+  1. Determine parallel_count = min(tasks_in_wave, 3)
+  2. Spawn `parallel_count` Builder agents simultaneously
+  3. Each Builder handles one task from the wave
+  4. WAIT for ALL Builders in wave to complete
+  5. Run Reviewer for EACH completed task (MANDATORY)
+  6. Proceed to next wave only after ALL tasks in current wave are APPROVED
+```
 
 **For each task in Todo List**:
 
@@ -233,11 +278,17 @@ WAIT for explicit approval before Phase 3
    - Run test → Must still pass
    - Commit: "refactor: clean [feature]"
 
-5. **Handoff to Reviewer** → Proceed to Phase 4
+5. **MANDATORY Handoff to Reviewer** → Proceed to Phase 4
+   - ⚠️ **NEVER skip this step**
+   - ⚠️ **DO NOT mark task complete until Reviewer approves**
 
 ---
 
-### Phase 4: REVIEWER
+### Phase 4: REVIEWER (MANDATORY)
+
+> ⚠️ **CRITICAL**: This phase is MANDATORY after EVERY Builder task.
+> The Orchestrator MUST invoke the Reviewer agent after each Builder completes.
+> Skipping this phase is a violation of the pipeline protocol.
 
 **Load**: `.agent/agents/reviewer/AGENT.md`
 
@@ -345,14 +396,16 @@ Architect → Planner:
   - Design patterns applied
 
 Planner → Builder:
-  - Todo list (ordered tasks)
+  - Todo list with waves (ordered tasks with dependencies)
+  - Parallelization plan (which tasks can run together)
   - All above context (Spec + Schema + Contract)
 
-Builder → Reviewer:
+Builder → Reviewer (MANDATORY):
   - Implementation (changed files)
   - Test results
   - API Contract reference
   - Refined Spec reference (for acceptance criteria)
+  - ⚠️ Orchestrator MUST invoke Reviewer after EVERY Builder task
 
 Reviewer → Builder (if issues):
   - Structured feedback
@@ -370,7 +423,10 @@ Reviewer → Builder (if issues):
 3. **Never write code** in Gatekeeper/Architect/Planner phases
 4. **Loop back if blocked** - Return to previous phase for clarification
 5. **Complete all tasks** before returning final result
-6. **One task at a time** - Mark in_progress, complete, then next
+6. **One task at a time per Builder** - Mark in_progress, complete, then next
 7. **Tests before code** - Builder must follow TDD strictly
-8. **Review every task** - Reviewer validates before marking complete
+8. **MANDATORY Review for every task** - Reviewer MUST validate before marking complete. NO EXCEPTIONS.
 9. **Max 3 review rounds** - Escalate if issues persist
+10. **Respect task dependencies** - Never start a task before its dependencies are APPROVED
+11. **Parallel execution by wave** - Only parallelize tasks within the same wave
+12. **Max 3 concurrent Builders** - To prevent resource exhaustion and context confusion

@@ -17,6 +17,9 @@ type UserRepository interface {
 	// FindByEmail finds a user by email
 	FindByEmail(ctx context.Context, email string) (*entity.User, error)
 
+	// Create creates a new user
+	Create(ctx context.Context, user *entity.User) error
+
 	// Update updates a user
 	Update(ctx context.Context, user *entity.User) error
 

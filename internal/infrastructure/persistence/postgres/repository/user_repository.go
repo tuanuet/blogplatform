@@ -40,6 +40,10 @@ func (r *userRepository) FindByEmail(ctx context.Context, email string) (*entity
 	return &user, err
 }
 
+func (r *userRepository) Create(ctx context.Context, user *entity.User) error {
+	return r.db.WithContext(ctx).Create(user).Error
+}
+
 func (r *userRepository) Update(ctx context.Context, user *entity.User) error {
 	return r.db.WithContext(ctx).Save(user).Error
 }

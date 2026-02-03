@@ -2,6 +2,7 @@ package modules
 
 import (
 	"github.com/aiagent/internal/interfaces/http/handler/admin"
+	"github.com/aiagent/internal/interfaces/http/handler/auth"
 	"github.com/aiagent/internal/interfaces/http/handler/blog"
 	"github.com/aiagent/internal/interfaces/http/handler/bookmark"
 	"github.com/aiagent/internal/interfaces/http/handler/category"
@@ -38,5 +39,6 @@ var HandlerModule = fx.Module("handler",
 		reading_history.NewReadingHistoryHandler,
 		fraud.NewFraudHandler,
 		recommendation.NewRecommendationHandler,
+		auth.NewAuthHandler,
 	),
 )

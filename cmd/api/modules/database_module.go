@@ -8,14 +8,20 @@ import (
 	"github.com/aiagent/internal/infrastructure/config"
 	"github.com/aiagent/internal/infrastructure/persistence/postgres"
 	"github.com/aiagent/pkg/logger"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/fx"
 	"gorm.io/gorm"
 )
 
 // DatabaseModule provides database and cache dependencies with lifecycle management
 var DatabaseModule = fx.Module("database",
-	fx.Provide(newDatabase, newRedisClient),
+	fx.Provide(newDatabase, newRedisClient, provideRedisRawClient),
 )
+
+// provideRedisRawClient extracts the raw redis.Client from our wrapper
+func provideRedisRawClient(client *cache.RedisClient) *redis.Client {
+	return client.Client()
+}
 
 // newDatabase creates DB connection with cleanup on shutdown
 func newDatabase(lc fx.Lifecycle, cfg *config.DatabaseConfig) (*gorm.DB, error) {

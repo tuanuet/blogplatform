@@ -57,6 +57,20 @@ func (mr *MockUserRepositoryMockRecorder) CountByMonth(ctx, months any) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountByMonth", reflect.TypeOf((*MockUserRepository)(nil).CountByMonth), ctx, months)
 }
 
+// Create mocks base method.
+func (m *MockUserRepository) Create(ctx context.Context, user *entity.User) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, user)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockUserRepositoryMockRecorder) Create(ctx, user any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUserRepository)(nil).Create), ctx, user)
+}
+
 // FindByEmail mocks base method.
 func (m *MockUserRepository) FindByEmail(ctx context.Context, email string) (*entity.User, error) {
 	m.ctrl.T.Helper()
