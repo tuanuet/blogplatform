@@ -29,3 +29,9 @@ scheduler:
   enabled: true
   daily_recalculation_hour: 0  # 0 = midnight (0 AM)
   timezone: "Local"  # Use "UTC" or specific timezone like "America/New_York"
+
+firebase:
+  enabled: false  # Set to true to enable Firebase Cloud Messaging
+  project_id: ""  # Firebase project ID
+  api_key: ""     # Firebase API key (for service account)
+  service_account_path: ""  # Path to Firebase service account JSON file

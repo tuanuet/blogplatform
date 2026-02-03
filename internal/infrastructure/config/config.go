@@ -15,6 +15,7 @@ type Config struct {
 	Logger    LoggerConfig
 	Telemetry TelemetryConfig
 	Scheduler SchedulerConfig
+	Firebase  FirebaseConfig
 }
 
 // ServerConfig holds server-related configuration
@@ -63,6 +64,14 @@ type SchedulerConfig struct {
 	Enabled                bool   `mapstructure:"enabled"`
 	DailyRecalculationHour int    `mapstructure:"daily_recalculation_hour"`
 	Timezone               string `mapstructure:"timezone"`
+}
+
+// FirebaseConfig holds Firebase Cloud Messaging configuration
+type FirebaseConfig struct {
+	ProjectID          string `mapstructure:"project_id"`
+	Enabled            bool   `mapstructure:"enabled"`
+	APIKey             string `mapstructure:"api_key"`              // For service account authentication
+	ServiceAccountPath string `mapstructure:"service_account_path"` // Path to service account JSON
 }
 
 // Load loads the configuration from file and environment variables
@@ -126,4 +135,10 @@ func setDefaults() {
 	viper.SetDefault("scheduler.enabled", true)
 	viper.SetDefault("scheduler.daily_recalculation_hour", 0)
 	viper.SetDefault("scheduler.timezone", "Local")
+
+	// Firebase defaults
+	viper.SetDefault("firebase.enabled", false)
+	viper.SetDefault("firebase.project_id", "")
+	viper.SetDefault("firebase.api_key", "")
+	viper.SetDefault("firebase.service_account_path", "")
 }
