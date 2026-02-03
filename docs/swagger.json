@@ -1428,6 +1428,63 @@
                 }
             }
         },
+        "/api/v1/payments": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Initiates a new payment transaction",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Create a new payment",
+                "parameters": [
+                    {
+                        "description": "Payment request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreatePaymentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreatePaymentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/permissions": {
             "get": {
                 "security": [
@@ -3204,6 +3261,70 @@
                 }
             }
         },
+        "/api/v1/webhooks/sepay": {
+            "post": {
+                "description": "Processes incoming webhook from SePay payment gateway",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Handle SePay webhook callback",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer \u003ctoken\u003e",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Alternative API Key",
+                        "name": "X-SePay-API-Key",
+                        "in": "header"
+                    },
+                    {
+                        "description": "Webhook request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProcessWebhookRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/ping": {
             "get": {
                 "description": "Simple ping endpoint for load balancer",
@@ -3524,6 +3645,69 @@
                 }
             }
         },
+        "dto.CreatePaymentRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "gateway",
+                "type",
+                "userId"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "gateway": {
+                    "$ref": "#/definitions/entity.TransactionGateway"
+                },
+                "planId": {
+                    "description": "Subscription plan ID",
+                    "type": "string"
+                },
+                "targetId": {
+                    "description": "ID of Subscription Author or Series",
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/entity.TransactionType"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreatePaymentResponse": {
+            "type": "object",
+            "properties": {
+                "accountName": {
+                    "type": "string"
+                },
+                "accountNo": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "number"
+                },
+                "bankName": {
+                    "type": "string"
+                },
+                "gateway": {
+                    "$ref": "#/definitions/entity.TransactionGateway"
+                },
+                "orderId": {
+                    "type": "string"
+                },
+                "qrData": {
+                    "type": "string"
+                },
+                "qrDataUrl": {
+                    "type": "string"
+                },
+                "referenceCode": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateRoleRequest": {
             "type": "object",
             "required": [
@@ -3616,6 +3800,47 @@
                     "type": "integer"
                 },
                 "resource": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ProcessWebhookRequest": {
+            "type": "object",
+            "properties": {
+                "accountNumber": {
+                    "type": "string"
+                },
+                "accumulated": {
+                    "type": "number"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "gateway": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "referenceCode": {
+                    "type": "string"
+                },
+                "subAccount": {
+                    "type": "string"
+                },
+                "transactionDate": {
+                    "type": "string"
+                },
+                "transferAmount": {
+                    "type": "number"
+                },
+                "transferType": {
                     "type": "string"
                 }
             }
@@ -4240,6 +4465,30 @@
                 "ReactionTypeUpvote",
                 "ReactionTypeDownvote",
                 "ReactionTypeNone"
+            ]
+        },
+        "entity.TransactionGateway": {
+            "type": "string",
+            "enum": [
+                "VIETQR",
+                "BANK_TRANSFER"
+            ],
+            "x-enum-varnames": [
+                "TransactionGatewayVietQR",
+                "TransactionGatewayBankTransfer"
+            ]
+        },
+        "entity.TransactionType": {
+            "type": "string",
+            "enum": [
+                "SUBSCRIPTION",
+                "SERIES",
+                "DONATION"
+            ],
+            "x-enum-varnames": [
+                "TransactionTypeSubscription",
+                "TransactionTypeSeries",
+                "TransactionTypeDonation"
             ]
         },
         "response.ErrorInfo": {

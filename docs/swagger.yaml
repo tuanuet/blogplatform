@@ -194,6 +194,49 @@ definitions:
     required:
     - content
     type: object
+  dto.CreatePaymentRequest:
+    properties:
+      amount:
+        type: number
+      gateway:
+        $ref: '#/definitions/entity.TransactionGateway'
+      planId:
+        description: Subscription plan ID
+        type: string
+      targetId:
+        description: ID of Subscription Author or Series
+        type: string
+      type:
+        $ref: '#/definitions/entity.TransactionType'
+      userId:
+        type: string
+    required:
+    - amount
+    - gateway
+    - type
+    - userId
+    type: object
+  dto.CreatePaymentResponse:
+    properties:
+      accountName:
+        type: string
+      accountNo:
+        type: string
+      amount:
+        type: number
+      bankName:
+        type: string
+      gateway:
+        $ref: '#/definitions/entity.TransactionGateway'
+      orderId:
+        type: string
+      qrData:
+        type: string
+      qrDataUrl:
+        type: string
+      referenceCode:
+        type: string
+    type: object
   dto.CreateRoleRequest:
     properties:
       description:
@@ -258,6 +301,33 @@ definitions:
       permissions:
         type: integer
       resource:
+        type: string
+    type: object
+  dto.ProcessWebhookRequest:
+    properties:
+      accountNumber:
+        type: string
+      accumulated:
+        type: number
+      code:
+        type: string
+      content:
+        type: string
+      description:
+        type: string
+      gateway:
+        type: string
+      id:
+        type: integer
+      referenceCode:
+        type: string
+      subAccount:
+        type: string
+      transactionDate:
+        type: string
+      transferAmount:
+        type: number
+      transferType:
         type: string
     type: object
   dto.ProfileResponse:
@@ -680,6 +750,24 @@ definitions:
     - ReactionTypeUpvote
     - ReactionTypeDownvote
     - ReactionTypeNone
+  entity.TransactionGateway:
+    enum:
+    - VIETQR
+    - BANK_TRANSFER
+    type: string
+    x-enum-varnames:
+    - TransactionGatewayVietQR
+    - TransactionGatewayBankTransfer
+  entity.TransactionType:
+    enum:
+    - SUBSCRIPTION
+    - SERIES
+    - DONATION
+    type: string
+    x-enum-varnames:
+    - TransactionTypeSubscription
+    - TransactionTypeSeries
+    - TransactionTypeDonation
   response.ErrorInfo:
     properties:
       code:
@@ -1631,6 +1719,42 @@ paths:
       summary: Get reading history
       tags:
       - ReadingHistory
+  /api/v1/payments:
+    post:
+      consumes:
+      - application/json
+      description: Initiates a new payment transaction
+      parameters:
+      - description: Payment request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.CreatePaymentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Create a new payment
+      tags:
+      - Payments
   /api/v1/permissions:
     get:
       consumes:
@@ -2746,6 +2870,48 @@ paths:
       summary: Update user interests
       tags:
       - Recommendations
+  /api/v1/webhooks/sepay:
+    post:
+      consumes:
+      - application/json
+      description: Processes incoming webhook from SePay payment gateway
+      parameters:
+      - description: Bearer <token>
+        in: header
+        name: Authorization
+        type: string
+      - description: Alternative API Key
+        in: header
+        name: X-SePay-API-Key
+        type: string
+      - description: Webhook request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProcessWebhookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Handle SePay webhook callback
+      tags:
+      - Webhooks
   /ping:
     get:
       consumes:
