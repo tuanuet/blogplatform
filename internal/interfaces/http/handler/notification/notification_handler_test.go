@@ -159,7 +159,7 @@ func TestNotificationHandler_UpdatePreferences(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		input := dto.UpdatePreferencesRequest{
-			Preferences: []dto.NotificationPreferenceResponse{
+			Preferences: []dto.NotificationPreferenceItem{
 				{NotificationType: "blog_like", Channel: "in_app", Enabled: false},
 			},
 		}

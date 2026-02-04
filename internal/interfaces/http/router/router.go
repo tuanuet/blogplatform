@@ -14,6 +14,7 @@ import (
 	"github.com/aiagent/internal/interfaces/http/handler/comment"
 	"github.com/aiagent/internal/interfaces/http/handler/fraud"
 	"github.com/aiagent/internal/interfaces/http/handler/health"
+	"github.com/aiagent/internal/interfaces/http/handler/notification"
 	"github.com/aiagent/internal/interfaces/http/handler/payment"
 	"github.com/aiagent/internal/interfaces/http/handler/plan"
 	"github.com/aiagent/internal/interfaces/http/handler/profile"
@@ -59,6 +60,7 @@ type Params struct {
 	WebhookHandler        payment.WebhookHandler
 	PlanHandler           plan.PlanHandler
 	AuthHandler           auth.AuthHandler
+	NotificationHandler   notification.NotificationHandler
 	SessionRepository     repository.SessionRepository
 	RedisClient           *redis.Client
 	RoleUseCase           roleUseCase.RoleUseCase // For authorization middleware
@@ -111,6 +113,7 @@ func New(p Params) *gin.Engine {
 		RegisterRankingRoutes(v1, p, auth, sessionAuth)
 		RegisterAdminRoutes(v1, p, auth, sessionAuth)
 		RegisterFraudRoutes(v1, p, auth, sessionAuth)
+		RegisterNotificationRoutes(v1, p, auth, sessionAuth)
 
 		// Payment & Webhooks
 		RegisterPaymentRoutes(v1, p.PaymentHandler, p.WebhookHandler, sessionAuth)

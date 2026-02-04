@@ -1,7 +1,11 @@
 package modules
 
 import (
+	"context"
+
+	"github.com/aiagent/internal/application/usecase/notification"
 	"github.com/aiagent/internal/infrastructure/adapter"
+	"github.com/aiagent/internal/infrastructure/config"
 	pgRepo "github.com/aiagent/internal/infrastructure/persistence/postgres/repository"
 	redisRepo "github.com/aiagent/internal/infrastructure/persistence/redis/repository"
 	"go.uber.org/fx"
@@ -33,5 +37,19 @@ var RepositoryModule = fx.Module("repository",
 		adapter.NewSePayAdapter,
 		pgRepo.NewFraudDetectionRepository,
 		pgRepo.NewUserSeriesPurchaseRepository,
+		// Notification Repositories
+		pgRepo.NewNotificationRepository,
+		pgRepo.NewDeviceTokenRepository,
+		pgRepo.NewNotificationPreferenceRepository,
+		// Firebase Adapter Client
+		func(cfg *config.Config) (adapter.FirebaseClient, error) {
+			return adapter.NewFirebaseClient(context.Background(), cfg.Firebase.ProjectID, cfg.Firebase.ServiceAccountPath, cfg.Firebase.Enabled)
+		},
+	),
+	fx.Provide(
+		fx.Annotate(
+			adapter.NewFirebaseAdapter,
+			fx.As(new(notification.NotificationAdapter)),
+		),
 	),
 )

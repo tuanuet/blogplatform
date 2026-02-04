@@ -8,6 +8,7 @@ import (
 	"github.com/aiagent/internal/application/usecase/category"
 	"github.com/aiagent/internal/application/usecase/comment"
 	"github.com/aiagent/internal/application/usecase/health"
+	"github.com/aiagent/internal/application/usecase/notification"
 	"github.com/aiagent/internal/application/usecase/permission"
 	"github.com/aiagent/internal/application/usecase/profile"
 	"github.com/aiagent/internal/application/usecase/ranking"
@@ -30,6 +31,7 @@ var UseCaseModule = fx.Module("usecase",
 		category.NewCategoryUseCase,
 		comment.NewCommentUseCase,
 		health.NewHealthUseCase,
+		notification.NewNotificationUseCase,
 		permission.NewPermissionUseCase,
 		profile.NewProfileUseCase,
 		ranking.NewRankingUseCase,

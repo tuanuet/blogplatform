@@ -24,13 +24,21 @@ type UnreadCountResponse struct {
 }
 
 type NotificationPreferenceResponse struct {
-	NotificationType string `json:"notification_type"`
-	Channel          string `json:"channel"`
-	Enabled          bool   `json:"enabled"`
+	NotificationType NotificationType `json:"notification_type"`
+	Channel          string           `json:"channel"`
+	Enabled          bool             `json:"enabled"`
 }
 
+type NotificationType string
+
 type UpdatePreferencesRequest struct {
-	Preferences []NotificationPreferenceResponse `json:"preferences" binding:"required,dive"`
+	Preferences []NotificationPreferenceItem `json:"preferences" binding:"required,dive"`
+}
+
+type NotificationPreferenceItem struct {
+	NotificationType NotificationType `json:"notification_type" binding:"required"`
+	Channel          string           `json:"channel" binding:"required"`
+	Enabled          bool             `json:"enabled"`
 }
 
 type RegisterDeviceTokenRequest struct {
