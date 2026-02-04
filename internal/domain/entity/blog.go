@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // BlogStatus represents the status of a blog post
@@ -37,7 +38,7 @@ type Blog struct {
 	PublishedAt  *time.Time     `json:"publishedAt,omitempty"`
 	CreatedAt    time.Time      `gorm:"not null;default:now()" json:"createdAt"`
 	UpdatedAt    time.Time      `gorm:"not null;default:now()" json:"updatedAt"`
-	DeletedAt    *time.Time     `gorm:"index" json:"deletedAt,omitempty"`
+	DeletedAt    gorm.DeletedAt `gorm:"index" json:"deletedAt,omitempty"`
 
 	// Reactions (Denormalized counts)
 	UpvoteCount   int `gorm:"not null;default:0" json:"upvoteCount"`
