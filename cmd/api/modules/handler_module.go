@@ -13,6 +13,7 @@ import (
 	"github.com/aiagent/internal/interfaces/http/handler/health"
 	"github.com/aiagent/internal/interfaces/http/handler/notification"
 	paymentH "github.com/aiagent/internal/interfaces/http/handler/payment"
+	"github.com/aiagent/internal/interfaces/http/handler/plan"
 	"github.com/aiagent/internal/interfaces/http/handler/profile"
 	"github.com/aiagent/internal/interfaces/http/handler/ranking"
 	"github.com/aiagent/internal/interfaces/http/handler/reading_history"
@@ -46,6 +47,7 @@ var HandlerModule = fx.Module("handler",
 		auth.NewAuthHandler,
 		notification.NewNotificationHandler,
 		paymentH.NewPaymentHandler,
+		plan.NewPlanHandler,
 		func(cfg *config.Config, uc payment.ProcessWebhookUseCase) paymentH.WebhookHandler {
 			return paymentH.NewWebhookHandler(uc, cfg.SePay.APIKey)
 		},
