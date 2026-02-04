@@ -317,6 +317,23 @@ func TestPlanManagementService_DeactivatePlan(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "plan not found")
 	})
+
+	t.Run("update_failure", func(t *testing.T) {
+		existingPlan := &entity.SubscriptionPlan{
+			ID:       uuid.New(),
+			AuthorID: authorID,
+			Tier:     entity.TierBronze,
+			IsActive: true,
+		}
+
+		mockPlanRepo.EXPECT().FindByAuthorAndTier(ctx, authorID, entity.TierBronze).Return(existingPlan, nil)
+		mockPlanRepo.EXPECT().Update(gomock.Any(), gomock.Any()).Return(errors.New("database error"))
+
+		err := svc.DeactivatePlan(ctx, authorID, entity.TierBronze)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to deactivate plan")
+	})
 }
 
 func TestPlanManagementService_ActivatePlan(t *testing.T) {
@@ -363,5 +380,22 @@ func TestPlanManagementService_ActivatePlan(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "plan not found")
+	})
+
+	t.Run("update_failure", func(t *testing.T) {
+		existingPlan := &entity.SubscriptionPlan{
+			ID:       uuid.New(),
+			AuthorID: authorID,
+			Tier:     entity.TierBronze,
+			IsActive: false,
+		}
+
+		mockPlanRepo.EXPECT().FindByAuthorAndTier(ctx, authorID, entity.TierBronze).Return(existingPlan, nil)
+		mockPlanRepo.EXPECT().Update(gomock.Any(), gomock.Any()).Return(errors.New("database error"))
+
+		err := svc.ActivatePlan(ctx, authorID, entity.TierBronze)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to activate plan")
 	})
 }

@@ -54,9 +54,9 @@ func (m *MockFraudDetectionService) BanUser(ctx context.Context, adminID, userID
 }
 
 // BanUser indicates an expected call of BanUser.
-func (mr *MockFraudDetectionServiceMockRecorder) BanUser(ctx, adminID, userID, req any) *gomock.Call {
+func (mr *MockFraudDetectionServiceMockRecorder) BanUser(ctx, adminID, userID, cmd any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BanUser", reflect.TypeOf((*MockFraudDetectionService)(nil).BanUser), ctx, adminID, userID, req)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BanUser", reflect.TypeOf((*MockFraudDetectionService)(nil).BanUser), ctx, adminID, userID, cmd)
 }
 
 // GetFraudDashboard mocks base method.
@@ -69,9 +69,9 @@ func (m *MockFraudDetectionService) GetFraudDashboard(ctx context.Context, filte
 }
 
 // GetFraudDashboard indicates an expected call of GetFraudDashboard.
-func (mr *MockFraudDetectionServiceMockRecorder) GetFraudDashboard(ctx, req any) *gomock.Call {
+func (mr *MockFraudDetectionServiceMockRecorder) GetFraudDashboard(ctx, filter any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFraudDashboard", reflect.TypeOf((*MockFraudDetectionService)(nil).GetFraudDashboard), ctx, req)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFraudDashboard", reflect.TypeOf((*MockFraudDetectionService)(nil).GetFraudDashboard), ctx, filter)
 }
 
 // GetFraudTrends mocks base method.
@@ -84,9 +84,9 @@ func (m *MockFraudDetectionService) GetFraudTrends(ctx context.Context, filter v
 }
 
 // GetFraudTrends indicates an expected call of GetFraudTrends.
-func (mr *MockFraudDetectionServiceMockRecorder) GetFraudTrends(ctx, req any) *gomock.Call {
+func (mr *MockFraudDetectionServiceMockRecorder) GetFraudTrends(ctx, filter any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFraudTrends", reflect.TypeOf((*MockFraudDetectionService)(nil).GetFraudTrends), ctx, req)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFraudTrends", reflect.TypeOf((*MockFraudDetectionService)(nil).GetFraudTrends), ctx, filter)
 }
 
 // GetUserBadgeStatus mocks base method.
@@ -144,9 +144,9 @@ func (m *MockFraudDetectionService) ReviewUser(ctx context.Context, adminID, use
 }
 
 // ReviewUser indicates an expected call of ReviewUser.
-func (mr *MockFraudDetectionServiceMockRecorder) ReviewUser(ctx, adminID, userID, req any) *gomock.Call {
+func (mr *MockFraudDetectionServiceMockRecorder) ReviewUser(ctx, adminID, userID, cmd any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReviewUser", reflect.TypeOf((*MockFraudDetectionService)(nil).ReviewUser), ctx, adminID, userID, req)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReviewUser", reflect.TypeOf((*MockFraudDetectionService)(nil).ReviewUser), ctx, adminID, userID, cmd)
 }
 
 // TriggerBatchAnalysis mocks base method.
@@ -159,9 +159,9 @@ func (m *MockFraudDetectionService) TriggerBatchAnalysis(ctx context.Context, cm
 }
 
 // TriggerBatchAnalysis indicates an expected call of TriggerBatchAnalysis.
-func (mr *MockFraudDetectionServiceMockRecorder) TriggerBatchAnalysis(ctx, req any) *gomock.Call {
+func (mr *MockFraudDetectionServiceMockRecorder) TriggerBatchAnalysis(ctx, cmd any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TriggerBatchAnalysis", reflect.TypeOf((*MockFraudDetectionService)(nil).TriggerBatchAnalysis), ctx, req)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TriggerBatchAnalysis", reflect.TypeOf((*MockFraudDetectionService)(nil).TriggerBatchAnalysis), ctx, cmd)
 }
 
 // MockFraudDetectionRepository is a mock of FraudDetectionRepository interface.

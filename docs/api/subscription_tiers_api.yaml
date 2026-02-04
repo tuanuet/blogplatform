@@ -1,0 +1,554 @@
+openapi: 3.0.3
+info:
+  title: Multi-Tier Subscription Plans API
+  description: API endpoints for managing subscription plans, tag-tier mappings, and content access control
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: API v1
+
+tags:
+  - name: Subscription Plans
+    description: Manage subscription plans and pricing
+  - name: Tag Tiers
+    description: Manage tag-tier mappings for content gating
+  - name: Access Control
+    description: Check blog access based on subscription tiers
+
+paths:
+  /authors/me/plans:
+    post:
+      tags:
+        - Subscription Plans
+      summary: Create or update subscription plans (upsert)
+      description: |
+        Author-only endpoint to create or update subscription plans for BRONZE, SILVER, GOLD tiers.
+        - Uses upsert logic: creates if not exists, updates if exists
+        - Validates price hierarchy (warns if BRONZE >= SILVER >= GOLD)
+        - Only the authenticated author can manage their own plans
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertPlansRequest'
+            example:
+              plans:
+                - tier: "BRONZE"
+                  price: 50000
+                  name: "Gói Học Viên"
+                  description: "Access to beginner tutorials"
+                - tier: "SILVER"
+                  price: 120000
+                  name: "Gói Nâng Cao"
+                  description: "Access to intermediate + advanced content"
+                - tier: "GOLD"
+                  price: 200000
+                  name: "Gói VIP"
+                  description: "Full access to all premium content"
+      responses:
+        '200':
+          description: Plans successfully created/updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertPlansResponse'
+              example:
+                plans:
+                  - id: "550e8400-e29b-41d4-a716-446655440000"
+                    tier: "BRONZE"
+                    price: 50000
+                    durationDays: 30
+                    name: "Gói Học Viên"
+                    isActive: true
+                    createdAt: "2024-02-03T10:00:00Z"
+                    updatedAt: "2024-02-03T10:00:00Z"
+                warnings:
+                  - "Price hierarchy warning: SILVER (120000) should be > BRONZE (50000)"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /authors/{authorId}/plans:
+    get:
+      tags:
+        - Subscription Plans
+      summary: Get author's pricing table (public)
+      description: |
+        Public endpoint to view an author's subscription plans with associated tags.
+        - Shows all tiers including FREE
+        - Includes tag counts and sample tag names per tier
+        - Used to display pricing options to readers
+      parameters:
+        - name: authorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Author's user ID
+      responses:
+        '200':
+          description: Author's pricing table retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAuthorPlansResponse'
+              example:
+                authorId: "550e8400-e29b-41d4-a716-446655440000"
+                plans:
+                  - tier: "FREE"
+                    price: 0
+                    durationDays: 0
+                    tagCount: 5
+                    tags: ["Public Tutorials", "News"]
+                  - tier: "BRONZE"
+                    price: 50000
+                    durationDays: 30
+                    name: "Gói Học Viên"
+                    tagCount: 3
+                    tags: ["Go Basics", "React Intro"]
+                  - tier: "SILVER"
+                    price: 120000
+                    durationDays: 30
+                    name: "Gói Nâng Cao"
+                    tagCount: 7
+                    tags: ["Advanced Go", "System Design"]
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /authors/me/tags/{tagId}/tier:
+    post:
+      tags:
+        - Tag Tiers
+      summary: Assign tag to a tier
+      description: |
+        Author-only endpoint to assign a tag to a subscription tier.
+        - Only tags owned by the author can be assigned
+        - Upsert logic: updates if mapping already exists
+        - Returns count of affected blogs
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tag ID to assign to tier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignTagTierRequest'
+            example:
+              requiredTier: "BRONZE"
+      responses:
+        '200':
+          description: Tag successfully assigned to tier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignTagTierResponse'
+              example:
+                tagId: "650e8400-e29b-41d4-a716-446655440000"
+                tagName: "Go Advanced"
+                requiredTier: "BRONZE"
+                affectedBlogsCount: 12
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Tag Tiers
+      summary: Unassign tag from tier
+      description: |
+        Author-only endpoint to remove tier requirement from a tag.
+        - Content with this tag becomes FREE tier
+        - Returns count of affected blogs
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tag ID to unassign from tier
+      responses:
+        '200':
+          description: Tag successfully unassigned from tier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnassignTagTierResponse'
+              example:
+                message: "Tag unassigned, content is now FREE"
+                affectedBlogsCount: 12
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /authors/me/tag-tiers:
+    get:
+      tags:
+        - Tag Tiers
+      summary: Get all tag-tier mappings for authenticated author
+      description: |
+        Author-only endpoint to view all tag-tier assignments.
+        - Shows only mappings for the authenticated author
+        - Includes blog count per tag
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Tag-tier mappings retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTagTiersResponse'
+              example:
+                mappings:
+                  - tagId: "650e8400-e29b-41d4-a716-446655440000"
+                    tagName: "Go Basics"
+                    requiredTier: "BRONZE"
+                    blogCount: 8
+                  - tagId: "750e8400-e29b-41d4-a716-446655440000"
+                    tagName: "Advanced Architecture"
+                    requiredTier: "GOLD"
+                    blogCount: 3
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /blogs/{blogId}/access:
+    get:
+      tags:
+        - Access Control
+      summary: Check if user can access a blog (public/authenticated)
+      description: |
+        Checks if the current user (or anonymous) can access the specified blog.
+        - Public endpoint (works for both authenticated and anonymous users)
+        - Returns accessibility status and reason
+        - Provides upgrade options if access is blocked
+        - For anonymous users, userTier = FREE
+      parameters:
+        - name: blogId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Blog ID to check access for
+      security:
+        - BearerAuth: []
+        - {}
+      responses:
+        '200':
+          description: Access check completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckBlogAccessResponse'
+              examples:
+                accessible:
+                  summary: User has access
+                  value:
+                    accessible: true
+                    userTier: "SILVER"
+                    requiredTier: "BRONZE"
+                    reason: "Your SILVER subscription includes BRONZE content"
+                blocked:
+                  summary: User needs upgrade
+                  value:
+                    accessible: false
+                    userTier: "BRONZE"
+                    requiredTier: "SILVER"
+                    reason: "Upgrade to SILVER to access this content"
+                    upgradeOptions:
+                      - tier: "SILVER"
+                        price: 120000
+                        durationDays: 30
+                        planId: "850e8400-e29b-41d4-a716-446655440000"
+                      - tier: "GOLD"
+                        price: 200000
+                        durationDays: 30
+                        planId: "950e8400-e29b-41d4-a716-446655440000"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CreatePlanRequest:
+      type: object
+      required:
+        - tier
+        - price
+      properties:
+        tier:
+          type: string
+          enum: [BRONZE, SILVER, GOLD]
+          description: Subscription tier
+        price:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Price in VND
+        name:
+          type: string
+          maxLength: 100
+          description: Optional custom name for the tier
+        description:
+          type: string
+          description: Optional description of what this tier includes
+
+    UpsertPlansRequest:
+      type: object
+      required:
+        - plans
+      properties:
+        plans:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/CreatePlanRequest'
+
+    PlanResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tier:
+          type: string
+          enum: [FREE, BRONZE, SILVER, GOLD]
+        price:
+          type: number
+          format: decimal
+        durationDays:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpsertPlansResponse:
+      type: object
+      properties:
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanResponse'
+        warnings:
+          type: array
+          items:
+            type: string
+
+    PlanWithTagsResponse:
+      type: object
+      properties:
+        tier:
+          type: string
+          enum: [FREE, BRONZE, SILVER, GOLD]
+        price:
+          type: number
+          format: decimal
+        durationDays:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        tagCount:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+
+    GetAuthorPlansResponse:
+      type: object
+      properties:
+        authorId:
+          type: string
+          format: uuid
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanWithTagsResponse'
+
+    AssignTagTierRequest:
+      type: object
+      required:
+        - requiredTier
+      properties:
+        requiredTier:
+          type: string
+          enum: [FREE, BRONZE, SILVER, GOLD]
+
+    AssignTagTierResponse:
+      type: object
+      properties:
+        tagId:
+          type: string
+          format: uuid
+        tagName:
+          type: string
+        requiredTier:
+          type: string
+          enum: [FREE, BRONZE, SILVER, GOLD]
+        affectedBlogsCount:
+          type: integer
+          format: int64
+
+    UnassignTagTierResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        affectedBlogsCount:
+          type: integer
+          format: int64
+
+    TagTierMappingResponse:
+      type: object
+      properties:
+        tagId:
+          type: string
+          format: uuid
+        tagName:
+          type: string
+        requiredTier:
+          type: string
+          enum: [FREE, BRONZE, SILVER, GOLD]
+        blogCount:
+          type: integer
+          format: int64
+
+    GetTagTiersResponse:
+      type: object
+      properties:
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagTierMappingResponse'
+
+    UpgradeOption:
+      type: object
+      properties:
+        tier:
+          type: string
+          enum: [BRONZE, SILVER, GOLD]
+        price:
+          type: number
+          format: decimal
+        durationDays:
+          type: integer
+        planId:
+          type: string
+          format: uuid
+
+    CheckBlogAccessResponse:
+      type: object
+      properties:
+        accessible:
+          type: boolean
+        userTier:
+          type: string
+          enum: [FREE, BRONZE, SILVER, GOLD]
+        requiredTier:
+          type: string
+          enum: [FREE, BRONZE, SILVER, GOLD]
+        reason:
+          type: string
+        upgradeOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpgradeOption'
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request - validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "VALIDATION_ERROR"
+            message: "Invalid tier value"
+
+    Unauthorized:
+      description: Unauthorized - authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "UNAUTHORIZED"
+            message: "Authentication required"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "NOT_FOUND"
+            message: "Resource not found"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "INTERNAL_ERROR"
+            message: "An unexpected error occurred"

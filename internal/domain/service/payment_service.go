@@ -1,5 +1,7 @@
 package service
 
+//go:generate mockgen -source=$GOFILE -destination=mocks/mock_$GOFILE -package=mocks
+
 import (
 	"context"
 	"fmt"
@@ -54,6 +56,8 @@ type SePayWebhookPayload struct {
 	Description     string          `json:"description"`
 }
 
+// go generate mockgen -source=payment_service.go -destination=../mocks/payment_service.go -package=mocks
+
 // PaymentService defines the interface for payment operations
 type PaymentService interface {
 	InitPayment(ctx context.Context, req CreatePaymentRequest) (*PaymentResponse, error)
@@ -67,6 +71,7 @@ type paymentService struct {
 	txRepo       repository.TransactionRepository
 	subRepo      repository.SubscriptionRepository
 	purchaseRepo repository.UserSeriesPurchaseRepository
+	planRepo     repository.SubscriptionPlanRepository
 	sepayAdapter adapter.SePayAdapter
 }
 
@@ -76,6 +81,7 @@ func NewPaymentService(
 	txRepo repository.TransactionRepository,
 	subRepo repository.SubscriptionRepository,
 	purchaseRepo repository.UserSeriesPurchaseRepository,
+	planRepo repository.SubscriptionPlanRepository,
 	sepayAdapter adapter.SePayAdapter,
 ) PaymentService {
 	return &paymentService{
@@ -83,6 +89,7 @@ func NewPaymentService(
 		txRepo:       txRepo,
 		subRepo:      subRepo,
 		purchaseRepo: purchaseRepo,
+		planRepo:     planRepo,
 		sepayAdapter: sepayAdapter,
 	}
 }
@@ -178,6 +185,7 @@ func (s *paymentService) HandleSePayWebhook(ctx context.Context, payload SePayWe
 		txRepo := s.txRepo.WithTx(dbTx)
 		subRepo := s.subRepo.WithTx(dbTx)
 		purchaseRepo := s.purchaseRepo.WithTx(dbTx)
+		planRepo := s.planRepo.WithTx(dbTx)
 
 		// Update transaction with SePayID for idempotency
 		tx.SePayID = sePayID
@@ -186,40 +194,11 @@ func (s *paymentService) HandleSePayWebhook(ctx context.Context, payload SePayWe
 			return fmt.Errorf("failed to update transaction: %w", err)
 		}
 
-		// Grant benefits
-		switch tx.Type {
-		case entity.TransactionTypeSubscription:
-			if tx.TargetID != nil && tx.PlanID != nil {
-				// Determine expiry based on PlanID
-				days := 30 // Default to 30 days
-				if *tx.PlanID == "1_YEAR" {
-					days = 365
-				} else if *tx.PlanID == "1_MONTH" {
-					days = 30
-				}
-				expiry := time.Now().AddDate(0, 0, days)
-				if err := subRepo.UpdateExpiry(ctx, tx.UserID, *tx.TargetID, expiry, *tx.PlanID); err != nil {
-					return fmt.Errorf("failed to update subscription: %w", err)
-				}
-			}
-		case entity.TransactionTypeSeries:
-			if tx.TargetID != nil {
-				purchase := &entity.UserSeriesPurchase{
-					UserID:   tx.UserID,
-					SeriesID: *tx.TargetID,
-					Amount:   tx.Amount,
-				}
-				if err := purchaseRepo.Create(ctx, purchase); err != nil {
-					return fmt.Errorf("failed to record series purchase: %w", err)
-				}
-			}
-		case entity.TransactionTypeDonation:
-			// Just log
-			logger.Info("Donation received", map[string]interface{}{
-				"amount": tx.Amount,
-				"userId": tx.UserID,
-			})
+		// Grant benefits based on transaction type
+		if err := s.grantBenefits(ctx, tx, subRepo, purchaseRepo, planRepo); err != nil {
+			return err
 		}
+
 		resultTx = tx
 		return nil
 	})
@@ -229,6 +208,86 @@ func (s *paymentService) HandleSePayWebhook(ctx context.Context, payload SePayWe
 	}
 
 	return resultTx, nil
+}
+
+// grantBenefits handles granting benefits for different transaction types
+func (s *paymentService) grantBenefits(
+	ctx context.Context,
+	tx *entity.Transaction,
+	subRepo repository.SubscriptionRepository,
+	purchaseRepo repository.UserSeriesPurchaseRepository,
+	planRepo repository.SubscriptionPlanRepository,
+) error {
+	switch tx.Type {
+	case entity.TransactionTypeSubscription:
+		return s.processSubscriptionPayment(ctx, tx, subRepo, planRepo)
+	case entity.TransactionTypeSeries:
+		return s.processSeriesPurchase(ctx, tx, purchaseRepo)
+	case entity.TransactionTypeDonation:
+		s.logDonation(tx)
+		return nil
+	}
+	return nil
+}
+
+// processSubscriptionPayment handles subscription payment benefit granting
+func (s *paymentService) processSubscriptionPayment(
+	ctx context.Context,
+	tx *entity.Transaction,
+	subRepo repository.SubscriptionRepository,
+	planRepo repository.SubscriptionPlanRepository,
+) error {
+	if tx.TargetID == nil || tx.PlanID == nil {
+		return nil // Nothing to process without target or plan
+	}
+
+	planUUID, err := uuid.Parse(*tx.PlanID)
+	if err != nil {
+		return fmt.Errorf("invalid plan ID: %w", err)
+	}
+
+	plan, err := planRepo.FindByID(ctx, planUUID)
+	if err != nil {
+		return fmt.Errorf("plan not found: %w", err)
+	}
+
+	// Calculate expiry based on plan duration
+	expiry := time.Now().AddDate(0, 0, plan.DurationDays)
+	if err := subRepo.UpdateExpiry(ctx, tx.UserID, *tx.TargetID, expiry, plan.Tier.String()); err != nil {
+		return fmt.Errorf("failed to update subscription: %w", err)
+	}
+
+	return nil
+}
+
+// processSeriesPurchase handles series purchase benefit granting
+func (s *paymentService) processSeriesPurchase(
+	ctx context.Context,
+	tx *entity.Transaction,
+	purchaseRepo repository.UserSeriesPurchaseRepository,
+) error {
+	if tx.TargetID == nil {
+		return nil // Nothing to process without target
+	}
+
+	purchase := &entity.UserSeriesPurchase{
+		UserID:   tx.UserID,
+		SeriesID: *tx.TargetID,
+		Amount:   tx.Amount,
+	}
+	if err := purchaseRepo.Create(ctx, purchase); err != nil {
+		return fmt.Errorf("failed to record series purchase: %w", err)
+	}
+
+	return nil
+}
+
+// logDonation logs donation transactions
+func (s *paymentService) logDonation(tx *entity.Transaction) {
+	logger.Info("Donation received", map[string]interface{}{
+		"amount": tx.Amount,
+		"userId": tx.UserID,
+	})
 }
 
 // GetTransactionStatus retrieves the status of a transaction

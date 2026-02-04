@@ -14,6 +14,29 @@ definitions:
     required:
     - roleId
     type: object
+  dto.AssignTagTierRequest:
+    properties:
+      requiredTier:
+        enum:
+        - FREE
+        - BRONZE
+        - SILVER
+        - GOLD
+        type: string
+    required:
+    - requiredTier
+    type: object
+  dto.AssignTagTierResponse:
+    properties:
+      affectedBlogsCount:
+        type: integer
+      requiredTier:
+        type: string
+      tagId:
+        type: string
+      tagName:
+        type: string
+    type: object
   dto.AvatarUploadResponse:
     properties:
       avatarUrl:
@@ -114,6 +137,21 @@ definitions:
       slug:
         type: string
       updatedAt:
+        type: string
+    type: object
+  dto.CheckBlogAccessResponse:
+    properties:
+      accessible:
+        type: boolean
+      reason:
+        type: string
+      requiredTier:
+        type: string
+      upgradeOptions:
+        items:
+          $ref: '#/definitions/dto.UpgradeOption'
+        type: array
+      userTier:
         type: string
     type: object
   dto.CommentResponse:
@@ -237,6 +275,26 @@ definitions:
       referenceCode:
         type: string
     type: object
+  dto.CreatePlanRequest:
+    properties:
+      description:
+        type: string
+      name:
+        maxLength: 100
+        type: string
+      price:
+        minimum: 0
+        type: number
+      tier:
+        enum:
+        - BRONZE
+        - SILVER
+        - GOLD
+        type: string
+    required:
+    - price
+    - tier
+    type: object
   dto.CreateRoleRequest:
     properties:
       description:
@@ -277,6 +335,22 @@ definitions:
     - name
     - slug
     type: object
+  dto.GetAuthorPlansResponse:
+    properties:
+      authorId:
+        type: string
+      plans:
+        items:
+          $ref: '#/definitions/dto.PlanWithTagsResponse'
+        type: array
+    type: object
+  dto.GetTagTiersResponse:
+    properties:
+      mappings:
+        items:
+          $ref: '#/definitions/dto.TagTierMappingResponse'
+        type: array
+    type: object
   dto.HealthResponse:
     properties:
       services:
@@ -301,6 +375,46 @@ definitions:
       permissions:
         type: integer
       resource:
+        type: string
+    type: object
+  dto.PlanResponse:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      durationDays:
+        type: integer
+      id:
+        type: string
+      isActive:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      tier:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  dto.PlanWithTagsResponse:
+    properties:
+      description:
+        type: string
+      durationDays:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      tagCount:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+      tier:
         type: string
     type: object
   dto.ProcessWebhookRequest:
@@ -535,6 +649,24 @@ definitions:
       slug:
         type: string
     type: object
+  dto.TagTierMappingResponse:
+    properties:
+      blogCount:
+        type: integer
+      requiredTier:
+        type: string
+      tagId:
+        type: string
+      tagName:
+        type: string
+    type: object
+  dto.UnassignTagTierResponse:
+    properties:
+      affectedBlogsCount:
+        type: integer
+      message:
+        type: string
+    type: object
   dto.UpdateBlogRequest:
     properties:
       categoryId:
@@ -651,6 +783,39 @@ definitions:
         type: array
     required:
     - tagIds
+    type: object
+  dto.UpgradeOption:
+    properties:
+      durationDays:
+        type: integer
+      planId:
+        type: string
+      price:
+        type: number
+      tier:
+        type: string
+    type: object
+  dto.UpsertPlansRequest:
+    properties:
+      plans:
+        items:
+          $ref: '#/definitions/dto.CreatePlanRequest'
+        maxItems: 3
+        minItems: 1
+        type: array
+    required:
+    - plans
+    type: object
+  dto.UpsertPlansResponse:
+    properties:
+      plans:
+        items:
+          $ref: '#/definitions/dto.PlanResponse'
+        type: array
+      warnings:
+        items:
+          type: string
+        type: array
     type: object
   dto.UserBriefResponse:
     properties:
@@ -812,6 +977,35 @@ info:
   title: Go Boilerplate API
   version: "1.0"
 paths:
+  /api/v1/authors/{authorId}/plans:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all pricing plans for a specific author
+      parameters:
+      - description: Author ID
+        in: path
+        name: authorId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GetAuthorPlansResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get author's subscription plans
+      tags:
+      - Plans
   /api/v1/authors/{authorId}/subscribe:
     post:
       consumes:
@@ -944,6 +1138,143 @@ paths:
       summary: Unsubscribe from an author
       tags:
       - Subscriptions
+  /api/v1/authors/me/plans:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Plans to upsert
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertPlansRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UpsertPlansResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Create or update subscription plans
+      tags:
+      - Plans
+  /api/v1/authors/me/tag-tiers:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all tag-tier mappings for the current author
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GetTagTiersResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Get author's tag-tier mappings
+      tags:
+      - Plans
+  /api/v1/authors/me/tags/{tagId}/tier:
+    delete:
+      consumes:
+      - application/json
+      description: Remove tier requirement, making content with this tag accessible
+        to all subscribers
+      parameters:
+      - description: Tag ID
+        in: path
+        name: tagId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UnassignTagTierResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Remove tier requirement from a tag
+      tags:
+      - Plans
+    post:
+      consumes:
+      - application/json
+      description: Set which subscription tier is required to access content with
+        this tag
+      parameters:
+      - description: Tag ID
+        in: path
+        name: tagId
+        required: true
+        type: string
+      - description: Required tier
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AssignTagTierRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AssignTagTierResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Assign a tag to a subscription tier
+      tags:
+      - Plans
   /api/v1/blogs:
     get:
       consumes:
@@ -1021,6 +1352,35 @@ paths:
       summary: Create a new blog
       tags:
       - Blogs
+  /api/v1/blogs/{blogId}/access:
+    get:
+      consumes:
+      - application/json
+      description: Check if a user can access a specific blog post
+      parameters:
+      - description: Blog ID
+        in: path
+        name: blogId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CheckBlogAccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Check blog access
+      tags:
+      - Plans
   /api/v1/blogs/{blogId}/comments:
     get:
       consumes:
@@ -2936,3 +3296,6 @@ securityDefinitions:
     name: Authorization
     type: apiKey
 swagger: "2.0"
+tags:
+- description: Multi-tier subscription plan management endpoints
+  name: Plans

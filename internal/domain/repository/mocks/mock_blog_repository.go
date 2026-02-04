@@ -100,6 +100,21 @@ func (mr *MockBlogRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBlogRepository)(nil).Delete), ctx, id)
 }
 
+// ExistsByAuthorAndTag mocks base method.
+func (m *MockBlogRepository) ExistsByAuthorAndTag(ctx context.Context, authorID, tagID uuid.UUID) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExistsByAuthorAndTag", ctx, authorID, tagID)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExistsByAuthorAndTag indicates an expected call of ExistsByAuthorAndTag.
+func (mr *MockBlogRepositoryMockRecorder) ExistsByAuthorAndTag(ctx, authorID, tagID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByAuthorAndTag", reflect.TypeOf((*MockBlogRepository)(nil).ExistsByAuthorAndTag), ctx, authorID, tagID)
+}
+
 // FindAll mocks base method.
 func (m *MockBlogRepository) FindAll(ctx context.Context, filter repository.BlogFilter, pagination repository.Pagination) (*repository.PaginatedResult[entity.Blog], error) {
 	m.ctrl.T.Helper()

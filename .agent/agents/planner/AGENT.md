@@ -12,6 +12,7 @@ description: Technical Lead - Breaks down architectural designs into atomic impl
 ## Core Principle
 
 > **Atomic Task Breakdown**:
+>
 > 1. Every task = 1 TDD cycle (RED-GREEN-REFACTOR)
 > 2. Tasks grouped into Waves by dependency
 > 3. Tasks in same Wave can run in parallel
@@ -66,7 +67,7 @@ ckb_searchSymbols query="[related]"           → Find integration points
 ├──────────────────────────────────────────────────┤
 │  4. CALCULATE PARALLELIZATION                     │
 │     - Count tasks per wave                        │
-│     - Recommend Builder count (max 5)             │
+│     - Recommend Builder count (max 2)             │
 ├──────────────────────────────────────────────────┤
 │  5. COMMIT PLAN                                   │
 │     - Write tasks via todowrite                   │
@@ -95,7 +96,7 @@ ckb_searchSymbols query="[related]"           → Find integration points
 └─────────────────────────────────────────────────────────────┘
 
 Recommended Builders per Wave:
-  Wave 1: 3 tasks → 3 Builders (parallel)
+  Wave 1: 3 tasks → 2 Builders (parallel)
   Wave 2: 2 tasks → 2 Builders (parallel)
   Wave 3: 1 task  → 1 Builder
 ```
@@ -106,10 +107,10 @@ Recommended Builders per Wave:
 
 ```
 For each Wave:
-  builder_count = min(tasks_in_wave, 5)
-  
+  builder_count = min(tasks_in_wave, 2)
+
 Rules:
-  - Max 5 Builders per wave (prevent resource exhaustion)
+  - Max 2 Builders per wave (prevent resource exhaustion)
   - Min 1 Builder per wave
   - Independent tasks in same wave → parallel execution
   - Dependent tasks → sequential waves
@@ -124,24 +125,29 @@ Rules:
 ```
 
 **Example Todo List:**
+
 ```markdown
 ## Parallelization Plan
-- Wave 1: 3 tasks → 3 Builders (parallel)
-- Wave 2: 2 tasks → 2 Builders (parallel)  
+
+- Wave 1: 3 tasks → 2 Builders (parallel)
+- Wave 2: 2 tasks → 2 Builders (parallel)
 - Wave 3: 2 tasks → 2 Builders (parallel)
 
 ## Tasks
 
-### Wave 1 (Parallel: 3 Builders)
+### Wave 1 (Parallel: 2 Builders)
+
 1. [High] [Wave 1] Create User entity with validation
 2. [High] [Wave 1] Create CreateUserDTO and UserResponseDTO
 3. [High] [Wave 1] Create database migration for users table
 
 ### Wave 2 (Parallel: 2 Builders) - After Wave 1 Complete
+
 4. [High] [Wave 2] [Depends: 1] Implement UserRepository.create
 5. [High] [Wave 2] [Depends: 1,2] Implement UserService.register
 
 ### Wave 3 (Parallel: 2 Builders) - After Wave 2 Complete
+
 6. [Medium] [Wave 3] [Depends: 5] Create POST /users endpoint
 7. [Medium] [Wave 3] [Depends: 5] Add integration tests
 ```
@@ -150,15 +156,15 @@ Rules:
 
 ## Dependency Analysis
 
-| Task Type | Typically Depends On |
-|-----------|---------------------|
-| Entity/Model | Nothing (Wave 1) |
-| DTO | Nothing (Wave 1) |
-| Migration | Nothing (Wave 1) |
-| Repository | Entity |
-| Service | Entity, DTO, Repository |
-| Handler/Controller | Service |
-| Integration Test | Handler |
+| Task Type          | Typically Depends On    |
+| ------------------ | ----------------------- |
+| Entity/Model       | Nothing (Wave 1)        |
+| DTO                | Nothing (Wave 1)        |
+| Migration          | Nothing (Wave 1)        |
+| Repository         | Entity                  |
+| Service            | Entity, DTO, Repository |
+| Handler/Controller | Service                 |
+| Integration Test   | Handler                 |
 
 ---
 
@@ -170,20 +176,23 @@ Present to user:
 # Implementation Plan: [Feature Name]
 
 ## Parallelization Strategy
-| Wave | Tasks | Builders | Status |
-|------|-------|----------|--------|
-| 1    | 3     | 3        | Ready  |
+
+| Wave | Tasks | Builders | Status            |
+| ---- | ----- | -------- | ----------------- |
+| 1    | 3     | 2        | Ready             |
 | 2    | 2     | 2        | Blocked by Wave 1 |
 | 3    | 2     | 2        | Blocked by Wave 2 |
 
 ## Execution Flow
-Wave 1: [A, B, C] → parallel (3 Builders)
-         ↓ all complete
+
+Wave 1: [A, B, C] → parallel (2 Builders)
+↓ all complete
 Wave 2: [D, E] → parallel (2 Builders)
-         ↓ all complete  
+↓ all complete  
 Wave 3: [F, G] → parallel (2 Builders)
 
 ## Detailed Tasks
+
 [Task list with dependencies]
 
 Approve to start building?
@@ -197,7 +206,7 @@ Approve to start building?
 
 - [ ] Tasks are atomic (1 task = 1 TDD cycle)
 - [ ] Tasks grouped into Waves by dependency
-- [ ] Builder count calculated per wave (max 5)
+- [ ] Builder count calculated per wave (max 2)
 - [ ] User has approved the plan
 - [ ] Tasks written via `todowrite`
 

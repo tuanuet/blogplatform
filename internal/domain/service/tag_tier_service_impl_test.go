@@ -3,6 +3,7 @@ package service_test
 import (
 	"context"
 	"errors"
+	"testing"
 
 	"github.com/aiagent/internal/domain/entity"
 	"github.com/aiagent/internal/domain/repository/mocks"
@@ -10,7 +11,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
-	"testing"
 )
 
 func TestTagTierService_AssignTagToTier(t *testing.T) {
@@ -82,6 +82,27 @@ func TestTagTierService_AssignTagToTier(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "failed to assign tag")
 	})
+
+	t.Run("count_blogs_failure", func(t *testing.T) {
+		mockTagRepo.EXPECT().FindByID(ctx, tagID).Return(&entity.Tag{ID: tagID, Name: "premium"}, nil)
+		mockBlogRepo.EXPECT().ExistsByAuthorAndTag(ctx, authorID, tagID).Return(true, nil)
+		mockTagTierRepo.EXPECT().CountBlogsByTagAndAuthor(ctx, authorID, tagID).Return(int64(0), errors.New("database error"))
+
+		_, _, err := svc.AssignTagToTier(ctx, authorID, tagID, entity.TierSilver)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to count blogs")
+	})
+
+	t.Run("exists_by_author_and_tag_failure", func(t *testing.T) {
+		mockTagRepo.EXPECT().FindByID(ctx, tagID).Return(&entity.Tag{ID: tagID, Name: "premium"}, nil)
+		mockBlogRepo.EXPECT().ExistsByAuthorAndTag(ctx, authorID, tagID).Return(false, errors.New("database error"))
+
+		_, _, err := svc.AssignTagToTier(ctx, authorID, tagID, entity.TierSilver)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to check tag usage")
+	})
 }
 
 func TestTagTierService_UnassignTagFromTier(t *testing.T) {
@@ -116,6 +137,15 @@ func TestTagTierService_UnassignTagFromTier(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "failed to unassign tag")
+	})
+
+	t.Run("count_blogs_failure", func(t *testing.T) {
+		mockTagTierRepo.EXPECT().CountBlogsByTagAndAuthor(ctx, authorID, tagID).Return(int64(0), errors.New("database error"))
+
+		_, err := svc.UnassignTagFromTier(ctx, authorID, tagID)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to count blogs")
 	})
 }
 
@@ -157,10 +187,11 @@ func TestTagTierService_GetRequiredTierForBlog(t *testing.T) {
 		mockBlogRepo.EXPECT().FindByID(ctx, blogID).Return(blog, nil)
 		mockTagTierRepo.EXPECT().FindByTagIDs(ctx, authorID, []uuid.UUID{tag1ID, tag2ID, tag3ID}).Return(mappings, nil)
 
-		tier, err := svc.GetRequiredTierForBlog(ctx, blogID)
+		tier, resultAuthorID, err := svc.GetRequiredTierForBlog(ctx, blogID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, entity.TierGold, tier)
+		assert.Equal(t, authorID, resultAuthorID)
 	})
 
 	t.Run("blog_with_no_tags_returns_free", func(t *testing.T) {
@@ -173,10 +204,11 @@ func TestTagTierService_GetRequiredTierForBlog(t *testing.T) {
 
 		mockBlogRepo.EXPECT().FindByID(ctx, blogID).Return(blog, nil)
 
-		tier, err := svc.GetRequiredTierForBlog(ctx, blogID)
+		tier, resultAuthorID, err := svc.GetRequiredTierForBlog(ctx, blogID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, entity.TierFree, tier)
+		assert.Equal(t, authorID, resultAuthorID)
 	})
 
 	t.Run("blog_with_unassigned_tags_returns_free", func(t *testing.T) {
@@ -193,10 +225,11 @@ func TestTagTierService_GetRequiredTierForBlog(t *testing.T) {
 		mockBlogRepo.EXPECT().FindByID(ctx, blogID).Return(blog, nil)
 		mockTagTierRepo.EXPECT().FindByTagIDs(ctx, authorID, []uuid.UUID{tag1ID, tag2ID}).Return([]entity.TagTierMapping{}, nil)
 
-		tier, err := svc.GetRequiredTierForBlog(ctx, blogID)
+		tier, resultAuthorID, err := svc.GetRequiredTierForBlog(ctx, blogID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, entity.TierFree, tier)
+		assert.Equal(t, authorID, resultAuthorID)
 	})
 
 	t.Run("all_tiers_same_level", func(t *testing.T) {
@@ -218,16 +251,17 @@ func TestTagTierService_GetRequiredTierForBlog(t *testing.T) {
 		mockBlogRepo.EXPECT().FindByID(ctx, blogID).Return(blog, nil)
 		mockTagTierRepo.EXPECT().FindByTagIDs(ctx, authorID, []uuid.UUID{tag1ID, tag2ID}).Return(mappings, nil)
 
-		tier, err := svc.GetRequiredTierForBlog(ctx, blogID)
+		tier, resultAuthorID, err := svc.GetRequiredTierForBlog(ctx, blogID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, entity.TierSilver, tier)
+		assert.Equal(t, authorID, resultAuthorID)
 	})
 
 	t.Run("blog_not_found", func(t *testing.T) {
 		mockBlogRepo.EXPECT().FindByID(ctx, blogID).Return(nil, errors.New("blog not found"))
 
-		_, err := svc.GetRequiredTierForBlog(ctx, blogID)
+		_, _, err := svc.GetRequiredTierForBlog(ctx, blogID)
 
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "blog not found")
@@ -251,16 +285,16 @@ func TestTagTierService_GetAuthorTagTiers(t *testing.T) {
 	tag3ID := uuid.New()
 
 	t.Run("returns_mappings_with_tag_names_and_counts", func(t *testing.T) {
-		mappings := []entity.TagTierMapping{
-			{ID: uuid.New(), AuthorID: authorID, TagID: tag1ID, RequiredTier: entity.TierBronze},
-			{ID: uuid.New(), AuthorID: authorID, TagID: tag2ID, RequiredTier: entity.TierSilver},
-			{ID: uuid.New(), AuthorID: authorID, TagID: tag3ID, RequiredTier: entity.TierGold},
-		}
-
 		tags := []entity.Tag{
 			{ID: tag1ID, Name: "bronze-tag"},
 			{ID: tag2ID, Name: "silver-tag"},
 			{ID: tag3ID, Name: "gold-tag"},
+		}
+
+		mappings := []entity.TagTierMapping{
+			{ID: uuid.New(), AuthorID: authorID, TagID: tag1ID, RequiredTier: entity.TierBronze},
+			{ID: uuid.New(), AuthorID: authorID, TagID: tag2ID, RequiredTier: entity.TierSilver},
+			{ID: uuid.New(), AuthorID: authorID, TagID: tag3ID, RequiredTier: entity.TierGold},
 		}
 
 		mockTagTierRepo.EXPECT().FindByAuthor(ctx, authorID).Return(mappings, nil)

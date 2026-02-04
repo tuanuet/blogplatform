@@ -97,22 +97,23 @@ func (s *tagTierService) UnassignTagFromTier(
 }
 
 // GetRequiredTierForBlog determines the highest required tier for a blog based on its tags
+// Returns: required tier, blog author ID, error
 func (s *tagTierService) GetRequiredTierForBlog(
 	ctx context.Context,
 	blogID uuid.UUID,
-) (entity.SubscriptionTier, error) {
+) (entity.SubscriptionTier, uuid.UUID, error) {
 	// Find blog
 	blog, err := s.blogRepo.FindByID(ctx, blogID)
 	if err != nil {
-		return entity.TierFree, fmt.Errorf("blog not found: %w", err)
+		return entity.TierFree, uuid.Nil, fmt.Errorf("blog not found: %w", err)
 	}
 	if blog == nil {
-		return entity.TierFree, fmt.Errorf("blog not found")
+		return entity.TierFree, uuid.Nil, fmt.Errorf("blog not found")
 	}
 
-	// If no tags, return FREE
+	// If no tags, return FREE with blog's author ID and nil error
 	if len(blog.Tags) == 0 {
-		return entity.TierFree, nil
+		return entity.TierFree, blog.AuthorID, nil
 	}
 
 	// Extract tag IDs
@@ -124,7 +125,7 @@ func (s *tagTierService) GetRequiredTierForBlog(
 	// Find tag-tier mappings
 	mappings, err := s.tagTierRepo.FindByTagIDs(ctx, blog.AuthorID, tagIDs)
 	if err != nil {
-		return entity.TierFree, fmt.Errorf("failed to find tag mappings: %w", err)
+		return entity.TierFree, blog.AuthorID, fmt.Errorf("failed to find tag mappings: %w", err)
 	}
 
 	// Find highest tier
@@ -135,7 +136,7 @@ func (s *tagTierService) GetRequiredTierForBlog(
 		}
 	}
 
-	return highestTier, nil
+	return highestTier, blog.AuthorID, nil
 }
 
 // GetAuthorTagTiers retrieves all tag-tier mappings for an author

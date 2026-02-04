@@ -13,17 +13,18 @@ CKB (Code Knowledge Backend) transforms your codebase into a queryable knowledge
 
 ## What CKB Can Do
 
-| Question | Without CKB | With CKB |
-|----------|-------------|----------|
-| "What breaks if I change this?" | Grep and hope | Precise blast radius with risk score |
-| "What tests should I run?" | Run everything (30 min) | Run affected tests only (2 min) |
-| "How does this system work?" | Read code for hours | Query architecture instantly |
-| "Is this code still used?" | Delete and see what breaks | Confidence-scored dead code detection |
-| "Who owns this code?" | Search CODEOWNERS manually | Ownership with drift detection |
+| Question                        | Without CKB                | With CKB                              |
+| ------------------------------- | -------------------------- | ------------------------------------- |
+| "What breaks if I change this?" | Grep and hope              | Precise blast radius with risk score  |
+| "What tests should I run?"      | Run everything (30 min)    | Run affected tests only (2 min)       |
+| "How does this system work?"    | Read code for hours        | Query architecture instantly          |
+| "Is this code still used?"      | Delete and see what breaks | Confidence-scored dead code detection |
+| "Who owns this code?"           | Search CODEOWNERS manually | Ownership with drift detection        |
 
 ## When to Use
 
 **USE CKB tools for:**
+
 - Understanding what a function/class does (symbol explanation)
 - Finding where a symbol is used (reference finding)
 - Tracing call relationships (call graph)
@@ -35,6 +36,7 @@ CKB (Code Knowledge Backend) transforms your codebase into a queryable knowledge
 - Security scanning (secrets, credentials)
 
 **USE basic tools for:**
+
 - Simple file existence checks (`glob`)
 - Reading entire file contents (`read`)
 - Basic text pattern matching (`grep`) when semantic analysis is not needed
@@ -77,11 +79,13 @@ npx @tastehub/ckb mcp --watch
 ### MCP Integration Setup
 
 **For Claude Code:**
+
 ```bash
 npx @tastehub/ckb setup
 ```
 
 Or manually add to `.mcp.json`:
+
 ```json
 {
   "mcpServers": {
@@ -95,6 +99,7 @@ Or manually add to `.mcp.json`:
 
 **For OpenCode:**
 Add to `opencode.json`:
+
 ```json
 {
   "mcp": {
@@ -126,19 +131,19 @@ npx @tastehub/ckb mcp --preset=full        # 80+ tools - all tools
 
 ## CKB Tool Selection Guide
 
-| Need                                    | Tool                          | Use Case Example |
-| --------------------------------------- | ----------------------------- | ---------------- |
-| Quick overview of file/directory        | `ckb_explore`                 | "What's in src/auth/?" |
-| Deep dive into a specific function     | `ckb_understand`              | "How does validateToken work?" |
-| Find all usages of a symbol            | `ckb_findReferences`          | "Where is createUser called?" |
-| See call relationships (callers/callees) | `ckb_getCallGraph`            | "What functions does processData call?" |
-| Analyze impact before change           | `ckb_prepareChange`            | "What breaks if I rename User?" |
-| Get architecture/dependencies          | `ckb_getArchitecture`          | "Show me module dependencies" |
-| Search for symbols by name             | `ckb_searchSymbols`            | "Find all database models" |
-| Trace usage from entrypoints           | `ckb_traceUsage`              | "How is this config reached?" |
-| Get explanation of symbol              | `ckb_explainSymbol`            | "What does this function do?" |
-| Batch retrieve symbols                | `ckb_batchGet`                | "Get 50 symbols at once" |
-| Batch search queries                  | `ckb_batchSearch`             | "Run 10 searches at once" |
+| Need                                     | Tool                  | Use Case Example                        |
+| ---------------------------------------- | --------------------- | --------------------------------------- |
+| Quick overview of file/directory         | `ckb_explore`         | "What's in src/auth/?"                  |
+| Deep dive into a specific function       | `ckb_understand`      | "How does validateToken work?"          |
+| Find all usages of a symbol              | `ckb_findReferences`  | "Where is createUser called?"           |
+| See call relationships (callers/callees) | `ckb_getCallGraph`    | "What functions does processData call?" |
+| Analyze impact before change             | `ckb_prepareChange`   | "What breaks if I rename User?"         |
+| Get architecture/dependencies            | `ckb_getArchitecture` | "Show me module dependencies"           |
+| Search for symbols by name               | `ckb_searchSymbols`   | "Find all database models"              |
+| Trace usage from entrypoints             | `ckb_traceUsage`      | "How is this config reached?"           |
+| Get explanation of symbol                | `ckb_explainSymbol`   | "What does this function do?"           |
+| Batch retrieve symbols                   | `ckb_batchGet`        | "Get 50 symbols at once"                |
+| Batch search queries                     | `ckb_batchSearch`     | "Run 10 searches at once"               |
 
 ## Tool Quick Reference
 
@@ -305,14 +310,15 @@ ckb_batchSearch queries=[{"query": "User", "kinds": ["class"]}, {"query": "creat
 
 CKB classifies languages into **quality tiers** based on indexer maturity:
 
-| Tier | Quality | Languages |
-|------|---------|-----------|
-| **Tier 1** | Full support, all features | Go |
-| **Tier 2** | Full support, minor edge cases | TypeScript, JavaScript, Python |
+| Tier       | Quality                                     | Languages                           |
+| ---------- | ------------------------------------------- | ----------------------------------- |
+| **Tier 1** | Full support, all features                  | Go                                  |
+| **Tier 2** | Full support, minor edge cases              | TypeScript, JavaScript, Python      |
 | **Tier 3** | Basic support, call graph may be incomplete | Rust, Java, Kotlin, C++, Ruby, Dart |
-| **Tier 4** | Experimental | C#, PHP |
+| **Tier 4** | Experimental                                | C#, PHP                             |
 
 **Key limitations:**
+
 - **Incremental indexing** is Go-only. Other languages require full reindex.
 - **TypeScript monorepos** may need `--infer-tsconfig` flag
 - **C/C++** requires `compile_commands.json`
@@ -366,18 +372,58 @@ Run `ckb doctor --tier standard` to check if your language tools are properly in
 4. Use patterns for new implementation
 ```
 
+## Advanced Scenarios
+
+### Scenario: "Safe Refactoring of a Core Utility"
+
+Refactoring a widely used utility (e.g., `DateUtils`) is risky.
+
+1. **Assess Impact:**
+   `ckb_prepareChange(target="DateUtils.format", changeType="modify")`
+   _Output:_ List of 50 files and risk score of 85/100.
+
+2. **Analyze Usage Patterns:**
+   `ckb_findReferences(symbolId="...")`
+   _Action:_ Categorize usages. Are they all using the same format string?
+
+3. **Trace Data Flow:**
+   `ckb_traceUsage(symbolId="...", maxDepth=2)`
+   _Action:_ Ensure no sensitive PII is being formatted/logged.
+
+4. **Execute & Verify:**
+   Make changes, then run only the affected tests identified in step 1.
+
+### Scenario: "Dead Code Cleanup"
+
+Cleaning up technical debt without breaking things.
+
+1. **Find Candidates:**
+   `ckb_findDeadCode(limit=20)`
+   _Output:_ List of symbols with 0 references or test-only references.
+
+2. **Verify Candidate:**
+   `ckb_findReferences(symbolId="...", includeTestOnly=true)`
+   _Action:_ Confirm it's truly unused or only used in old tests.
+
+3. **Check for Reflection/Config Usage:**
+   `ckb_searchSymbols(query="SymbolName")`
+   _Action:_ Check for string reflection usage (CKB might miss dynamic calls).
+
+4. **Delete:**
+   Remove the code safely.
+
 ## Comparison: CKB vs Basic Tools
 
-| Task               | Basic Tools (grep/glob/read)              | CKB Tools                              |
-| ------------------ | ----------------------------------------- | -------------------------------------- |
-| Find function calls| `grep -r "functionName"` - text matching  | `ckb_findReferences` - semantic links |
-| Understand code    | Read file + manual analysis               | `ckb_understand` - explanation + usage|
-| See relationships  | Manual tracing                            | `ckb_getCallGraph` - automatic graph   |
-| Impact analysis    | Manual search + assumptions               | `ckb_prepareChange` - blast radius    |
-| Explore codebase   | Multiple `ls` and `read` calls             | `ckb_explore` - comprehensive view    |
-| Find symbols       | `grep` - prone to false positives         | `ckb_searchSymbols` - semantic search |
-| Architecture view  | Manual diagramming                        | `ckb_getArchitecture` - auto-generated |
-| What breaks if...  | Guesswork                                  | Precise blast radius with risk score   |
+| Task                | Basic Tools (grep/glob/read)             | CKB Tools                              |
+| ------------------- | ---------------------------------------- | -------------------------------------- |
+| Find function calls | `grep -r "functionName"` - text matching | `ckb_findReferences` - semantic links  |
+| Understand code     | Read file + manual analysis              | `ckb_understand` - explanation + usage |
+| See relationships   | Manual tracing                           | `ckb_getCallGraph` - automatic graph   |
+| Impact analysis     | Manual search + assumptions              | `ckb_prepareChange` - blast radius     |
+| Explore codebase    | Multiple `ls` and `read` calls           | `ckb_explore` - comprehensive view     |
+| Find symbols        | `grep` - prone to false positives        | `ckb_searchSymbols` - semantic search  |
+| Architecture view   | Manual diagramming                       | `ckb_getArchitecture` - auto-generated |
+| What breaks if...   | Guesswork                                | Precise blast radius with risk score   |
 
 ## Best Practices
 
@@ -395,59 +441,11 @@ Run `ckb doctor --tier standard` to check if your language tools are properly in
 Most CKB tools require a stable symbol ID with format: `ckb:<repo>:sym:<fingerprint>`
 
 Get symbol IDs from:
+
 - `ckb_searchSymbols` results
 - `ckb_explore` results
 - `ckb_understand` results
 - `ckb_batchGet` results
-
-## Integration in Agent Workflows
-
-### Gatekeeper Agent
-
-**Use CKB for:**
-- Understanding project structure during requirement analysis
-- Finding relevant code for feature context
-- Identifying existing patterns
-
-```
-Workflow:
-1. ckb_explore target="src/" - Get project overview
-2. ckb_getArchitecture granularity="module" - Understand module structure
-3. ckb_searchSymbols query="relatedFeature" - Find similar implementations
-4. Use context to generate accurate Refined Spec
-```
-
-### Architect Agent
-
-**Use CKB for:**
-- Understanding existing patterns before designing
-- Analyzing module dependencies
-- Ensuring consistency with existing architecture
-
-```
-Workflow:
-1. ckb_getArchitecture - Understand module dependencies
-2. ckb_searchSymbols query="Model" kinds=["class"] - Find existing models
-3. ckb_understand query="ExistingModel" - Understand schema patterns
-4. Design new schema/API following existing conventions
-```
-
-### Builder Agent
-
-**Use CKB for:**
-- Impact analysis before any modifications
-- Understanding existing code before writing tests
-- Locating all test files related to a feature
-- Understanding execution flow
-
-```
-Workflow:
-1. ckb_prepareChange target="TargetSymbol" changeType="modify" - Impact analysis
-2. ckb_understand query="FunctionToTest" - Understand implementation
-3. ckb_findReferences symbolId="..." - Locate test files
-4. ckb_traceUsage - Understand execution flow
-5. Write TDD tests based on understanding
-```
 
 ## Additional Resources
 

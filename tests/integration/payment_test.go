@@ -118,6 +118,7 @@ func TestPaymentIntegration(t *testing.T) {
 	// Setup Dependencies
 	txRepo := repository.NewTransactionRepository(db)
 	subRepo := repository.NewSubscriptionRepository(db)
+	planRepo := repository.NewSubscriptionPlanRepository(db)
 	userRepo := repository.NewUserRepository(db)
 	purchaseRepo := repository.NewUserSeriesPurchaseRepository(db)
 
@@ -131,7 +132,7 @@ func TestPaymentIntegration(t *testing.T) {
 	}
 	sepayAdapter := adapter.NewSePayAdapter(cfg)
 
-	paymentSvc := service.NewPaymentService(db, txRepo, subRepo, purchaseRepo, sepayAdapter)
+	paymentSvc := service.NewPaymentService(db, txRepo, subRepo, purchaseRepo, planRepo, sepayAdapter)
 	createPaymentUC := payment.NewCreatePaymentUseCase(paymentSvc)
 	processWebhookUC := payment.NewProcessWebhookUseCase(paymentSvc)
 
@@ -177,12 +178,24 @@ func TestPaymentIntegration(t *testing.T) {
 	err = subRepo.Create(context.Background(), sub)
 	require.NoError(t, err)
 
+	// Create subscription plan for the author
+	plan := &entity.SubscriptionPlan{
+		ID:           uuid.New(),
+		AuthorID:     authorID,
+		Tier:         entity.TierSilver,
+		DurationDays: 30,
+		Price:        decimal.NewFromInt(50000),
+		IsActive:     true,
+	}
+	err = planRepo.Create(context.Background(), plan)
+	require.NoError(t, err)
+
 	// Setup router with mock auth
 	router.RegisterPaymentRoutes(r.Group("/api/v1"), paymentH, webhookH, mockAuthMiddleware(userID))
 
 	t.Run("Scenario 1: Happy Path (Subscription)", func(t *testing.T) {
 		// 1. Create payment request
-		planID := "1_MONTH"
+		planID := plan.ID.String()
 		targetID := authorID.String()
 		reqBody := dto.CreatePaymentRequest{
 			UserID:   userID.String(),

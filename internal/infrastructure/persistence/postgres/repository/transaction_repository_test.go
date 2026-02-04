@@ -170,7 +170,7 @@ func TestTransactionRepository_FindByRefID_Success(t *testing.T) {
 	rows := sqlmock.NewRows([]string{
 		"id", "created_at", "updated_at", "deleted_at", "user_id", "amount", "currency",
 		"provider", "gateway", "type", "status", "target_id", "plan_id",
-		"content", "se_pay_id", "reference_code", "order_id", "webhook_payload",
+		"content", "sepay_id", "reference_code", "order_id", "webhook_payload",
 	}).AddRow(
 		uuid.New(),
 		time.Now(),
@@ -245,7 +245,7 @@ func TestTransactionRepository_FindBySePayID_Success(t *testing.T) {
 	rows := sqlmock.NewRows([]string{
 		"id", "created_at", "updated_at", "deleted_at", "user_id", "amount", "currency",
 		"provider", "gateway", "type", "status", "target_id", "plan_id",
-		"content", "se_pay_id", "reference_code", "order_id", "webhook_payload",
+		"content", "sepay_id", "reference_code", "order_id", "webhook_payload",
 	}).AddRow(
 		uuid.New(),
 		time.Now(),
@@ -371,7 +371,7 @@ func TestTransactionRepository_FindByUserID_Success(t *testing.T) {
 	rows := sqlmock.NewRows([]string{
 		"id", "created_at", "updated_at", "deleted_at", "user_id", "amount", "currency",
 		"provider", "gateway", "type", "status", "target_id", "plan_id",
-		"content", "se_pay_id", "reference_code", "order_id", "webhook_payload",
+		"content", "sepay_id", "reference_code", "order_id", "webhook_payload",
 	}).AddRow(
 		uuid.New(),
 		time.Now(),
@@ -440,7 +440,7 @@ func TestTransactionRepository_FindByUserID_NotFound(t *testing.T) {
 	rows := sqlmock.NewRows([]string{
 		"id", "created_at", "updated_at", "deleted_at", "user_id", "amount", "currency",
 		"provider", "gateway", "type", "status", "target_id", "plan_id",
-		"content", "se_pay_id", "reference_code", "order_id", "webhook_payload",
+		"content", "sepay_id", "reference_code", "order_id", "webhook_payload",
 	})
 
 	mock.ExpectQuery(regexp.QuoteMeta(

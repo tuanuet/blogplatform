@@ -24,6 +24,263 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/authors/me/plans": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Plans"
+                ],
+                "summary": "Create or update subscription plans",
+                "parameters": [
+                    {
+                        "description": "Plans to upsert",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertPlansRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertPlansResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/authors/me/tag-tiers": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Retrieve all tag-tier mappings for the current author",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Plans"
+                ],
+                "summary": "Get author's tag-tier mappings",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.GetTagTiersResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/authors/me/tags/{tagId}/tier": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Set which subscription tier is required to access content with this tag",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Plans"
+                ],
+                "summary": "Assign a tag to a subscription tier",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tag ID",
+                        "name": "tagId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Required tier",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AssignTagTierRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AssignTagTierResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Remove tier requirement, making content with this tag accessible to all subscribers",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Plans"
+                ],
+                "summary": "Remove tier requirement from a tag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tag ID",
+                        "name": "tagId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UnassignTagTierResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/authors/{authorId}/plans": {
+            "get": {
+                "description": "Retrieve all pricing plans for a specific author",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Plans"
+                ],
+                "summary": "Get author's subscription plans",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Author ID",
+                        "name": "authorId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.GetAuthorPlansResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/authors/{authorId}/subscribe": {
             "post": {
                 "security": [
@@ -384,6 +641,50 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/blogs/{blogId}/access": {
+            "get": {
+                "description": "Check if a user can access a specific blog post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Plans"
+                ],
+                "summary": "Check blog access",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Blog ID",
+                        "name": "blogId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CheckBlogAccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -3381,6 +3682,40 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.AssignTagTierRequest": {
+            "type": "object",
+            "required": [
+                "requiredTier"
+            ],
+            "properties": {
+                "requiredTier": {
+                    "type": "string",
+                    "enum": [
+                        "FREE",
+                        "BRONZE",
+                        "SILVER",
+                        "GOLD"
+                    ]
+                }
+            }
+        },
+        "dto.AssignTagTierResponse": {
+            "type": "object",
+            "properties": {
+                "affectedBlogsCount": {
+                    "type": "integer"
+                },
+                "requiredTier": {
+                    "type": "string"
+                },
+                "tagId": {
+                    "type": "string"
+                },
+                "tagName": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.AvatarUploadResponse": {
             "type": "object",
             "properties": {
@@ -3534,6 +3869,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CheckBlogAccessResponse": {
+            "type": "object",
+            "properties": {
+                "accessible": {
+                    "type": "boolean"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "requiredTier": {
+                    "type": "string"
+                },
+                "upgradeOptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UpgradeOption"
+                    }
+                },
+                "userTier": {
                     "type": "string"
                 }
             }
@@ -3714,6 +4072,34 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreatePlanRequest": {
+            "type": "object",
+            "required": [
+                "price",
+                "tier"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "price": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "tier": {
+                    "type": "string",
+                    "enum": [
+                        "BRONZE",
+                        "SILVER",
+                        "GOLD"
+                    ]
+                }
+            }
+        },
         "dto.CreateRoleRequest": {
             "type": "object",
             "required": [
@@ -3770,6 +4156,31 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.GetAuthorPlansResponse": {
+            "type": "object",
+            "properties": {
+                "authorId": {
+                    "type": "string"
+                },
+                "plans": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PlanWithTagsResponse"
+                    }
+                }
+            }
+        },
+        "dto.GetTagTiersResponse": {
+            "type": "object",
+            "properties": {
+                "mappings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TagTierMappingResponse"
+                    }
+                }
+            }
+        },
         "dto.HealthResponse": {
             "type": "object",
             "properties": {
@@ -3806,6 +4217,67 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "resource": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PlanResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "durationDays": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "tier": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PlanWithTagsResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "durationDays": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "tagCount": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tier": {
                     "type": "string"
                 }
             }
@@ -4163,6 +4635,34 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.TagTierMappingResponse": {
+            "type": "object",
+            "properties": {
+                "blogCount": {
+                    "type": "integer"
+                },
+                "requiredTier": {
+                    "type": "string"
+                },
+                "tagId": {
+                    "type": "string"
+                },
+                "tagName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UnassignTagTierResponse": {
+            "type": "object",
+            "properties": {
+                "affectedBlogsCount": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.UpdateBlogRequest": {
             "type": "object",
             "properties": {
@@ -4322,6 +4822,56 @@ const docTemplate = `{
             ],
             "properties": {
                 "tagIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.UpgradeOption": {
+            "type": "object",
+            "properties": {
+                "durationDays": {
+                    "type": "integer"
+                },
+                "planId": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "tier": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpsertPlansRequest": {
+            "type": "object",
+            "required": [
+                "plans"
+            ],
+            "properties": {
+                "plans": {
+                    "type": "array",
+                    "maxItems": 3,
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/dto.CreatePlanRequest"
+                    }
+                }
+            }
+        },
+        "dto.UpsertPlansResponse": {
+            "type": "object",
+            "properties": {
+                "plans": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PlanResponse"
+                    }
+                },
+                "warnings": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4551,7 +5101,13 @@ const docTemplate = `{
             "name": "Authorization",
             "in": "header"
         }
-    }
+    },
+    "tags": [
+        {
+            "description": "Multi-tier subscription plan management endpoints",
+            "name": "Plans"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

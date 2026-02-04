@@ -25,6 +25,9 @@ import (
 // @name Authorization
 // @description Type "Bearer" followed by a space and the access token.
 
+// @tag.name Plans
+// @tag.description Multi-tier subscription plan management endpoints
+
 func main() {
 	app := fx.New(
 		// Configuration module (loads config, initializes logger & validator)

@@ -25,6 +25,7 @@ func TestPaymentService_InitPayment(t *testing.T) {
 	mockTxRepo := mocks.NewMockTransactionRepository(ctrl)
 	mockSubRepo := mocks.NewMockSubscriptionRepository(ctrl)
 	mockPurchaseRepo := mocks.NewMockUserSeriesPurchaseRepository(ctrl)
+	mockPlanRepo := mocks.NewMockSubscriptionPlanRepository(ctrl)
 	mockSePayAdapter := adapter_mocks.NewMockSePayAdapter(ctrl)
 
 	db, _, _ := sqlmock.New()
@@ -35,6 +36,7 @@ func TestPaymentService_InitPayment(t *testing.T) {
 		mockTxRepo,
 		mockSubRepo,
 		mockPurchaseRepo,
+		mockPlanRepo,
 		mockSePayAdapter,
 	)
 
@@ -102,6 +104,7 @@ func TestPaymentService_HandleSePayWebhook(t *testing.T) {
 	mockTxRepo := mocks.NewMockTransactionRepository(ctrl)
 	mockSubRepo := mocks.NewMockSubscriptionRepository(ctrl)
 	mockPurchaseRepo := mocks.NewMockUserSeriesPurchaseRepository(ctrl)
+	mockPlanRepo := mocks.NewMockSubscriptionPlanRepository(ctrl)
 	mockSePayAdapter := adapter_mocks.NewMockSePayAdapter(ctrl)
 
 	db, sqlMock, _ := sqlmock.New()
@@ -112,6 +115,7 @@ func TestPaymentService_HandleSePayWebhook(t *testing.T) {
 		mockTxRepo,
 		mockSubRepo,
 		mockPurchaseRepo,
+		mockPlanRepo,
 		mockSePayAdapter,
 	)
 
@@ -153,6 +157,16 @@ func TestPaymentService_HandleSePayWebhook(t *testing.T) {
 	})
 
 	t.Run("success_subscription", func(t *testing.T) {
+		planID := uuid.New()
+		targetID := uuid.New()
+		plan := &entity.SubscriptionPlan{
+			ID:           planID,
+			AuthorID:     targetID,
+			Tier:         entity.TierSilver,
+			DurationDays: 30,
+			Price:        decimal.NewFromInt(100000),
+		}
+
 		tx := &entity.Transaction{
 			ID:      uuid.New(),
 			UserID:  userID,
@@ -161,10 +175,9 @@ func TestPaymentService_HandleSePayWebhook(t *testing.T) {
 			Type:    entity.TransactionTypeSubscription,
 			Status:  entity.TransactionStatusPending,
 		}
-		targetID := uuid.New()
-		planID := "premium"
 		tx.TargetID = &targetID
-		tx.PlanID = &planID
+		planIDStr := planID.String()
+		tx.PlanID = &planIDStr
 
 		mockTxRepo.EXPECT().FindBySePayID(ctx, sePayID).Return(nil, nil)
 		mockTxRepo.EXPECT().FindByRefID(ctx, orderID).Return(tx, nil)
@@ -174,9 +187,13 @@ func TestPaymentService_HandleSePayWebhook(t *testing.T) {
 		mockTxRepo.EXPECT().WithTx(gomock.Any()).Return(mockTxRepo)
 		mockSubRepo.EXPECT().WithTx(gomock.Any()).Return(mockSubRepo)
 		mockPurchaseRepo.EXPECT().WithTx(gomock.Any()).Return(mockPurchaseRepo)
+		mockPlanRepo.EXPECT().WithTx(gomock.Any()).Return(mockPlanRepo)
 
-		mockTxRepo.EXPECT().Update(ctx, tx).Return(nil)
-		mockSubRepo.EXPECT().UpdateExpiry(ctx, userID, targetID, gomock.Any(), planID).Return(nil)
+		// Expect plan to be fetched by ID
+		mockPlanRepo.EXPECT().FindByID(ctx, planID).Return(plan, nil)
+
+		mockTxRepo.EXPECT().Update(ctx, gomock.Any()).Return(nil)
+		mockSubRepo.EXPECT().UpdateExpiry(ctx, userID, targetID, gomock.Any(), entity.TierSilver.String()).Return(nil)
 		sqlMock.ExpectCommit()
 
 		result, err := svc.HandleSePayWebhook(ctx, payload)
@@ -206,8 +223,9 @@ func TestPaymentService_HandleSePayWebhook(t *testing.T) {
 		mockTxRepo.EXPECT().WithTx(gomock.Any()).Return(mockTxRepo)
 		mockSubRepo.EXPECT().WithTx(gomock.Any()).Return(mockSubRepo)
 		mockPurchaseRepo.EXPECT().WithTx(gomock.Any()).Return(mockPurchaseRepo)
+		mockPlanRepo.EXPECT().WithTx(gomock.Any()).Return(mockPlanRepo)
 
-		mockTxRepo.EXPECT().Update(ctx, tx).Return(nil)
+		mockTxRepo.EXPECT().Update(ctx, gomock.Any()).Return(nil)
 		mockPurchaseRepo.EXPECT().Create(ctx, gomock.Any()).Return(nil)
 		sqlMock.ExpectCommit()
 
@@ -215,6 +233,248 @@ func TestPaymentService_HandleSePayWebhook(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
+	})
+
+	t.Run("success_subscription_with_plan_tier_update", func(t *testing.T) {
+		// Arrange
+		planID := uuid.New()
+		targetID := uuid.New()
+		plan := &entity.SubscriptionPlan{
+			ID:           planID,
+			AuthorID:     targetID,
+			Tier:         entity.TierGold,
+			DurationDays: 90,
+			Price:        decimal.NewFromInt(300000),
+		}
+
+		tx := &entity.Transaction{
+			ID:       uuid.New(),
+			UserID:   userID,
+			OrderID:  orderID,
+			Amount:   amount,
+			Type:     entity.TransactionTypeSubscription,
+			Status:   entity.TransactionStatusPending,
+			TargetID: &targetID,
+		}
+		planIDStr := planID.String()
+		tx.PlanID = &planIDStr
+
+		mockTxRepo.EXPECT().FindBySePayID(ctx, sePayID).Return(nil, nil)
+		mockTxRepo.EXPECT().FindByRefID(ctx, orderID).Return(tx, nil)
+
+		// Expectations for transaction and WithTx
+		sqlMock.ExpectBegin()
+		mockTxRepo.EXPECT().WithTx(gomock.Any()).Return(mockTxRepo)
+		mockSubRepo.EXPECT().WithTx(gomock.Any()).Return(mockSubRepo)
+		mockPurchaseRepo.EXPECT().WithTx(gomock.Any()).Return(mockPurchaseRepo)
+		mockPlanRepo.EXPECT().WithTx(gomock.Any()).Return(mockPlanRepo)
+
+		// Expect plan to be fetched by ID
+		mockPlanRepo.EXPECT().FindByID(ctx, planID).Return(plan, nil)
+
+		mockTxRepo.EXPECT().Update(ctx, gomock.Any()).Return(nil)
+		mockSubRepo.EXPECT().UpdateExpiry(ctx, userID, targetID, gomock.Any(), entity.TierGold.String()).Return(nil)
+		sqlMock.ExpectCommit()
+
+		// Act
+		result, err := svc.HandleSePayWebhook(ctx, payload)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Equal(t, entity.TransactionStatusSuccess, result.Status)
+		assert.Equal(t, sePayID, result.SePayID)
+	})
+
+	t.Run("subscription_with_plan_not_found", func(t *testing.T) {
+		// Arrange
+		planID := uuid.New()
+		targetID := uuid.New()
+
+		tx := &entity.Transaction{
+			ID:       uuid.New(),
+			UserID:   userID,
+			OrderID:  orderID,
+			Amount:   amount,
+			Type:     entity.TransactionTypeSubscription,
+			Status:   entity.TransactionStatusPending,
+			TargetID: &targetID,
+		}
+		planIDStr := planID.String()
+		tx.PlanID = &planIDStr
+
+		mockTxRepo.EXPECT().FindBySePayID(ctx, sePayID).Return(nil, nil)
+		mockTxRepo.EXPECT().FindByRefID(ctx, orderID).Return(tx, nil)
+
+		sqlMock.ExpectBegin()
+		mockTxRepo.EXPECT().WithTx(gomock.Any()).Return(mockTxRepo)
+		mockSubRepo.EXPECT().WithTx(gomock.Any()).Return(mockSubRepo)
+		mockPurchaseRepo.EXPECT().WithTx(gomock.Any()).Return(mockPurchaseRepo)
+		mockPlanRepo.EXPECT().WithTx(gomock.Any()).Return(mockPlanRepo)
+
+		// Plan not found
+		mockTxRepo.EXPECT().Update(ctx, gomock.Any()).Return(nil)
+		mockPlanRepo.EXPECT().FindByID(ctx, planID).Return(nil, gorm.ErrRecordNotFound)
+		sqlMock.ExpectRollback()
+
+		// Act
+		result, err := svc.HandleSePayWebhook(ctx, payload)
+
+		// Assert
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "plan not found")
+		assert.Nil(t, result)
+	})
+
+	t.Run("subscription_with_different_plan_tiers", func(t *testing.T) {
+		tests := []struct {
+			name         string
+			tier         entity.SubscriptionTier
+			durationDays int
+		}{
+			{"bronze_tier", entity.TierBronze, 30},
+			{"silver_tier", entity.TierSilver, 60},
+			{"gold_tier", entity.TierGold, 90},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				// Arrange
+				planID := uuid.New()
+				targetID := uuid.New()
+				plan := &entity.SubscriptionPlan{
+					ID:           planID,
+					AuthorID:     targetID,
+					Tier:         tt.tier,
+					DurationDays: tt.durationDays,
+					Price:        decimal.NewFromInt(100000),
+				}
+
+				tx := &entity.Transaction{
+					ID:       uuid.New(),
+					UserID:   userID,
+					OrderID:  orderID,
+					Amount:   amount,
+					Type:     entity.TransactionTypeSubscription,
+					Status:   entity.TransactionStatusPending,
+					TargetID: &targetID,
+				}
+				planIDStr := planID.String()
+				tx.PlanID = &planIDStr
+
+				mockTxRepo.EXPECT().FindBySePayID(ctx, sePayID).Return(nil, nil)
+				mockTxRepo.EXPECT().FindByRefID(ctx, orderID).Return(tx, nil)
+
+				sqlMock.ExpectBegin()
+				mockTxRepo.EXPECT().WithTx(gomock.Any()).Return(mockTxRepo)
+				mockSubRepo.EXPECT().WithTx(gomock.Any()).Return(mockSubRepo)
+				mockPurchaseRepo.EXPECT().WithTx(gomock.Any()).Return(mockPurchaseRepo)
+				mockPlanRepo.EXPECT().WithTx(gomock.Any()).Return(mockPlanRepo)
+
+				mockPlanRepo.EXPECT().FindByID(ctx, planID).Return(plan, nil)
+				mockTxRepo.EXPECT().Update(ctx, gomock.Any()).Return(nil)
+				mockSubRepo.EXPECT().UpdateExpiry(ctx, userID, targetID, gomock.Any(), tt.tier.String()).Return(nil)
+				sqlMock.ExpectCommit()
+
+				// Act
+				result, err := svc.HandleSePayWebhook(ctx, payload)
+
+				// Assert
+				assert.NoError(t, err)
+				assert.Equal(t, entity.TransactionStatusSuccess, result.Status)
+			})
+		}
+	})
+
+	t.Run("subscription_with_invalid_plan_uuid", func(t *testing.T) {
+		// Arrange
+		targetID := uuid.New()
+		invalidPlanID := "not-a-uuid"
+
+		tx := &entity.Transaction{
+			ID:       uuid.New(),
+			UserID:   userID,
+			OrderID:  orderID,
+			Amount:   amount,
+			Type:     entity.TransactionTypeSubscription,
+			Status:   entity.TransactionStatusPending,
+			TargetID: &targetID,
+		}
+		tx.PlanID = &invalidPlanID
+
+		mockTxRepo.EXPECT().FindBySePayID(ctx, sePayID).Return(nil, nil)
+		mockTxRepo.EXPECT().FindByRefID(ctx, orderID).Return(tx, nil)
+
+		sqlMock.ExpectBegin()
+		mockTxRepo.EXPECT().WithTx(gomock.Any()).Return(mockTxRepo)
+		mockSubRepo.EXPECT().WithTx(gomock.Any()).Return(mockSubRepo)
+		mockPurchaseRepo.EXPECT().WithTx(gomock.Any()).Return(mockPurchaseRepo)
+		mockPlanRepo.EXPECT().WithTx(gomock.Any()).Return(mockPlanRepo)
+
+		mockTxRepo.EXPECT().Update(ctx, gomock.Any()).Return(nil)
+		sqlMock.ExpectRollback()
+
+		// Act
+		result, err := svc.HandleSePayWebhook(ctx, payload)
+
+		// Assert
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "invalid plan ID")
+		assert.Nil(t, result)
+	})
+
+	t.Run("transaction_already_successful", func(t *testing.T) {
+		// Arrange
+		tx := &entity.Transaction{
+			ID:      uuid.New(),
+			UserID:  userID,
+			OrderID: orderID,
+			Amount:  amount,
+			Type:    entity.TransactionTypeSubscription,
+			Status:  entity.TransactionStatusSuccess,
+		}
+
+		mockTxRepo.EXPECT().FindBySePayID(ctx, sePayID).Return(nil, nil)
+		mockTxRepo.EXPECT().FindByRefID(ctx, orderID).Return(tx, nil)
+
+		// Act
+		result, err := svc.HandleSePayWebhook(ctx, payload)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Equal(t, entity.TransactionStatusSuccess, result.Status)
+	})
+
+	t.Run("subscription_without_target_or_plan", func(t *testing.T) {
+		// Arrange - subscription with nil TargetID or PlanID should be handled gracefully
+		tx := &entity.Transaction{
+			ID:       uuid.New(),
+			UserID:   userID,
+			OrderID:  orderID,
+			Amount:   amount,
+			Type:     entity.TransactionTypeSubscription,
+			Status:   entity.TransactionStatusPending,
+			TargetID: nil, // No target ID
+			PlanID:   nil, // No plan ID
+		}
+
+		mockTxRepo.EXPECT().FindBySePayID(ctx, sePayID).Return(nil, nil)
+		mockTxRepo.EXPECT().FindByRefID(ctx, orderID).Return(tx, nil)
+
+		sqlMock.ExpectBegin()
+		mockTxRepo.EXPECT().WithTx(gomock.Any()).Return(mockTxRepo)
+		mockSubRepo.EXPECT().WithTx(gomock.Any()).Return(mockSubRepo)
+		mockPurchaseRepo.EXPECT().WithTx(gomock.Any()).Return(mockPurchaseRepo)
+		mockPlanRepo.EXPECT().WithTx(gomock.Any()).Return(mockPlanRepo)
+
+		mockTxRepo.EXPECT().Update(ctx, gomock.Any()).Return(nil)
+		sqlMock.ExpectCommit()
+
+		// Act
+		result, err := svc.HandleSePayWebhook(ctx, payload)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Equal(t, entity.TransactionStatusSuccess, result.Status)
 	})
 }
 
@@ -226,7 +486,7 @@ func TestPaymentService_GetTransactionStatus(t *testing.T) {
 	db, _, _ := sqlmock.New()
 	gormDB, _ := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
 
-	svc := service.NewPaymentService(gormDB, mockTxRepo, nil, nil, nil)
+	svc := service.NewPaymentService(gormDB, mockTxRepo, nil, nil, nil, nil)
 
 	ctx := context.Background()
 	orderID := "ORDER-123"
@@ -248,7 +508,7 @@ func TestPaymentService_VerifySePayWebhookSignature(t *testing.T) {
 	db, _, _ := sqlmock.New()
 	gormDB, _ := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
 
-	svc := service.NewPaymentService(gormDB, nil, nil, nil, mockAdapter)
+	svc := service.NewPaymentService(gormDB, nil, nil, nil, nil, mockAdapter)
 
 	payload := map[string]interface{}{"foo": "bar"}
 	signature := "valid-sig"
