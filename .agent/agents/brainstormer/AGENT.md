@@ -15,7 +15,9 @@ description: Creative Facilitator - Collaborative feature discussion and require
 >
 > This is a **pre-cursor** to `/pipeline`. Output feeds directly into Gatekeeper.
 
-## Skills Used
+## Required Skills
+
+> **Note**: These skills are mandatory. Other skills should be automatically loaded if relevant to the task.
 
 - `brainstorming` - SCAMPER, Six Thinking Hats, 5 Whys, Mind Mapping
 - `ideation` - Problem Reframing, Constraint Removal, Cross-Domain Inspiration
@@ -64,14 +66,14 @@ Raw feature idea (may be vague or incomplete)
 
 ### Discussion Questions Template
 
-| Category        | Questions to Explore                           |
-| --------------- | ---------------------------------------------- |
-| Problem         | What pain point does this address?             |
-| User            | Who benefits? What's their current workaround? |
-| Value           | How do we measure success?                     |
-| Scope           | What's in/out of scope?                        |
-| Constraints     | Any technical/business limitations?            |
-| Prior Art       | Similar features in codebase or competitors?   |
+| Category    | Questions to Explore                           |
+| ----------- | ---------------------------------------------- |
+| Problem     | What pain point does this address?             |
+| User        | Who benefits? What's their current workaround? |
+| Value       | How do we measure success?                     |
+| Scope       | What's in/out of scope?                        |
+| Constraints | Any technical/business limitations?            |
+| Prior Art   | Similar features in codebase or competitors?   |
 
 ### Output
 
@@ -117,11 +119,13 @@ As a [role], I want to [action] so that [benefit].
 ## User Flows
 
 ### Happy Path
+
 1. User does X
 2. System responds with Y
 3. User sees Z
 
 ### Edge Cases
+
 1. What if [scenario]? → Handle by [approach]
 ```
 
@@ -168,19 +172,23 @@ As a [role], I want to [action] so that [benefit].
 ## Requirements
 
 ### Functional
+
 - [ ] Requirement 1
 - [ ] Requirement 2
 
 ### Non-Functional
+
 - [ ] Performance: ...
 - [ ] Security: ...
 
 ## User Stories
 
 ### Story 1: [Name]
+
 As a [role], I want to [action] so that [benefit].
 
 **Acceptance Criteria:**
+
 - [ ] Given..., When..., Then...
 
 ## Technical Context
@@ -193,10 +201,12 @@ As a [role], I want to [action] so that [benefit].
 ## User Flows
 
 ### Happy Path
+
 1. ...
 2. ...
 
 ### Edge Cases
+
 1. [Edge case]: [Handling approach]
 
 ## Out of Scope
@@ -214,26 +224,26 @@ As a [role], I want to [action] so that [benefit].
 
 ### SCAMPER (for transforming ideas)
 
-| Letter | Action     | Question                    |
-| ------ | ---------- | --------------------------- |
-| S      | Substitute | What can be replaced?       |
-| C      | Combine    | What can be merged?         |
-| A      | Adapt      | Ideas from other domains?   |
-| M      | Modify     | Enlarge, minimize, change?  |
-| P      | Put to use | Other uses for this?        |
-| E      | Eliminate  | What can be removed?        |
-| R      | Reverse    | What if we flip it?         |
+| Letter | Action     | Question                   |
+| ------ | ---------- | -------------------------- |
+| S      | Substitute | What can be replaced?      |
+| C      | Combine    | What can be merged?        |
+| A      | Adapt      | Ideas from other domains?  |
+| M      | Modify     | Enlarge, minimize, change? |
+| P      | Put to use | Other uses for this?       |
+| E      | Eliminate  | What can be removed?       |
+| R      | Reverse    | What if we flip it?        |
 
 ### Six Thinking Hats (for perspectives)
 
-| Hat    | Focus      | Question                     |
-| ------ | ---------- | ---------------------------- |
-| White  | Facts      | What data do we have?        |
-| Red    | Emotions   | How do users feel?           |
-| Black  | Risks      | What could go wrong?         |
-| Yellow | Benefits   | What are the advantages?     |
-| Green  | Creativity | What new ideas emerge?       |
-| Blue   | Process    | What's our next step?        |
+| Hat    | Focus      | Question                 |
+| ------ | ---------- | ------------------------ |
+| White  | Facts      | What data do we have?    |
+| Red    | Emotions   | How do users feel?       |
+| Black  | Risks      | What could go wrong?     |
+| Yellow | Benefits   | What are the advantages? |
+| Green  | Creativity | What new ideas emerge?   |
+| Blue   | Process    | What's our next step?    |
 
 ### Problem Reframing (for new perspectives)
 

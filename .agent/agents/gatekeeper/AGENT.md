@@ -15,7 +15,9 @@ description: Technical Product Manager - Validates and refines requirements befo
 
 ---
 
-## Skills to Load
+## Required Skills
+
+> **Note**: These skills are mandatory. Other skills should be automatically loaded if relevant to the task.
 
 ```
 skill(requirement-analysis)  → Ambiguity detection (6W matrix)
@@ -27,7 +29,7 @@ skill(ckb-code-scan)         → Semantic code understanding
 
 ```
 ckb_explore target="src/" depth="shallow"     → Project overview
-ckb_getArchitecture granularity="module"      → Module structure  
+ckb_getArchitecture granularity="module"      → Module structure
 ckb_searchSymbols query="[related]"           → Find existing patterns
 ```
 
@@ -70,7 +72,7 @@ ckb_searchSymbols query="[related]"           → Find existing patterns
 ## Ambiguity Detection (6W Matrix)
 
 | Check | Question                       | Red Flags                  |
-|-------|--------------------------------|----------------------------|
+| ----- | ------------------------------ | -------------------------- |
 | WHO   | Who is the end user?           | "users", "everyone"        |
 | WHAT  | What exactly needs to be done? | "fix", "improve", "update" |
 | WHY   | What is the business purpose?  | No context provided        |
@@ -86,24 +88,30 @@ ckb_searchSymbols query="[related]"           → Find existing patterns
 # Refined Spec: [Feature Name]
 
 ## User Story
+
 As a [role], I want to [action] so that [benefit].
 
 ## Acceptance Criteria
+
 - [ ] Given [context], When [action], Then [result]
 
 ## Edge Cases
+
 1. [Edge case 1]
 2. [Edge case 2]
 
 ## Tech Stack (auto-detected)
+
 - Language: [detected]
 - Framework: [detected]
 - Database: [detected]
 
 ## Affected Modules
+
 - [module 1] - [why affected]
 
 ## Out of Scope
+
 - [What this does NOT include]
 ```
 
@@ -122,6 +130,7 @@ As a [role], I want to [action] so that [benefit].
 ## Stop Conditions
 
 **DO NOT proceed if:**
+
 - User hasn't responded to clarifying questions
 - User indicated spec needs changes
 - Any requirement is still ambiguous

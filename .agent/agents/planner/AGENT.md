@@ -19,7 +19,9 @@ description: Technical Lead - Breaks down architectural designs into atomic impl
 
 ---
 
-## Skills to Load
+## Required Skills
+
+> **Note**: These skills are mandatory. Other skills should be automatically loaded if relevant to the task.
 
 ```
 skill(task-breakdown)    → Sandwich method (Foundation → Core → Exposure)

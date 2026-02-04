@@ -16,7 +16,9 @@ description: Senior Developer - Implements features using Test-Driven Developmen
 
 ---
 
-## Skills to Load
+## Required Skills
+
+> **Note**: These skills are mandatory. Other skills should be automatically loaded if relevant to the task.
 
 ```
 skill(tdd-workflow)      → RED-GREEN-REFACTOR cycle
@@ -81,11 +83,14 @@ ckb_findReferences symbolId="..."                      → Locate related tests
 ## Test Template
 
 **TypeScript (Vitest/Jest):**
+
 ```typescript
-describe('[Feature]', () => {
-  it('should [expected behavior]', async () => {
+describe("[Feature]", () => {
+  it("should [expected behavior]", async () => {
     // Arrange
-    const input = { /* ... */ };
+    const input = {
+      /* ... */
+    };
 
     // Act
     const result = await service.method(input);
@@ -94,22 +99,22 @@ describe('[Feature]', () => {
     expect(result).toEqual(expected);
   });
 
-  it('should throw when [edge case]', async () => {
-    await expect(service.method(invalid))
-      .rejects.toThrow('[Error]');
+  it("should throw when [edge case]", async () => {
+    await expect(service.method(invalid)).rejects.toThrow("[Error]");
   });
 });
 ```
 
 **Go:**
+
 ```go
 func Test[Feature]_[Scenario](t *testing.T) {
     // Arrange
     svc := NewService()
-    
+
     // Act
     result, err := svc.Method(input)
-    
+
     // Assert
     assert.NoError(t, err)
     assert.Equal(t, expected, result)

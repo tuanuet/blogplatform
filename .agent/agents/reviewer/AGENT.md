@@ -16,7 +16,9 @@ description: Code Reviewer - Verifies implementation quality for parallel task e
 
 ---
 
-## Skills to Load
+## Required Skills
+
+> **Note**: These skills are mandatory. Other skills should be automatically loaded if relevant to the task.
 
 ```
 skill(code-review)       → Security, performance, best practices checklist
@@ -117,6 +119,7 @@ When multiple Builders complete tasks in same wave:
 ## Review Checklists
 
 ### Security
+
 - [ ] No SQL injection
 - [ ] No XSS vulnerabilities
 - [ ] Inputs validated
@@ -124,17 +127,20 @@ When multiple Builders complete tasks in same wave:
 - [ ] No secrets in code
 
 ### Performance
+
 - [ ] No N+1 queries
 - [ ] No unnecessary loops
 - [ ] Pagination for large datasets
 
 ### Clean Code
+
 - [ ] Meaningful names
 - [ ] Small functions
 - [ ] No duplication
 - [ ] No dead code
 
 ### TDD Violation
+
 ```
 ⚠️ Logic changed but no test changed → TDD VIOLATION → NEEDS_CHANGES
 ```
@@ -149,16 +155,19 @@ When multiple Builders complete tasks in same wave:
 ### Task: [Task ID from Wave]
 
 ### Summary
+
 - Tests: ✅ Pass
 - Security: ⚠️ 1 issue
 
 ### Issues to Fix
 
 #### 🔴 CRITICAL
+
 1. **SQL Injection** at `src/api/users.ts:42`
    - Fix: Use parameterized query
 
 ### Next Steps
+
 1. Fix issues
 2. Re-submit for review
 ```
@@ -173,13 +182,15 @@ When multiple Builders complete tasks in same wave:
 ### Task: [Task ID from Wave]
 
 ### Summary
+
 - Tests: ✅ Pass
 - Security: ✅ Clean
 - Clean Code: ✅ Clean
 - Acceptance: ✅ Met
 
 ### Status
-Mark task complete. 
+
+Mark task complete.
 If all tasks in wave approved → Proceed to next wave.
 ```
 
@@ -192,17 +203,19 @@ After reviewing all tasks in a wave:
 ```markdown
 ## Wave [N] Review Summary
 
-| Task | Builder | Status | Issues |
-|------|---------|--------|--------|
-| A    | 1       | ✅ APPROVED | - |
+| Task | Builder | Status           | Issues        |
+| ---- | ------- | ---------------- | ------------- |
+| A    | 1       | ✅ APPROVED      | -             |
 | B    | 2       | ⚠️ NEEDS_CHANGES | SQL injection |
-| C    | 3       | ✅ APPROVED | - |
+| C    | 3       | ✅ APPROVED      | -             |
 
 ### Wave Status: INCOMPLETE
+
 - 2/3 tasks approved
 - Task B needs fixes → Return to Builder 2
 
 ### Next Action
+
 - Builder 2 fixes Task B
 - Re-review Task B
 - When all approved → Proceed to Wave [N+1]

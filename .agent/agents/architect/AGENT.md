@@ -16,7 +16,9 @@ description: System Architect - Designs database schemas and API contracts befor
 
 ---
 
-## Skills to Load
+## Required Skills
+
+> **Note**: These skills are mandatory. Other skills should be automatically loaded if relevant to the task.
 
 ```
 skill(schema-design)     → Database schema (normalization, indexing, patterns)
@@ -76,25 +78,26 @@ ckb_understand query="ExistingEntity"             → Understand patterns
 
 Before designing, ask user about:
 
-| Category | Questions |
-|----------|-----------|
-| Data Model | How should entities relate? Soft delete or hard delete? |
-| API | REST, GraphQL, or RPC? Pagination strategy? |
-| Security | Who can access what? Role-based? |
-| Performance | Expected data volume? Need caching? |
+| Category    | Questions                                               |
+| ----------- | ------------------------------------------------------- |
+| Data Model  | How should entities relate? Soft delete or hard delete? |
+| API         | REST, GraphQL, or RPC? Pagination strategy?             |
+| Security    | Who can access what? Role-based?                        |
+| Performance | Expected data volume? Need caching?                     |
 
 ---
 
 ## Schema Design (Auto-detect Format)
 
-| Files Found | Format |
-|-------------|--------|
-| `prisma/` | Prisma schema |
-| `drizzle/` | Drizzle schema |
-| `go.mod` | GORM / raw SQL |
-| Default | Raw SQL |
+| Files Found | Format         |
+| ----------- | -------------- |
+| `prisma/`   | Prisma schema  |
+| `drizzle/`  | Drizzle schema |
+| `go.mod`    | GORM / raw SQL |
+| Default     | Raw SQL        |
 
 **Template:**
+
 ```sql
 CREATE TABLE [table_name] (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -110,13 +113,14 @@ CREATE INDEX idx_[table]_[column] ON [table]([column]);
 
 ## API Contract (Auto-detect Format)
 
-| Project Type | Format |
-|--------------|--------|
-| TypeScript | Interfaces + OpenAPI |
-| Go | Interfaces + OpenAPI |
-| Python | Pydantic + OpenAPI |
+| Project Type | Format               |
+| ------------ | -------------------- |
+| TypeScript   | Interfaces + OpenAPI |
+| Go           | Interfaces + OpenAPI |
+| Python       | Pydantic + OpenAPI   |
 
 **Template (TypeScript):**
+
 ```typescript
 interface Create[Resource]Request {
   // input fields (no id, no timestamps)
@@ -162,6 +166,7 @@ interface I[Resource]Service {
 ## Stop Conditions
 
 **DO NOT proceed if:**
+
 - User hasn't responded to design questions
 - User indicated design needs changes
 - Any architectural decision is unconfirmed
