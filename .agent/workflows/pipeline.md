@@ -43,9 +43,9 @@ USER REQUEST
 │                                                                     │
 │  FOR EACH WAVE:                                                     │
 │  ┌───────────────────────────────────────────────────────────────┐  │
-│  │  Spawn N Builders in PARALLEL (N = min(tasks, 5))             │  │
+│  │  Spawn N Builders in PARALLEL (N = min(tasks, 2))             │  │
 │  │  ┌─────────┐  ┌─────────┐  ┌─────────┐                        │  │
-│  │  │Builder 1│  │Builder 2│  │Builder 3│  ...up to 5            │  │
+│  │  │Builder 1│  │Builder 2│  │Builder 3│  ...up to 2            │  │
 │  │  │ Task A  │  │ Task B  │  │ Task C  │                        │  │
 │  │  └────┬────┘  └────┬────┘  └────┬────┘                        │  │
 │  │       │            │            │                             │  │
@@ -86,7 +86,7 @@ Same as before - load agent, follow instructions, wait for approval.
 ```
 FOR EACH WAVE in plan:
   1. Get tasks for this wave
-  2. Calculate builder_count = min(tasks_in_wave, 5)
+  2. Calculate builder_count = min(tasks_in_wave, 2)
   3. Spawn builder_count Builder agents IN PARALLEL
      - Each Builder handles one task
      - Use Task tool with parallel invocations
@@ -121,14 +121,14 @@ Wave 2 has 2 tasks:
 
 ## Context Passing
 
-| From | To | Context |
-|------|----|---------|
-| Gatekeeper | Architect | Refined Spec, Tech Stack |
-| Architect | Planner | Schema, API Contract |
-| Planner | Orchestrator | Todo List with Waves, Builder count |
-| Orchestrator | Builders | Task assignment, Contract reference |
-| Builder | Reviewer | Implementation, Test results |
-| Reviewer | Builder | Feedback (if NEEDS_CHANGES) |
+| From         | To           | Context                             |
+| ------------ | ------------ | ----------------------------------- |
+| Gatekeeper   | Architect    | Refined Spec, Tech Stack            |
+| Architect    | Planner      | Schema, API Contract                |
+| Planner      | Orchestrator | Todo List with Waves, Builder count |
+| Orchestrator | Builders     | Task assignment, Contract reference |
+| Builder      | Reviewer     | Implementation, Test results        |
+| Reviewer     | Builder      | Feedback (if NEEDS_CHANGES)         |
 
 ---
 
@@ -147,11 +147,11 @@ Wave 2 has 2 tasks:
 
 ## Error Recovery
 
-| Situation | Action |
-|-----------|--------|
-| Request unclear | Gatekeeper asks questions → Loop |
-| User rejects design | Architect revises → Loop |
-| User rejects plan | Planner revises → Loop |
+| Situation              | Action                                |
+| ---------------------- | ------------------------------------- |
+| Request unclear        | Gatekeeper asks questions → Loop      |
+| User rejects design    | Architect revises → Loop              |
+| User rejects plan      | Planner revises → Loop                |
 | One task fails in wave | Other tasks continue, fix failed task |
-| Review fails | Builder fixes → Re-submit (max 3) |
-| 3 rounds exceeded | Escalate to user |
+| Review fails           | Builder fixes → Re-submit (max 3)     |
+| 3 rounds exceeded      | Escalate to user                      |
