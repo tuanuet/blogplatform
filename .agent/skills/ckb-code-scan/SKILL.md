@@ -1,6 +1,6 @@
 ---
 name: ckb-code-scan
-description: Use Code Knowledge Base (CKB) tools for semantic code scanning, understanding symbols, analyzing relationships, and impact analysis instead of basic grep/glob/read operations
+description: Core engine for codebase understanding. REQUIRED for all coding tasks involving searching, navigation, or reading context. Use this BEFORE any other file operations to locating code, understand relationships, and analyze impact.
 ---
 
 # CKB Code Scanning

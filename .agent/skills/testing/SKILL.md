@@ -1,6 +1,6 @@
 ---
 name: testing
-description: Testing strategies for unit, integration, and e2e tests
+description: Testing strategies for unit test, integration test, and e2e tests
 ---
 
 # Testing Skill
