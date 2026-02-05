@@ -27,3 +27,15 @@ func RegisterBlogRoutes(v1 *gin.RouterGroup, p Params, auth *middleware.Authoriz
 		blogs.POST("/:id/comments", sessionAuth, auth.RequireCreate("comments"), p.CommentHandler.Create)
 	}
 }
+
+func RegisterVersionRoutes(v1 *gin.RouterGroup, p Params, auth *middleware.Authorization, sessionAuth gin.HandlerFunc) {
+	versions := v1.Group("/blogs/:id/versions")
+	versions.Use(sessionAuth) // All version endpoints require authentication
+	{
+		versions.GET("", p.VersionHandler.List)
+		versions.GET("/:versionId", p.VersionHandler.Get)
+		versions.POST("", auth.RequireUpdate("blogs"), p.VersionHandler.Create)
+		versions.POST("/:versionId/restore", auth.RequireUpdate("blogs"), p.VersionHandler.Restore)
+		versions.DELETE("/:versionId", auth.RequireUpdate("blogs"), p.VersionHandler.Delete)
+	}
+}

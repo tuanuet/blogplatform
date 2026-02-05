@@ -10,6 +10,7 @@ import (
 	"github.com/aiagent/internal/domain/entity"
 	"github.com/aiagent/internal/domain/repository"
 	"github.com/aiagent/internal/infrastructure/cache"
+	"github.com/aiagent/pkg/logger"
 	"github.com/google/uuid"
 )
 
@@ -18,6 +19,11 @@ var (
 	ErrBlogAccessDenied     = errors.New("access denied to this blog")
 	ErrBlogAlreadyPublished = errors.New("blog is already published")
 	ErrSlugAlreadyExists    = errors.New("slug already exists for this author")
+)
+
+const (
+	VersionInitial  = "Initial version"
+	VersionAutoSave = "Auto-saved"
 )
 
 type BlogService interface {
@@ -37,6 +43,7 @@ type blogService struct {
 	blogRepo         repository.BlogRepository
 	subscriptionRepo repository.SubscriptionRepository
 	tagRepo          repository.TagRepository
+	versionService   VersionService
 	batcher          *ReactionBatcher
 }
 
@@ -45,6 +52,7 @@ func NewBlogService(
 	subscriptionRepo repository.SubscriptionRepository,
 	tagRepo repository.TagRepository,
 	redis *cache.RedisClient,
+	versionService VersionService,
 ) BlogService {
 	// Initialize batcher with 5 second flush interval, now using Redis
 	batcher := NewReactionBatcher(blogRepo, redis, 5*time.Second)
@@ -55,6 +63,7 @@ func NewBlogService(
 		subscriptionRepo: subscriptionRepo,
 		tagRepo:          tagRepo,
 		batcher:          batcher,
+		versionService:   versionService,
 	}
 }
 
@@ -66,6 +75,10 @@ func (s *blogService) Create(ctx context.Context, blog *entity.Blog, tagIDs []uu
 
 	if err := s.blogRepo.Create(ctx, blog); err != nil {
 		return err
+	}
+
+	if _, err := s.versionService.CreateVersion(ctx, blog, blog.AuthorID, VersionInitial); err != nil {
+		logger.Error("failed to create initial blog version", err, map[string]interface{}{"blog_id": blog.ID})
 	}
 
 	if len(tagIDs) > 0 {
@@ -142,6 +155,10 @@ func (s *blogService) Update(ctx context.Context, blog *entity.Blog, tagIDs []uu
 
 	if err := s.blogRepo.Update(ctx, blog); err != nil {
 		return err
+	}
+
+	if _, err := s.versionService.CreateVersion(ctx, blog, blog.AuthorID, VersionAutoSave); err != nil {
+		logger.Error("failed to create auto-save blog version", err, map[string]interface{}{"blog_id": blog.ID})
 	}
 
 	if tagIDs != nil {

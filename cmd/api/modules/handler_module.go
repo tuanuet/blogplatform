@@ -22,6 +22,7 @@ import (
 	"github.com/aiagent/internal/interfaces/http/handler/series"
 	"github.com/aiagent/internal/interfaces/http/handler/subscription"
 	"github.com/aiagent/internal/interfaces/http/handler/tag"
+	"github.com/aiagent/internal/interfaces/http/handler/version"
 	"go.uber.org/fx"
 )
 
@@ -46,6 +47,7 @@ var HandlerModule = fx.Module("handler",
 		recommendation.NewRecommendationHandler,
 		auth.NewAuthHandler,
 		notification.NewNotificationHandler,
+		version.NewVersionHandler,
 		paymentH.NewPaymentHandler,
 		plan.NewPlanHandler,
 		func(cfg *config.Config, uc payment.ProcessWebhookUseCase) paymentH.WebhookHandler {

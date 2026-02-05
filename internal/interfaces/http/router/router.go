@@ -25,6 +25,7 @@ import (
 	"github.com/aiagent/internal/interfaces/http/handler/series"
 	"github.com/aiagent/internal/interfaces/http/handler/subscription"
 	"github.com/aiagent/internal/interfaces/http/handler/tag"
+	"github.com/aiagent/internal/interfaces/http/handler/version"
 	"github.com/aiagent/internal/interfaces/http/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -44,6 +45,7 @@ type Params struct {
 	HealthHandler         health.HealthHandler
 	AdminHandler          admin.AdminHandler
 	BlogHandler           blog.BlogHandler
+	VersionHandler        *version.VersionHandler
 	BookmarkHandler       bookmark.BookmarkHandler
 	CategoryHandler       category.CategoryHandler
 	TagHandler            tag.TagHandler
@@ -103,6 +105,7 @@ func New(p Params) *gin.Engine {
 		RegisterUserRoutes(v1, p, auth, sessionAuth)
 		RegisterRoleRoutes(v1, p, auth, sessionAuth)
 		RegisterBlogRoutes(v1, p, auth, sessionAuth)
+		RegisterVersionRoutes(v1, p, auth, sessionAuth)
 		RegisterSeriesRoutes(v1, p, auth, sessionAuth)
 		RegisterCommentRoutes(v1, p, auth, sessionAuth)
 		RegisterCategoryRoutes(v1, p, auth, sessionAuth)

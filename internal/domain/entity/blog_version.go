@@ -26,7 +26,7 @@ type BlogVersion struct {
 	// Relationships
 	Category *Category `gorm:"foreignKey:CategoryID" json:"category,omitempty"`
 	Editor   *User     `gorm:"foreignKey:EditorID" json:"editor,omitempty"`
-	Tags     []Tag     `gorm:"many2many:blog_version_tags" json:"tags,omitempty"`
+	Tags     []Tag     `gorm:"many2many:blog_version_tags;joinForeignKey:version_id;joinReferences:tag_id" json:"tags,omitempty"`
 }
 
 // TableName returns the table name for BlogVersion

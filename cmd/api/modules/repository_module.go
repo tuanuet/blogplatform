@@ -16,6 +16,7 @@ import (
 var RepositoryModule = fx.Module("repository",
 	fx.Provide(
 		pgRepo.NewBlogRepository,
+		pgRepo.NewBlogVersionRepository,
 		pgRepo.NewCategoryRepository,
 		pgRepo.NewTagRepository,
 		pgRepo.NewCommentRepository,
