@@ -39,6 +39,9 @@ func NewReactionBatcher(blogRepo repository.BlogRepository, redis *cache.RedisCl
 
 // Start begins the batch processing loop
 func (b *ReactionBatcher) Start() {
+	if b.redis == nil {
+		return
+	}
 	go func() {
 		ticker := time.NewTicker(b.interval)
 		defer ticker.Stop()
@@ -57,11 +60,24 @@ func (b *ReactionBatcher) Start() {
 
 // Stop stops the batcher
 func (b *ReactionBatcher) Stop() {
+	if b.redis == nil {
+		return
+	}
 	close(b.stopCh)
 }
 
 // Add queues a reaction update in Redis
 func (b *ReactionBatcher) Add(blogID uuid.UUID, upDelta, downDelta int) {
+	if b.redis == nil {
+		// If Redis is not available, we should ideally update the DB directly
+		// but since this is a background batcher, we'll just log and skip
+		// or we could call b.blogRepo.UpdateCounts directly.
+		// For now, let's just avoid the panic.
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_ = b.blogRepo.UpdateCounts(ctx, blogID, upDelta, downDelta)
+		return
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 

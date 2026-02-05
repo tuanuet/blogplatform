@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/aiagent/internal/application/dto"
+	"github.com/aiagent/internal/domain/entity"
 	"github.com/aiagent/internal/domain/repository"
 	"github.com/aiagent/internal/domain/service"
 	"github.com/aiagent/pkg/response"
@@ -83,25 +84,7 @@ func (h *VersionHandler) List(c *gin.Context) {
 
 	versions := make([]dto.VersionResponse, len(result.Data))
 	for i, v := range result.Data {
-		editorBrief := dto.UserBriefResponse{
-			ID: v.EditorID,
-		}
-		if v.Editor != nil {
-			editorBrief.Name = v.Editor.Name
-			editorBrief.Email = v.Editor.Email
-		}
-
-		versions[i] = dto.VersionResponse{
-			ID:            v.ID,
-			VersionNumber: v.VersionNumber,
-			Title:         v.Title,
-			Excerpt:       v.Excerpt,
-			Status:        string(v.Status),
-			Visibility:    string(v.Visibility),
-			Editor:        editorBrief,
-			ChangeSummary: v.ChangeSummary,
-			CreatedAt:     v.CreatedAt,
-		}
+		versions[i] = h.toVersionResponse(&v)
 	}
 
 	response.SuccessWithMeta(c, versions, &response.Meta{
@@ -155,25 +138,29 @@ func (h *VersionHandler) Get(c *gin.Context) {
 		return
 	}
 
+	response.Success(c, http.StatusOK, h.toVersionDetailResponse(version))
+}
+
+func (h *VersionHandler) toVersionDetailResponse(v *entity.BlogVersion) dto.VersionDetailResponse {
 	editorBrief := dto.UserBriefResponse{
-		ID: version.EditorID,
+		ID: v.EditorID,
 	}
-	if version.Editor != nil {
-		editorBrief.Name = version.Editor.Name
-		editorBrief.Email = version.Editor.Email
+	if v.Editor != nil {
+		editorBrief.Name = v.Editor.Name
+		editorBrief.Email = v.Editor.Email
 	}
 
 	var categoryResp *dto.CategoryResponse
-	if version.Category != nil {
+	if v.Category != nil {
 		categoryResp = &dto.CategoryResponse{
-			ID:   version.Category.ID,
-			Name: version.Category.Name,
-			Slug: version.Category.Slug,
+			ID:   v.Category.ID,
+			Name: v.Category.Name,
+			Slug: v.Category.Slug,
 		}
 	}
 
 	tagsResp := make([]dto.TagResponse, 0)
-	for _, t := range version.Tags {
+	for _, t := range v.Tags {
 		tagsResp = append(tagsResp, dto.TagResponse{
 			ID:   t.ID,
 			Name: t.Name,
@@ -181,24 +168,22 @@ func (h *VersionHandler) Get(c *gin.Context) {
 		})
 	}
 
-	resp := dto.VersionDetailResponse{
-		ID:            version.ID,
-		VersionNumber: version.VersionNumber,
-		Title:         version.Title,
-		Slug:          version.Slug,
-		Excerpt:       version.Excerpt,
-		Content:       version.Content,
-		ThumbnailURL:  version.ThumbnailURL,
-		Status:        string(version.Status),
-		Visibility:    string(version.Visibility),
+	return dto.VersionDetailResponse{
+		ID:            v.ID,
+		VersionNumber: v.VersionNumber,
+		Title:         v.Title,
+		Slug:          v.Slug,
+		Excerpt:       v.Excerpt,
+		Content:       v.Content,
+		ThumbnailURL:  v.ThumbnailURL,
+		Status:        string(v.Status),
+		Visibility:    string(v.Visibility),
 		Category:      categoryResp,
 		Tags:          tagsResp,
 		Editor:        editorBrief,
-		ChangeSummary: version.ChangeSummary,
-		CreatedAt:     version.CreatedAt,
+		ChangeSummary: v.ChangeSummary,
+		CreatedAt:     v.CreatedAt,
 	}
-
-	response.Success(c, http.StatusOK, resp)
 }
 
 func (h *VersionHandler) Create(c *gin.Context) {
@@ -264,28 +249,29 @@ func (h *VersionHandler) Create(c *gin.Context) {
 		return
 	}
 
-	// Map response
+	response.Success(c, http.StatusOK, h.toVersionResponse(version))
+}
+
+func (h *VersionHandler) toVersionResponse(v *entity.BlogVersion) dto.VersionResponse {
 	editorBrief := dto.UserBriefResponse{
-		ID: version.EditorID,
+		ID: v.EditorID,
 	}
-	if version.Editor != nil {
-		editorBrief.Name = version.Editor.Name
-		editorBrief.Email = version.Editor.Email
+	if v.Editor != nil {
+		editorBrief.Name = v.Editor.Name
+		editorBrief.Email = v.Editor.Email
 	}
 
-	resp := dto.VersionResponse{
-		ID:            version.ID,
-		VersionNumber: version.VersionNumber,
-		Title:         version.Title,
-		Excerpt:       version.Excerpt,
-		Status:        string(version.Status),
-		Visibility:    string(version.Visibility),
+	return dto.VersionResponse{
+		ID:            v.ID,
+		VersionNumber: v.VersionNumber,
+		Title:         v.Title,
+		Excerpt:       v.Excerpt,
+		Status:        string(v.Status),
+		Visibility:    string(v.Visibility),
 		Editor:        editorBrief,
-		ChangeSummary: version.ChangeSummary,
-		CreatedAt:     version.CreatedAt,
+		ChangeSummary: v.ChangeSummary,
+		CreatedAt:     v.CreatedAt,
 	}
-
-	response.Success(c, http.StatusOK, resp)
 }
 
 func (h *VersionHandler) Restore(c *gin.Context) {
@@ -331,10 +317,10 @@ func (h *VersionHandler) Restore(c *gin.Context) {
 	}
 
 	// Map Blog to BlogResponse
-	// We need to map manually as we don't have a mapper service here
-	// and we don't want to duplicate code too much.
-	// Ideally we use a helper.
+	response.Success(c, http.StatusOK, h.toBlogResponse(blog))
+}
 
+func (h *VersionHandler) toBlogResponse(blog *entity.Blog) dto.BlogResponse {
 	authorBrief := dto.UserBriefResponse{ID: blog.AuthorID}
 	if blog.Author != nil {
 		authorBrief.Name = blog.Author.Name
@@ -359,7 +345,7 @@ func (h *VersionHandler) Restore(c *gin.Context) {
 		})
 	}
 
-	resp := dto.BlogResponse{
+	return dto.BlogResponse{
 		ID:            blog.ID,
 		AuthorID:      blog.AuthorID,
 		Author:        &authorBrief,
@@ -379,8 +365,6 @@ func (h *VersionHandler) Restore(c *gin.Context) {
 		CreatedAt:     blog.CreatedAt,
 		UpdatedAt:     blog.UpdatedAt,
 	}
-
-	response.Success(c, http.StatusOK, resp)
 }
 
 func (h *VersionHandler) Delete(c *gin.Context) {

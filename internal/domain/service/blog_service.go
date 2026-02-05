@@ -77,12 +77,15 @@ func (s *blogService) Create(ctx context.Context, blog *entity.Blog, tagIDs []uu
 		return err
 	}
 
-	if _, err := s.versionService.CreateVersion(ctx, blog, blog.AuthorID, VersionInitial); err != nil {
-		logger.Error("failed to create initial blog version", err, map[string]interface{}{"blog_id": blog.ID})
-	}
-
 	if len(tagIDs) > 0 {
 		_ = s.blogRepo.AddTags(ctx, blog.ID, tagIDs)
+		// Populate tags for versioning
+		tags, _ := s.tagRepo.FindByIDs(ctx, tagIDs)
+		blog.Tags = tags
+	}
+
+	if _, err := s.versionService.CreateVersion(ctx, blog, blog.AuthorID, VersionInitial); err != nil {
+		logger.Error("failed to create initial blog version", err, map[string]interface{}{"blog_id": blog.ID})
 	}
 
 	return nil
@@ -157,13 +160,17 @@ func (s *blogService) Update(ctx context.Context, blog *entity.Blog, tagIDs []uu
 		return err
 	}
 
+	if tagIDs != nil {
+		_ = s.blogRepo.ReplaceTags(ctx, blog.ID, tagIDs)
+		// Populate tags for versioning
+		tags, _ := s.tagRepo.FindByIDs(ctx, tagIDs)
+		blog.Tags = tags
+	}
+
 	if _, err := s.versionService.CreateVersion(ctx, blog, blog.AuthorID, VersionAutoSave); err != nil {
 		logger.Error("failed to create auto-save blog version", err, map[string]interface{}{"blog_id": blog.ID})
 	}
 
-	if tagIDs != nil {
-		_ = s.blogRepo.ReplaceTags(ctx, blog.ID, tagIDs)
-	}
 	return nil
 }
 

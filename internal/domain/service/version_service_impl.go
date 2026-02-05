@@ -49,6 +49,7 @@ func (s *versionService) CreateVersion(ctx context.Context, blog *entity.Blog, e
 		CategoryID:    blog.CategoryID,
 		EditorID:      editorID,
 		ChangeSummary: changeSummaryPtr,
+		Tags:          blog.Tags,
 	}
 
 	if err := s.versionRepo.Create(ctx, version); err != nil {
@@ -121,6 +122,15 @@ func (s *versionService) RestoreVersion(ctx context.Context, blogID uuid.UUID, v
 	blog.CategoryID = version.CategoryID
 
 	if err := s.blogRepo.Update(ctx, blog); err != nil {
+		return nil, err
+	}
+
+	// Restore tags
+	tagIDs := make([]uuid.UUID, 0, len(version.Tags))
+	for _, t := range version.Tags {
+		tagIDs = append(tagIDs, t.ID)
+	}
+	if err := s.blogRepo.ReplaceTags(ctx, blog.ID, tagIDs); err != nil {
 		return nil, err
 	}
 

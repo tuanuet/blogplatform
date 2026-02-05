@@ -12,8 +12,9 @@ import (
 	"github.com/aiagent/internal/application/dto"
 	"github.com/aiagent/internal/application/usecase/blog"
 	"github.com/aiagent/internal/domain/entity"
+	"github.com/aiagent/internal/domain/repository"
 	"github.com/aiagent/internal/domain/service"
-	"github.com/aiagent/internal/infrastructure/persistence/postgres/repository"
+	postgresRepository "github.com/aiagent/internal/infrastructure/persistence/postgres/repository"
 	blogHandler "github.com/aiagent/internal/interfaces/http/handler/blog"
 	versionHandler "github.com/aiagent/internal/interfaces/http/handler/version"
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,7 @@ type VersionTestContext struct {
 	DB             *gin.Engine
 	BlogHandler    blogHandler.BlogHandler
 	VersionHandler *versionHandler.VersionHandler
+	TagRepo        repository.TagRepository
 	UserAReader    *TestUser
 	UserBReader    *TestUser
 	Cleanup        func()
@@ -41,11 +43,11 @@ func setupVersionTestServer(t *testing.T) *VersionTestContext {
 	db, cleanup := setupTestDB(t)
 
 	// Repositories
-	blogRepo := repository.NewBlogRepository(db)
-	versionRepo := repository.NewBlogVersionRepository(db)
-	userRepo := repository.NewUserRepository(db)
-	subRepo := repository.NewSubscriptionRepository(db)
-	tagRepo := repository.NewTagRepository(db)
+	blogRepo := postgresRepository.NewBlogRepository(db)
+	versionRepo := postgresRepository.NewBlogVersionRepository(db)
+	userRepo := postgresRepository.NewUserRepository(db)
+	subRepo := postgresRepository.NewSubscriptionRepository(db)
+	tagRepo := postgresRepository.NewTagRepository(db)
 
 	// Services
 	versionSvc := service.NewVersionService(versionRepo, blogRepo)
@@ -120,6 +122,7 @@ func setupVersionTestServer(t *testing.T) *VersionTestContext {
 		DB:             r,
 		BlogHandler:    bHandler,
 		VersionHandler: vHandler,
+		TagRepo:        tagRepo,
 		UserAReader: &TestUser{
 			ID:    userA.ID,
 			Email: userA.Email,
@@ -143,12 +146,24 @@ func TestVersionHistoryWorkflow(t *testing.T) {
 	defer ctx.Cleanup()
 
 	var blogID string
+	var tag1ID uuid.UUID
 
-	t.Run("1. Create blog (verify Version 1 exists)", func(t *testing.T) {
+	t.Run("0. Create a tag", func(t *testing.T) {
+		tag := &entity.Tag{
+			ID:   uuid.New(),
+			Name: "Tag 1",
+			Slug: "tag-1",
+		}
+		require.NoError(t, ctx.TagRepo.Create(context.Background(), tag))
+		tag1ID = tag.ID
+	})
+
+	t.Run("1. Create blog (verify Version 1 exists and has tags)", func(t *testing.T) {
 		reqBody := dto.CreateBlogRequest{
 			Title:   "Initial Title",
 			Slug:    "initial-slug",
 			Content: "Initial Content",
+			TagIDs:  []string{tag1ID.String()},
 		}
 		jsonBody, _ := json.Marshal(reqBody)
 		w := httptest.NewRecorder()
@@ -179,6 +194,18 @@ func TestVersionHistoryWorkflow(t *testing.T) {
 		json.Unmarshal(w.Body.Bytes(), &vResp)
 		assert.Len(t, vResp.Data, 1)
 		assert.Equal(t, 1, vResp.Data[0].VersionNumber)
+
+		// Verify Version 1 detail has tags
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("GET", fmt.Sprintf("/api/v1/blogs/%s/versions/%s", blogID, vResp.Data[0].ID), nil)
+		req.Header.Set("Authorization", ctx.UserAReader.Token)
+		ctx.DB.ServeHTTP(w, req)
+		var vDetail struct {
+			Data dto.VersionDetailResponse `json:"data"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &vDetail)
+		assert.Len(t, vDetail.Data.Tags, 1)
+		assert.Equal(t, "Tag 1", vDetail.Data.Tags[0].Name)
 	})
 
 	t.Run("2. Update blog (verify Version 2 exists)", func(t *testing.T) {
@@ -291,7 +318,7 @@ func TestVersionHistoryWorkflow(t *testing.T) {
 		assert.Equal(t, "Initial Content", vDetail.Data.Content)
 	})
 
-	t.Run("6. Restore to Version 1 (verify blog content and Version 4 exists)", func(t *testing.T) {
+	t.Run("6. Restore to Version 1 (verify blog content, tags and Version 4 exists)", func(t *testing.T) {
 		// Get ID of version 1
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/api/v1/blogs/%s/versions", blogID), nil)
@@ -319,6 +346,8 @@ func TestVersionHistoryWorkflow(t *testing.T) {
 		}
 		json.Unmarshal(w.Body.Bytes(), &bResp)
 		assert.Equal(t, "Initial Title", bResp.Data.Title)
+		assert.Len(t, bResp.Data.Tags, 1)
+		assert.Equal(t, "Tag 1", bResp.Data.Tags[0].Name)
 
 		// Verify Version 4 exists
 		w = httptest.NewRecorder()
@@ -430,6 +459,29 @@ func TestVersionHistorySecurity(t *testing.T) {
 	t.Run("User B cannot restore version of User A's blog", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("POST", fmt.Sprintf("/api/v1/blogs/%s/versions/%s/restore", blogID, v1ID), nil)
+		req.Header.Set("Authorization", ctx.UserBReader.Token)
+		ctx.DB.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+	})
+
+	t.Run("User B cannot create version for User A's blog", func(t *testing.T) {
+		reqBody := dto.CreateVersionRequest{
+			ChangeSummary: "User B trying to create version",
+		}
+		jsonBody, _ := json.Marshal(reqBody)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", fmt.Sprintf("/api/v1/blogs/%s/versions", blogID), bytes.NewBuffer(jsonBody))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", ctx.UserBReader.Token)
+		ctx.DB.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+	})
+
+	t.Run("User B cannot delete User A's version", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("DELETE", fmt.Sprintf("/api/v1/blogs/%s/versions/%s", blogID, v1ID), nil)
 		req.Header.Set("Authorization", ctx.UserBReader.Token)
 		ctx.DB.ServeHTTP(w, req)
 
