@@ -13,10 +13,18 @@ description: Create or Update documentation on demand.
 
 ## Flow
 
-```
-User Request ──▶ Documenter ──▶ Draft ──▶ Document-Reviewer ──▶ Final Output
-                     ▲                            │
-                     └─────── (Feedback) ─────────┘
+```mermaid
+flowchart LR
+    Start([User Request]) --> Documenter[Documenter]
+    Documenter --> Draft[Draft Docs]
+    Draft --> Reviewer[Document-Reviewer]
+    
+    Reviewer -->|APPROVED| Output([Final Output])
+    Reviewer -->|NEEDS_CHANGES| Documenter
+    
+    style Documenter fill:#e3f2fd
+    style Reviewer fill:#fce4ec
+    style Output fill:#c8e6c9
 ```
 
 ## Steps

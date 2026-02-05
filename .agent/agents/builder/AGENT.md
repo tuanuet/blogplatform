@@ -78,51 +78,6 @@ ckb_findReferences symbolId="..."                      → Locate related tests
 └─────────────────────────────────────────────┘
 ```
 
----
-
-## Test Template
-
-**TypeScript (Vitest/Jest):**
-
-```typescript
-describe("[Feature]", () => {
-  it("should [expected behavior]", async () => {
-    // Arrange
-    const input = {
-      /* ... */
-    };
-
-    // Act
-    const result = await service.method(input);
-
-    // Assert
-    expect(result).toEqual(expected);
-  });
-
-  it("should throw when [edge case]", async () => {
-    await expect(service.method(invalid)).rejects.toThrow("[Error]");
-  });
-});
-```
-
-**Go:**
-
-```go
-func Test[Feature]_[Scenario](t *testing.T) {
-    // Arrange
-    svc := NewService()
-
-    // Act
-    result, err := svc.Method(input)
-
-    // Assert
-    assert.NoError(t, err)
-    assert.Equal(t, expected, result)
-}
-```
-
----
-
 ## Clean Code Checklist (REFACTOR phase)
 
 - [ ] Meaningful names
@@ -131,21 +86,6 @@ func Test[Feature]_[Scenario](t *testing.T) {
 - [ ] No deep nesting (max 2-3 levels)
 - [ ] DRY - No duplicated logic
 - [ ] Comments explain WHY, not WHAT
-
----
-
-## Mocking (Go)
-
-```go
-ctrl := gomock.NewController(t)
-defer ctrl.Finish()
-
-mockRepo := mocks.NewMockUserRepository(ctrl)
-mockRepo.EXPECT().FindById("123").Return(&user, nil)
-
-svc := NewUserService(mockRepo)
-result, err := svc.GetUser("123")
-```
 
 ---
 

@@ -13,7 +13,7 @@ description: Creative Facilitator - Collaborative feature discussion and require
 
 > **Ideas before implementation** - Explore the problem space thoroughly before jumping to solutions.
 >
-> This is a **pre-cursor** to `/pipeline`. Output feeds directly into Gatekeeper.
+> This is a **pre-cursor** to `/develop`. Output feeds directly into Gatekeeper.
 
 ## Required Skills
 
@@ -30,7 +30,7 @@ Raw feature idea (may be vague or incomplete)
 
 ## Output
 
-**Feature Specification** - Structured document ready for `/pipeline` (Gatekeeper)
+**Feature Specification** - Structured document ready for `/develop` (Gatekeeper)
 
 ## Workflow
 
@@ -140,7 +140,7 @@ As a [role], I want to [action] so that [benefit].
 
 ## Phase 3: PREPARE (Pipeline Input)
 
-**Goal**: Structure output for `/pipeline`
+**Goal**: Structure output for `/develop`
 
 ### Steps
 
@@ -299,7 +299,7 @@ As a [role], I want to [action] so that [benefit].
 │  │   YES                           │
 │  └───────┼─────────────────────────┘
 │          ↓                              │
-│  Output: Feature Spec for /pipeline     │
+│  Output: Feature Spec for /develop     │
 └─────────────────────────────────────────┘
 ```
 
@@ -308,12 +308,12 @@ As a [role], I want to [action] so that [benefit].
 ## Integration with Pipeline
 
 ```
-/brainstorm (This Agent) ──▶ Output: Feature Spec ──▶ /pipeline (Gatekeeper)
+/brainstorm (This Agent) ──▶ Output: Feature Spec ──▶ /develop (Gatekeeper)
 ```
 
 ### Handoff Checklist
 
-Before handing off to `/pipeline`, ensure:
+Before handing off to `/develop`, ensure:
 
 - [ ] Objective is clear and concise
 - [ ] All requirements are listed and checkable

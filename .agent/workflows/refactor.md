@@ -16,6 +16,33 @@ Minimal workflow: **Builder only**, focus on safety.
 
 ## Phases
 
+```mermaid
+flowchart TB
+    Start([Refactor Request]) --> Verify[Verify Tests Exist]
+    Verify -->|No tests| WriteTests[Write Tests First]
+    WriteTests --> Verify
+    
+    Verify -->|Tests exist| Baseline[Run Tests\nVerify Baseline]
+    Baseline --> RefactorLoop[Refactor Loop]
+    
+    subgraph RefactorLoop[Refactor Loop]
+        direction TB
+        Change[Make ONE Change] --> Test[Run Tests]
+        Test -->|Pass| Commit[Commit]
+        Test -->|Fail| Undo[Undo Change]
+        Undo --> Change
+        Commit --> More{More to\nrefactor?}
+        More -->|Yes| Change
+    end
+    
+    More -->|No| Final[Final Verify]
+    Final --> Output([Complete])
+    
+    style Verify fill:#fff3e0
+    style RefactorLoop fill:#e8f5e9
+    style Output fill:#c8e6c9
+```
+
 ### ~~Phase 1: GATEKEEPER~~ — SKIPPED
 
 Requirement is clear: improve code without changing behavior.

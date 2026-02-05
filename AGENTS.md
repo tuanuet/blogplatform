@@ -2,11 +2,11 @@
 
 ## Orchestration
 
-### Pipeline Workflow
+### Development Workflow
 
-**Location**: `.agent/workflows/pipeline.md`
+**Location**: `.agent/workflows/develop.md`
 
-**Trigger**: `/pipeline` command or auto-detected for multi-phase development
+**Trigger**: `/develop` command or auto-detected for multi-phase development
 
 **Responsibility**: Coordinates the 5-Phase Pipeline by loading and following agent instructions in sequence.
 
@@ -18,9 +18,19 @@
 
 **Trigger**: `/brainstorm` command
 
-**Responsibility**: Collaborative feature discussion and requirement definition. Pre-cursor to `/pipeline`.
+**Responsibility**: Collaborative feature discussion and requirement definition. Pre-cursor to `/develop`.
 
-**Flow**: Discuss → Define → Prepare → Output Feature Spec for `/pipeline`
+**Flow**: Discuss → Define → Prepare → Output Feature Spec for `/develop`
+
+### Implementation Workflow
+
+**Location**: `.agent/workflows/implementation.md`
+
+**Trigger**: `/implementation` command
+
+**Responsibility**: Implementation workflow for pre-defined specs. Skips Gatekeeper phase, starts from Architect.
+
+**Flow**: Architect → Planner → Builder ⇄ Reviewer
 
 ### Document Workflow
 
@@ -53,11 +63,11 @@
 
 **Output**:
 
-- Feature Specification (ready for `/pipeline`)
+- Feature Specification (ready for `/develop`)
 
 **Workflow**: DISCUSS (context) → DEFINE (specs) → PREPARE (output)
 
-**Integration**: `/brainstorm` → Feature Spec → `/pipeline` (Gatekeeper)
+**Integration**: `/brainstorm` → Feature Spec → `/develop` (Gatekeeper)
 
 ---
 
@@ -251,7 +261,7 @@
 ┌─────────────────────────────────────────────────────┐
 │  User Request                                       │
 │       ↓                                             │
-│  [/pipeline workflow] ──→ Load appropriate agent    │
+│  [/develop workflow] ──→ Load appropriate agent    │
 │       │                                             │
 │       ↓                                             │
 │  [Gatekeeper] ──→ Refined Spec or Questions         │

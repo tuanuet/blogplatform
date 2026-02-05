@@ -13,7 +13,7 @@ GATEKEEPER → ARCHITECT → BUILDER
 
 | Command        | Description             |
 | -------------- | ----------------------- |
-| `/pipeline`    | Full 3-phase workflow   |
+| `/develop`     | Full 3-phase workflow   |
 | `/new-feature` | New feature development |
 | `/bug-fix`     | Bug fix workflow        |
 

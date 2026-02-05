@@ -64,6 +64,26 @@ Create a skill file at `.agent/skills/learned/[pattern-name].md`:
 
 ## Process
 
+```mermaid
+flowchart TB
+    Start([/learn]) --> Review[Review Session]
+    
+    Review --> Identify[Identify Pattern]
+    Identify --> Draft[Draft Skill File]
+    
+    Draft --> Confirm{User\nConfirms?}
+    Confirm -->|No| Revise[Revise Draft]
+    Revise --> Draft
+    
+    Confirm -->|Yes| Save[Save to\n.agent/skills/learned/]
+    Save --> Output([Pattern Saved])
+    
+    style Review fill:#e3f2fd
+    style Identify fill:#f3e5f5
+    style Draft fill:#fff3e0
+    style Output fill:#c8e6c9
+```
+
 1. Review the session for extractable patterns
 2. Identify the most valuable/reusable insight
 3. Draft the skill file

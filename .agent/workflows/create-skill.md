@@ -16,6 +16,28 @@ Uses the `skill-creator` skill to guide the creation of high-quality, effective 
 
 ## Phases
 
+```mermaid
+flowchart TB
+    Start([Skill Request]) --> Prep[Phase 1: Preparation]
+    
+    Prep -->|Load skill-creator| Design[Define Context]
+    Design --> Create[Phase 2: Creation]
+    
+    Create -->|Scaffold directory| Draft[Draft SKILL.md]
+    Draft --> Review[Review Format]
+    Review -->|Needs changes| Draft
+    Review -->|Approved| Verify[Phase 3: Verification]
+    
+    Verify -->|Test skill| Test{Works?}
+    Test -->|No| Draft
+    Test -->|Yes| Output([Skill Ready])
+    
+    style Prep fill:#e3f2fd
+    style Create fill:#e8f5e9
+    style Verify fill:#fff3e0
+    style Output fill:#c8e6c9
+```
+
 ### Phase 1: Preparation & Design
 
 1. **Load Skill**: `skill-creator`

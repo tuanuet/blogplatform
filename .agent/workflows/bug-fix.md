@@ -16,6 +16,26 @@ Simplified workflow: **Skip Architect**, focus on reproducing and fixing.
 
 ## Phases
 
+```mermaid
+flowchart TB
+    Start([Bug Report]) --> Gatekeeper[Phase 1: Gatekeeper\nGather Bug Info]
+    
+    Gatekeeper --> Reproduce[Phase 3: Builder\nCreate Failing Test]
+    
+    Reproduce -->|Test Fails| Fix[Write Minimal Fix]
+    Fix --> Tests[Run All Tests]
+    
+    Tests -->|Pass| Verify[Manual Verify]
+    Tests -->|Fail| Fix
+    
+    Verify --> Output([Complete])
+    
+    style Gatekeeper fill:#ffebee
+    style Reproduce fill:#fff3e0
+    style Fix fill:#e8f5e9
+    style Output fill:#c8e6c9
+```
+
 ### Phase 1: GATEKEEPER (Lite)
 
 Gather bug info:

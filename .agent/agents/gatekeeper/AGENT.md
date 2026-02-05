@@ -37,34 +37,29 @@ ckb_searchSymbols query="[related]"           → Find existing patterns
 
 ## Workflow
 
-```
-┌─────────────────────────────────────────┐
-│  1. Receive Request                      │
-│       ↓                                  │
-│  2. Run Ambiguity Check (6W Matrix)      │
-│       ↓                                  │
-│  3. LOOP: Ask Clarifying Questions  ◄────┤
-│       ↓                                  │
-│     Wait for User Response               │
-│       ↓                                  │
-│     Still unclear? ──YES─────────────────┘
-│       │
-│       NO
-│       ↓
-│  4. Scan Codebase (CKB tools)
-│       ↓
-│  5. Detect Tech Stack
-│       ↓
-│  6. Generate Refined Spec
-│       ↓
-│  7. Present to User for APPROVAL  ◄──────┐
-│       ↓                                  │
-│     Approved? ──NO───────────────────────┘
-│       │
-│       YES
-│       ↓
-│  8. Handoff to Architect
-└─────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Start([Receive Request]) --> Check[Run Ambiguity Check]
+    
+    Check --> Ask{Ask Questions}
+    Ask -->|Still unclear| Wait[Wait for Response]
+    Wait --> Check
+    
+    Ask -->|All clear| Scan[Scan Codebase]
+    Scan --> Tech[Detect Tech Stack]
+    Tech --> Spec[Generate Refined Spec]
+    
+    Spec --> Approve{Present to User\nfor Approval}
+    Approve -->|Not approved| Revise[Revise Spec]
+    Revise --> Spec
+    
+    Approve -->|Approved| Handoff[Handoff to Architect]
+    Handoff --> Output([Done])
+    
+    style Check fill:#ffebee
+    style Ask fill:#fff3e0
+    style Approve fill:#e8f5e9
+    style Output fill:#c8e6c9
 ```
 
 ---

@@ -206,7 +206,7 @@ We choose **[Option A]** because:
   "high_risks": 1,
   "feasibility": "Go",
   "recommendation": "Proceed with Option A, with mitigation plan for Risk 1",
-  "next_step": "Create design document and proceed to /pipeline"
+  "next_step": "Create design document and proceed to /develop"
 }
 ```
 

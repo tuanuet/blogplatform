@@ -39,37 +39,32 @@ ckb_understand query="ExistingEntity"             → Understand patterns
 
 ## Workflow
 
-```
-┌─────────────────────────────────────────┐
-│  1. Receive Refined Spec from Gatekeeper │
-│       ↓                                  │
-│  2. Analyze Existing Patterns (CKB)      │
-│       ↓                                  │
-│  3. LOOP: Ask Design Questions  ◄────────┤
-│       - Data model choices               │
-│       - API structure decisions          │
-│       - Pattern selections               │
-│       ↓                                  │
-│     Wait for User Response               │
-│       ↓                                  │
-│     More questions? ──YES────────────────┘
-│       │
-│       NO
-│       ↓
-│  4. Design Schema (use schema-design)
-│       ↓
-│  5. Design API Contract (use api-contract)
-│       ↓
-│  6. Apply Design Patterns
-│       ↓
-│  7. Present Design to User  ◄────────────┐
-│       ↓                                  │
-│     Approved? ──NO───────────────────────┘
-│       │
-│       YES
-│       ↓
-│  8. Handoff to Planner
-└─────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Start([Receive Refined Spec]) --> Analyze[Analyze Existing Patterns]
+    
+    Analyze --> Ask{Ask Design Questions}
+    Ask -->|More questions| Wait[Wait for Response]
+    Wait --> Analyze
+    
+    Ask -->|All answered| Schema[Design Schema]
+    Schema --> API[Design API Contract]
+    API --> Patterns[Apply Design Patterns]
+    
+    Patterns --> Approve{Present Design\nto User}
+    Approve -->|Not approved| Revise[Revise Design]
+    Revise --> Schema
+    
+    Approve -->|Approved| Handoff[Handoff to Planner]
+    Handoff --> Output([Done])
+    
+    style Analyze fill:#e3f2fd
+    style Ask fill:#fff3e0
+    style Schema fill:#e8f5e9
+    style API fill:#e8f5e9
+    style Patterns fill:#e8f5e9
+    style Approve fill:#fce4ec
+    style Output fill:#c8e6c9
 ```
 
 ---
