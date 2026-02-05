@@ -22,6 +22,16 @@
 
 **Flow**: Discuss → Define → Prepare → Output Feature Spec for `/pipeline`
 
+### Document Workflow
+
+**Location**: `.agent/workflows/document.md`
+
+**Trigger**: `/document` command
+
+**Responsibility**: Generate and verify documentation on demand.
+
+**Flow**: Documenter → Document-Reviewer
+
 ---
 
 ## Agents
@@ -181,6 +191,57 @@
 **Workflow**: Review → Feedback Loop → Until Approved
 
 **Constraint**: Max 3 review rounds, then escalate to user
+
+---
+
+### Documenter Agent
+
+**Role**: Documentation Specialist
+
+**Location**: `.agent/agents/documenter/AGENT.md`
+
+**Skills**:
+
+- `ckb-code-scan`
+- `mermaid-diagram-specialist`
+- `api-contract`
+- `documentation`
+
+**Input**: User request (Scope/Type) + Codebase
+
+**Output**:
+
+- Architecture Diagrams (C4)
+- User Flow Diagrams (Sequence)
+- API Documentation
+
+**Workflow**: Analyze → Scan → Generate → Save
+
+**Trigger**: On-demand (e.g. "Document auth flow")
+
+---
+
+### Document-Reviewer Agent
+
+**Role**: Documentation QA
+
+**Location**: `.agent/agents/document-reviewer/AGENT.md`
+
+**Skills**:
+
+- `code-review`
+- `ckb-code-scan`
+- `api-contract`
+- `documentation`
+
+**Input**: Draft Documentation + Codebase
+
+**Output**:
+
+- APPROVED (ready to save)
+- NEEDS_CHANGES (feedback to Documenter)
+
+**Workflow**: Verify Accuracy → Verify Quality → Report
 
 ---
 
