@@ -80,3 +80,90 @@ func TestUpdateProfile_WithBirthday(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.Equal(t, birthdayStr, resp.Birthday)
 }
+
+func TestUpdateProfile_WithDescription(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	description := "This is a long description about the user."
+	req := dto.UpdateProfileRequest{
+		Description: &description,
+	}
+
+	mockUserSvc.EXPECT().UpdateUser(gomock.Any(), userID, gomock.Any()).Return(nil)
+
+	user := &entity.User{
+		ID:          userID,
+		Name:        "Test User",
+		Email:       "test@example.com",
+		Description: &description,
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.UpdateProfile(context.Background(), userID, req)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, description, resp.Description)
+}
+
+func TestGetProfile_WithDescription(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	description := "User description"
+	user := &entity.User{
+		ID:          userID,
+		Name:        "Test User",
+		Email:       "test@example.com",
+		Description: &description,
+		CreatedAt:   time.Now(),
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.GetProfile(context.Background(), userID)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, description, resp.Description)
+}
+
+func TestGetPublicProfile_WithDescription(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	description := "Public user description"
+	user := &entity.User{
+		ID:          userID,
+		Name:        "Test User",
+		Description: &description,
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.GetPublicProfile(context.Background(), userID)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, description, resp.Description)
+}

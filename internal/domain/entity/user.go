@@ -21,6 +21,7 @@ type User struct {
 	// Profile fields
 	DisplayName   *string    `gorm:"size:50" json:"displayName,omitempty"`
 	Bio           *string    `gorm:"type:text" json:"bio,omitempty"`
+	Description   *string    `gorm:"type:text" json:"description,omitempty"`
 	AvatarURL     *string    `gorm:"size:500" json:"avatarUrl,omitempty"`
 	Website       *string    `gorm:"size:255" json:"website,omitempty"`
 	Location      *string    `gorm:"size:100" json:"location,omitempty"`

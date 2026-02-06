@@ -122,6 +122,9 @@ func (uc *profileUseCase) UpdateProfile(ctx context.Context, userID uuid.UUID, r
 		}
 		updates["birthday"] = birthday
 	}
+	if req.Description != nil {
+		updates["description"] = *req.Description
+	}
 
 	if err := uc.userSvc.UpdateUser(ctx, userID, updates); err != nil {
 		return nil, err
@@ -234,6 +237,9 @@ func (uc *profileUseCase) toProfileResponse(user *entity.User) *dto.ProfileRespo
 	if user.Birthday != nil {
 		resp.Birthday = user.Birthday.Format("2006-01-02")
 	}
+	if user.Description != nil {
+		resp.Description = *user.Description
+	}
 
 	return resp
 }
@@ -264,6 +270,9 @@ func (uc *profileUseCase) toPublicProfileResponse(user *entity.User) *dto.Public
 	}
 	if user.LinkedinURL != nil {
 		resp.LinkedinURL = *user.LinkedinURL
+	}
+	if user.Description != nil {
+		resp.Description = *user.Description
 	}
 
 	return resp

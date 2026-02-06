@@ -13,6 +13,7 @@ type UpdateProfileRequest struct {
 	LinkedinURL   *string `json:"linkedinUrl" validate:"omitempty,max=255,url"`
 	Gender        *string `json:"gender" validate:"omitempty,oneof=male female other"`
 	Birthday      *string `json:"birthday" validate:"omitempty,datetime=2006-01-02"`
+	Description   *string `json:"description" validate:"omitempty,max=5000"`
 }
 
 // ProfileResponse represents the user profile response
@@ -30,6 +31,7 @@ type ProfileResponse struct {
 	LinkedinURL   string    `json:"linkedinUrl,omitempty"`
 	Gender        string    `json:"gender,omitempty"`
 	Birthday      string    `json:"birthday,omitempty"`
+	Description   string    `json:"description,omitempty"`
 	CreatedAt     string    `json:"createdAt"`
 }
 
@@ -38,6 +40,7 @@ type PublicProfileResponse struct {
 	ID            uuid.UUID `json:"id"`
 	DisplayName   string    `json:"displayName"`
 	Bio           string    `json:"bio,omitempty"`
+	Description   string    `json:"description,omitempty"`
 	AvatarURL     string    `json:"avatarUrl,omitempty"`
 	Website       string    `json:"website,omitempty"`
 	Location      string    `json:"location,omitempty"`
