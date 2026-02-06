@@ -9,6 +9,13 @@ import (
 	"github.com/google/uuid"
 )
 
+type HighlightedSeriesResult struct {
+	Series          *entity.Series
+	Author          *entity.User
+	SubscriberCount int
+	BlogCount       int
+}
+
 type SeriesRepository interface {
 	Create(ctx context.Context, series *entity.Series) error
 	Update(ctx context.Context, series *entity.Series) error
@@ -18,4 +25,5 @@ type SeriesRepository interface {
 	List(ctx context.Context, params map[string]interface{}) ([]entity.Series, int64, error)
 	AddBlog(ctx context.Context, seriesID, blogID uuid.UUID) error
 	RemoveBlog(ctx context.Context, seriesID, blogID uuid.UUID) error
+	GetHighlighted(ctx context.Context, limit int) ([]HighlightedSeriesResult, error)
 }

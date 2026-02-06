@@ -14,4 +14,5 @@ type SeriesHandler interface {
 	List(c *gin.Context)
 	AddBlog(c *gin.Context)
 	RemoveBlog(c *gin.Context)
+	GetHighlightedSeries(c *gin.Context)
 }

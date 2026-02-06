@@ -85,6 +85,21 @@ func (mr *MockSeriesUseCaseMockRecorder) DeleteSeries(ctx, userID, seriesID any)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSeries", reflect.TypeOf((*MockSeriesUseCase)(nil).DeleteSeries), ctx, userID, seriesID)
 }
 
+// GetHighlightedSeries mocks base method.
+func (m *MockSeriesUseCase) GetHighlightedSeries(ctx context.Context) ([]*dto.HighlightedSeriesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetHighlightedSeries", ctx)
+	ret0, _ := ret[0].([]*dto.HighlightedSeriesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetHighlightedSeries indicates an expected call of GetHighlightedSeries.
+func (mr *MockSeriesUseCaseMockRecorder) GetHighlightedSeries(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHighlightedSeries", reflect.TypeOf((*MockSeriesUseCase)(nil).GetHighlightedSeries), ctx)
+}
+
 // GetSeriesByID mocks base method.
 func (m *MockSeriesUseCase) GetSeriesByID(ctx context.Context, id uuid.UUID) (*dto.SeriesResponse, error) {
 	m.ctrl.T.Helper()

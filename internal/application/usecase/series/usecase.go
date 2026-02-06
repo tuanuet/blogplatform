@@ -22,6 +22,7 @@ type SeriesUseCase interface {
 	ListSeries(ctx context.Context, params *dto.SeriesFilterParams) ([]dto.SeriesResponse, int64, error)
 	AddBlogToSeries(ctx context.Context, userID, seriesID, blogID uuid.UUID) error
 	RemoveBlogFromSeries(ctx context.Context, userID, seriesID, blogID uuid.UUID) error
+	GetHighlightedSeries(ctx context.Context) ([]*dto.HighlightedSeriesResponse, error)
 }
 
 type seriesUseCase struct {
@@ -229,4 +230,41 @@ func (u *seriesUseCase) mapSeriesToDTO(series *entity.Series) *dto.SeriesRespons
 	}
 
 	return resp
+}
+
+func (u *seriesUseCase) GetHighlightedSeries(ctx context.Context) ([]*dto.HighlightedSeriesResponse, error) {
+	results, err := u.seriesRepo.GetHighlighted(ctx, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	responses := make([]*dto.HighlightedSeriesResponse, len(results))
+	for i, res := range results {
+		resp := &dto.HighlightedSeriesResponse{
+			ID:              res.Series.ID,
+			Title:           res.Series.Title,
+			Slug:            res.Series.Slug,
+			Description:     res.Series.Description,
+			AuthorID:        res.Series.AuthorID,
+			SubscriberCount: res.SubscriberCount,
+			BlogCount:       res.BlogCount,
+			CreatedAt:       res.Series.CreatedAt,
+		}
+
+		if res.Author != nil {
+			if res.Author.DisplayName != nil && *res.Author.DisplayName != "" {
+				resp.AuthorName = *res.Author.DisplayName
+			} else {
+				resp.AuthorName = res.Author.Name
+			}
+
+			if res.Author.AvatarURL != nil {
+				resp.AuthorAvatarURL = res.Author.AvatarURL
+			}
+		}
+
+		responses[i] = resp
+	}
+
+	return responses, nil
 }

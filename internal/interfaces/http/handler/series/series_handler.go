@@ -322,3 +322,22 @@ func (h *seriesHandler) RemoveBlog(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+// GetHighlightedSeries godoc
+// @Summary Get highlighted series
+// @Description Get a list of highlighted series
+// @Tags Series
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /api/v1/series/highlighted [get]
+func (h *seriesHandler) GetHighlightedSeries(c *gin.Context) {
+	series, err := h.seriesUseCase.GetHighlightedSeries(c.Request.Context())
+	if err != nil {
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, series)
+}

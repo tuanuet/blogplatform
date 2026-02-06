@@ -44,3 +44,17 @@ type SeriesFilterParams struct {
 	Page     int     `form:"page,default=1"`
 	PageSize int     `form:"pageSize,default=10"`
 }
+
+// HighlightedSeriesResponse represents a highlighted series in API responses
+type HighlightedSeriesResponse struct {
+	ID              uuid.UUID `json:"id"`
+	Title           string    `json:"title"`
+	Slug            string    `json:"slug"`
+	Description     string    `json:"description"`
+	AuthorID        uuid.UUID `json:"authorId"`
+	AuthorName      string    `json:"authorName"`
+	AuthorAvatarURL *string   `json:"authorAvatarUrl,omitempty"`
+	SubscriberCount int       `json:"subscriberCount"`
+	BlogCount       int       `json:"blogCount"`
+	CreatedAt       time.Time `json:"createdAt"`
+}

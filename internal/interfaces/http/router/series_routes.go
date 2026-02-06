@@ -9,6 +9,7 @@ func RegisterSeriesRoutes(v1 *gin.RouterGroup, p Params, auth *middleware.Author
 	seriesGroup := v1.Group("/series")
 	{
 		seriesGroup.GET("", p.SeriesHandler.List)
+		seriesGroup.GET("/highlighted", p.SeriesHandler.GetHighlightedSeries)
 		seriesGroup.GET("/:id", p.SeriesHandler.GetByID)
 		seriesGroup.GET("/slug/:slug", p.SeriesHandler.GetBySlug)
 		seriesGroup.POST("", sessionAuth, auth.RequireCreate("series"), p.SeriesHandler.Create)

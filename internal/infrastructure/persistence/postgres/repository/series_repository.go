@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/aiagent/internal/domain/entity"
 	"github.com/aiagent/internal/domain/repository"
@@ -105,4 +106,71 @@ func (r *seriesRepository) AddBlog(ctx context.Context, seriesID, blogID uuid.UU
 
 func (r *seriesRepository) RemoveBlog(ctx context.Context, seriesID, blogID uuid.UUID) error {
 	return r.db.WithContext(ctx).Model(&entity.Series{ID: seriesID}).Association("Blogs").Delete(&entity.Blog{ID: blogID})
+}
+
+func (r *seriesRepository) GetHighlighted(ctx context.Context, limit int) ([]repository.HighlightedSeriesResult, error) {
+	type highlightedSeriesRaw struct {
+		ID              uuid.UUID `gorm:"column:id"`
+		Title           string    `gorm:"column:title"`
+		Slug            string    `gorm:"column:slug"`
+		Description     string    `gorm:"column:description"`
+		AuthorID        uuid.UUID `gorm:"column:author_id"`
+		CreatedAt       time.Time `gorm:"column:created_at"`
+		AuthorName      string    `gorm:"column:author_name"`
+		AuthorAvatarURL *string   `gorm:"column:author_avatar_url"`
+		SubscriberCount int       `gorm:"column:subscriber_count"`
+		BlogCount       int       `gorm:"column:blog_count"`
+	}
+
+	var rawResults []highlightedSeriesRaw
+
+	query := `SELECT
+          s.id, s.title, s.slug, s.description, s.author_id, s.created_at,
+          u.name as author_name, u.avatar_url as author_avatar_url,
+          COALESCE(sub.subscriber_count, 0) as subscriber_count,
+          COALESCE(bc.blog_count, 0) as blog_count
+      FROM series s
+      LEFT JOIN users u ON s.author_id = u.id
+      LEFT JOIN (
+          SELECT series_id, COUNT(*) as subscriber_count
+          FROM user_series_purchases
+          GROUP BY series_id
+      ) sub ON s.id = sub.series_id
+      LEFT JOIN (
+          SELECT sb.series_id, COUNT(*) as blog_count
+          FROM series_blogs sb
+          JOIN blogs b ON sb.blog_id = b.id
+          WHERE b.deleted_at IS NULL
+          GROUP BY sb.series_id
+      ) bc ON s.id = bc.series_id
+      WHERE s.deleted_at IS NULL
+      ORDER BY subscriber_count DESC
+      LIMIT ?`
+
+	if err := r.db.WithContext(ctx).Raw(query, limit).Scan(&rawResults).Error; err != nil {
+		return nil, err
+	}
+
+	results := make([]repository.HighlightedSeriesResult, len(rawResults))
+	for i, raw := range rawResults {
+		results[i] = repository.HighlightedSeriesResult{
+			Series: &entity.Series{
+				ID:          raw.ID,
+				Title:       raw.Title,
+				Slug:        raw.Slug,
+				Description: raw.Description,
+				AuthorID:    raw.AuthorID,
+				CreatedAt:   raw.CreatedAt,
+			},
+			Author: &entity.User{
+				ID:        raw.AuthorID,
+				Name:      raw.AuthorName,
+				AvatarURL: raw.AuthorAvatarURL,
+			},
+			SubscriberCount: raw.SubscriberCount,
+			BlogCount:       raw.BlogCount,
+		}
+	}
+
+	return results, nil
 }

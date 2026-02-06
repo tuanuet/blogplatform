@@ -100,6 +100,18 @@ func (mr *MockSeriesHandlerMockRecorder) GetBySlug(c any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBySlug", reflect.TypeOf((*MockSeriesHandler)(nil).GetBySlug), c)
 }
 
+// GetHighlightedSeries mocks base method.
+func (m *MockSeriesHandler) GetHighlightedSeries(c *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "GetHighlightedSeries", c)
+}
+
+// GetHighlightedSeries indicates an expected call of GetHighlightedSeries.
+func (mr *MockSeriesHandlerMockRecorder) GetHighlightedSeries(c any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHighlightedSeries", reflect.TypeOf((*MockSeriesHandler)(nil).GetHighlightedSeries), c)
+}
+
 // List mocks base method.
 func (m *MockSeriesHandler) List(c *gin.Context) {
 	m.ctrl.T.Helper()

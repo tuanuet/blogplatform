@@ -14,6 +14,7 @@ import (
 	reflect "reflect"
 
 	entity "github.com/aiagent/internal/domain/entity"
+	repository "github.com/aiagent/internal/domain/repository"
 	uuid "github.com/google/uuid"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -112,6 +113,21 @@ func (m *MockSeriesRepository) GetBySlug(ctx context.Context, slug string) (*ent
 func (mr *MockSeriesRepositoryMockRecorder) GetBySlug(ctx, slug any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBySlug", reflect.TypeOf((*MockSeriesRepository)(nil).GetBySlug), ctx, slug)
+}
+
+// GetHighlighted mocks base method.
+func (m *MockSeriesRepository) GetHighlighted(ctx context.Context, limit int) ([]repository.HighlightedSeriesResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetHighlighted", ctx, limit)
+	ret0, _ := ret[0].([]repository.HighlightedSeriesResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetHighlighted indicates an expected call of GetHighlighted.
+func (mr *MockSeriesRepositoryMockRecorder) GetHighlighted(ctx, limit any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHighlighted", reflect.TypeOf((*MockSeriesRepository)(nil).GetHighlighted), ctx, limit)
 }
 
 // List mocks base method.
