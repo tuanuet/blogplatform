@@ -109,6 +109,9 @@ func (uc *profileUseCase) UpdateProfile(ctx context.Context, userID uuid.UUID, r
 	if req.LinkedinURL != nil {
 		updates["linkedin_url"] = *req.LinkedinURL
 	}
+	if req.FacebookURL != nil {
+		updates["facebook_url"] = *req.FacebookURL
+	}
 	if req.Gender != nil {
 		updates["gender"] = *req.Gender
 	}
@@ -231,6 +234,9 @@ func (uc *profileUseCase) toProfileResponse(user *entity.User) *dto.ProfileRespo
 	if user.LinkedinURL != nil {
 		resp.LinkedinURL = *user.LinkedinURL
 	}
+	if user.FacebookURL != nil {
+		resp.FacebookURL = *user.FacebookURL
+	}
 	if user.Gender != nil {
 		resp.Gender = *user.Gender
 	}
@@ -270,6 +276,9 @@ func (uc *profileUseCase) toPublicProfileResponse(user *entity.User) *dto.Public
 	}
 	if user.LinkedinURL != nil {
 		resp.LinkedinURL = *user.LinkedinURL
+	}
+	if user.FacebookURL != nil {
+		resp.FacebookURL = *user.FacebookURL
 	}
 	if user.Description != nil {
 		resp.Description = *user.Description

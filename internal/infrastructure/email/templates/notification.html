@@ -1,0 +1,12 @@
+{{define "content"}}
+<h2 style="margin-top: 0; color: #343a40;">Notification</h2>
+<p>{{.Message}}</p>
+{{if .ActionURL}}
+<div style="margin-top: 30px;">
+    <a href="{{.ActionURL}}" class="btn btn-primary">View Details</a>
+</div>
+{{end}}
+<p style="margin-top: 30px; font-size: 14px; color: #6c757d;">
+    You received this email because you are a registered user of AI Agent.
+</p>
+{{end}}

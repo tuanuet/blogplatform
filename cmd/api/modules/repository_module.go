@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiagent/internal/application/usecase/notification"
+	"github.com/aiagent/internal/domain/service"
 	"github.com/aiagent/internal/infrastructure/adapter"
 	"github.com/aiagent/internal/infrastructure/config"
 	pgRepo "github.com/aiagent/internal/infrastructure/persistence/postgres/repository"
@@ -36,6 +37,9 @@ var RepositoryModule = fx.Module("repository",
 		redisRepo.NewSessionRepository,
 		adapter.NewSystemRepository,
 		adapter.NewSePayAdapter,
+		func(cfg *config.Config) adapter.EmailProvider {
+			return adapter.NewSMTPAdapter(cfg.Email)
+		},
 		pgRepo.NewFraudDetectionRepository,
 		pgRepo.NewUserSeriesPurchaseRepository,
 		// Notification Repositories
@@ -51,6 +55,7 @@ var RepositoryModule = fx.Module("repository",
 		fx.Annotate(
 			adapter.NewFirebaseAdapter,
 			fx.As(new(notification.NotificationAdapter)),
+			fx.As(new(service.FirebaseAdapter)),
 		),
 	),
 )

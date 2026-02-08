@@ -8,9 +8,9 @@
 
 **Trigger**: `/develop` command or auto-detected for multi-phase development
 
-**Responsibility**: Coordinates the 5-Phase Pipeline by loading and following agent instructions in sequence.
+**Responsibility**: Coordinates the development pipeline by loading and following agent instructions in sequence.
 
-**Flow**: Gatekeeper → Architect → Planner → Builder ⇄ Reviewer
+**Flow**: Gatekeeper → Architect → Reviewer (Architecture) → Builder Phase 2 → Reviewer (Implementation) → Builder Phase 3 → Reviewer (Integration)
 
 ### Brainstorm Workflow
 
@@ -30,7 +30,7 @@
 
 **Responsibility**: Implementation workflow for pre-defined specs. Skips Gatekeeper phase, starts from Architect.
 
-**Flow**: Architect → Planner → Builder ⇄ Reviewer
+**Flow**: Architect → Reviewer (Architecture) → Builder Phase 2 → Reviewer (Implementation) → Builder Phase 3 → Reviewer (Integration)
 
 ### Document Workflow
 
@@ -117,34 +117,18 @@
 
 - Database Schema (auto-detect format from codebase)
 - API Contract (OpenAPI/Interface)
+- Phase-Based Implementation Plan
 
-**⚠️ MANDATORY**: Must ask user about design decisions and loop until ALL architectural choices are confirmed. User must explicitly approve the design before proceeding.
+**⚠️ MANDATORY**: 
+- Must ask user about design decisions and loop until ALL architectural choices are confirmed
+- User must explicitly approve the design and task plan before proceeding
+- **After approval → Handoff to Reviewer for Architecture Review**
 
 **Constraint**: DO NOT write function bodies
 
 ---
 
-### Planner Agent
 
-**Role**: Technical Lead
-
-**Location**: `.agent/agents/planner/AGENT.md`
-
-**Skills**:
-
-- `task-breakdown`
-- `ckb-code-scan`
-- `requirement-analysis`
-
-**Input**: Architect's Design OR Bug Report
-
-**Output**:
-
-- Atomic, sequential Todo List
-
-**Constraint**: Tasks must be implementable in one TDD cycle
-
----
 
 ### Builder Agent
 
@@ -163,7 +147,7 @@
 - `ckb-code-scan`
 - `documentation`
 
-**Input**: API Contract from Architect + Todo List from Planner
+**Input**: API Contract from Architect + Todo List from Architect
 
 **Output**:
 
@@ -179,7 +163,7 @@
 
 ### Reviewer Agent
 
-**Role**: Code Reviewer
+**Role**: Quality Gatekeeper - Reviews at 3 stages
 
 **Location**: `.agent/agents/reviewer/AGENT.md`
 
@@ -191,16 +175,20 @@
 - `design-patterns`
 - `ckb-code-scan`
 
-**Input**: Builder's implementation + API Contract + Refined Spec
+**Input**: 
+- Phase 1: Contracts and Plan from Architect
+- Phase 2: Component implementations from Builder
+- Phase 3: Complete feature from Builder
 
 **Output**:
 
-- APPROVED (task complete)
-- NEEDS_CHANGES (feedback to Builder)
+- **Phase 1 (Architecture)**: APPROVED/NEEDS_CHANGES on contracts
+- **Phase 2 (Implementation)**: APPROVED/NEEDS_CHANGES on components
+- **Phase 3 (Integration)**: APPROVED/NEEDS_CHANGES on complete feature
 
-**Workflow**: Review → Feedback Loop → Until Approved
+**Workflow**: 3 Review Gates → Feedback Loop → Until Approved
 
-**Constraint**: Max 3 review rounds, then escalate to user
+**Constraint**: Max 3 review rounds per phase, then escalate to user
 
 ---
 
@@ -271,35 +259,45 @@
 │       │         - Loop until ALL clear              │
 │       │         - User MUST approve spec            │
 │       ↓                                             │
-│  [Architect] ──→ Schema + API Contract              │
+│  [Architect] ──→ Contracts + Phase-Based Plan       │
 │       │         ⚠️ MANDATORY LOOP:                  │
 │       │         - Ask design questions              │
+│       │         - Create implementation plan            │
 │       │         - Wait for user response            │
 │       │         - Loop until ALL confirmed          │
-│       │         - User MUST approve design          │
+│       │         - User MUST approve design + plan       │
 │       ↓                                             │
-│  [Planner] ──→ Implementation Plan (Todo List)      │
-│       │         (STOP: wait for approval)           │
+│  [Reviewer] ──→ Architecture Review                 │
+│       │         "Contracts OK? Patterns OK?"        │
+│       │         ├─ NEEDS_CHANGES → Back to Architect│
+│       │         └─ APPROVED → Continue              │
 │       ↓                                             │
 │  ┌─────────────────────────────────────────────┐    │
-│  │ FOR EACH TASK:                              │    │
+│  │  PHASE 2: CORE IMPLEMENTATION               │    │
 │  │                                             │    │
-│  │  [Builder] ──→ TDD Implementation           │    │
+│  │  [Builder] ──→ Implement components         │    │
 │  │       │                                     │    │
 │  │       ↓                                     │    │
-│  │  [Reviewer] ──→ APPROVED or NEEDS_CHANGES   │    │
-│  │       │              │                      │    │
-│  │       │         NEEDS_CHANGES               │    │
-│  │       │              ↓                      │    │
-│  │       │         Back to Builder (loop)      │    │
-│  │       │                                     │    │
-│  │       ↓ APPROVED                            │    │
-│  │  Mark task complete                         │    │
-│  │       ↓                                     │    │
-│  │  Next task...                               │    │
+│  │  [Reviewer] ──→ Implementation Review       │    │
+│  │       │         "Components work? Quality?"   │    │
+│  │       │         ├─ NEEDS_CHANGES → Back       │    │
+│  │       │         └─ APPROVED → Phase 3         │    │
 │  └─────────────────────────────────────────────┘    │
-│       │                                             │
+│       ↓                                             │
+│  ┌─────────────────────────────────────────────┐    │
+│  │  PHASE 3: INTEGRATION                       │    │
+│  │                                             │    │
+│  │  [Builder] ──→ Wire up + Tests              │    │
+│  │       │                                     │    │
+│  │       ↓                                     │    │
+│  │  [Reviewer] ──→ Integration Review          │    │
+│  │       │         "Feature complete? E2E OK?" │    │
+│  │       │         ├─ NEEDS_CHANGES → Back       │    │
+│  │       │         └─ APPROVED → Complete!       │    │
+│  └─────────────────────────────────────────────┘    │
 │       ↓                                             │
 │  Return to User                                     │
 └─────────────────────────────────────────────────────┘
+
+Total Reviews: 3 (Architecture, Implementation, Integration)
 ```

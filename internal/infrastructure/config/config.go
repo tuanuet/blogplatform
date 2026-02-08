@@ -17,6 +17,16 @@ type Config struct {
 	Scheduler SchedulerConfig
 	Firebase  FirebaseConfig
 	SePay     SePayConfig
+	Email     EmailConfig
+}
+
+// EmailConfig holds SMTP-related configuration
+type EmailConfig struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+	From     string `mapstructure:"from"`
 }
 
 // SePayConfig holds SePay-related configuration
@@ -160,4 +170,11 @@ func setDefaults() {
 	viper.SetDefault("sepay.bank_account", "")
 	viper.SetDefault("sepay.bank_owner", "")
 	viper.SetDefault("sepay.bank_branch", "")
+
+	// Email defaults
+	viper.SetDefault("email.host", "localhost")
+	viper.SetDefault("email.port", 1025) // Default for MailHog
+	viper.SetDefault("email.user", "")
+	viper.SetDefault("email.password", "")
+	viper.SetDefault("email.from", "noreply@aiagent.com")
 }

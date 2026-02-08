@@ -37,6 +37,8 @@ type notificationDispatcher struct {
 	tokenRepo  repository.DeviceTokenRepository
 	aggregator NotificationAggregator
 	firebase   FirebaseAdapter
+	email      EmailService
+	taskRunner TaskRunner
 }
 
 // NewNotificationDispatcher creates a new NotificationDispatcher instance
@@ -46,6 +48,8 @@ func NewNotificationDispatcher(
 	tokenRepo repository.DeviceTokenRepository,
 	aggregator NotificationAggregator,
 	firebase FirebaseAdapter,
+	email EmailService,
+	taskRunner TaskRunner,
 ) NotificationDispatcher {
 	return &notificationDispatcher{
 		notifRepo:  notifRepo,
@@ -53,6 +57,8 @@ func NewNotificationDispatcher(
 		tokenRepo:  tokenRepo,
 		aggregator: aggregator,
 		firebase:   firebase,
+		email:      email,
+		taskRunner: taskRunner,
 	}
 }
 
@@ -63,15 +69,23 @@ func (d *notificationDispatcher) Notify(
 	notifType entity.NotificationType,
 	data map[string]interface{},
 ) error {
-	// Step 1: Check user preferences
-	enabled, err := d.prefRepo.IsEnabled(ctx, userID, notifType, "push")
+	// Step 1: Check user preferences for all channels
+	inAppEnabled, err := d.prefRepo.IsEnabled(ctx, userID, notifType, "in_app")
 	if err != nil {
-		log.Printf("Warning: failed to check notification preferences for user %s: %v", userID, err)
-		// Continue with default (enabled) - fail open
-		enabled = true
+		inAppEnabled = true // Fail open
 	}
-	if !enabled {
-		// User has disabled this notification type, return early
+
+	pushEnabled, err := d.prefRepo.IsEnabled(ctx, userID, notifType, "push")
+	if err != nil {
+		pushEnabled = true // Fail open
+	}
+
+	emailEnabled, err := d.prefRepo.IsEnabled(ctx, userID, notifType, "email")
+	if err != nil {
+		emailEnabled = true // Fail open
+	}
+
+	if !inAppEnabled && !pushEnabled && !emailEnabled {
 		return nil
 	}
 
@@ -80,9 +94,7 @@ func (d *notificationDispatcher) Notify(
 		allowed, err := d.aggregator.CheckRateLimit(ctx, userID, notifType)
 		if err != nil {
 			log.Printf("Warning: failed to check rate limit for user %s: %v", userID, err)
-			// Continue anyway - fail open
 		} else if !allowed {
-			// Rate limit exceeded, skip notification
 			log.Printf("Info: rate limit exceeded for user %s, notification type %s", userID, notifType)
 			return nil
 		}
@@ -100,42 +112,81 @@ func (d *notificationDispatcher) Notify(
 
 	// Step 4: Prepare notification
 	notif := d.prepareNotification(userID, notifType, data)
-
-	// If aggregation found, update the existing notification
 	if existingNotif != nil {
 		notif = existingNotif
 		d.updateAggregatedNotification(notif, data)
 	}
 
-	// Step 5: Save notification to database
-	if err := d.notifRepo.Save(ctx, notif); err != nil {
-		return fmt.Errorf("failed to save notification: %w", err)
-	}
+	// Step 5: Save notification to database (In-app)
+	if inAppEnabled {
+		if err := d.notifRepo.Save(ctx, notif); err != nil {
+			return fmt.Errorf("failed to save notification: %w", err)
+		}
 
-	// Increment rate limit counter
-	if d.aggregator != nil {
-		if err := d.aggregator.IncrementRateLimit(ctx, userID, notifType); err != nil {
-			log.Printf("Warning: failed to increment rate limit for user %s: %v", userID, err)
+		// Increment rate limit counter
+		if d.aggregator != nil {
+			if err := d.aggregator.IncrementRateLimit(ctx, userID, notifType); err != nil {
+				log.Printf("Warning: failed to increment rate limit for user %s: %v", userID, err)
+			}
 		}
 	}
 
-	// Step 6: Get user's device tokens
-	tokens, err := d.tokenRepo.FindByUserID(ctx, userID)
-	if err != nil {
-		log.Printf("Warning: failed to get device tokens for user %s: %v", userID, err)
-		// Continue anyway - notification was saved
-		return nil
-	}
+	// Step 6: Asynchronous dispatch to other channels
+	channels := []string{"push", "email"}
+	for _, channel := range channels {
+		switch channel {
+		case "push":
+			if pushEnabled && d.firebase != nil && d.taskRunner != nil {
+				d.taskRunner.Submit(func(ctx context.Context) {
+					tokens, err := d.tokenRepo.FindByUserID(ctx, userID)
+					if err != nil {
+						log.Printf("Error: failed to get device tokens for user %s: %v", userID, err)
+						return
+					}
+					if len(tokens) > 0 {
+						title := d.generateTitle(notifType, data)
+						body := d.generateBody(notifType, data)
 
-	// Step 7: Send FCM push if channel enabled and tokens exist
-	if len(tokens) > 0 && d.firebase != nil {
-		title := d.generateTitle(notifType, data)
-		body := d.generateBody(notifType, data)
+						// Enrich data map for Firebase validation
+						enrichedData := make(map[string]interface{})
+						for k, v := range data {
+							enrichedData[k] = v
+						}
+						if _, ok := enrichedData["category"]; !ok {
+							enrichedData["category"] = string(d.getCategory(notifType))
+						}
+						if _, ok := enrichedData["target_type"]; !ok {
+							// Infer target type from notification type if missing
+							switch notifType {
+							case entity.NotificationTypeBlogLike, entity.NotificationTypeBlogComment, entity.NotificationTypeNewBlogFromFollowing:
+								enrichedData["target_type"] = "blog"
+							case entity.NotificationTypeCommentReply:
+								enrichedData["target_type"] = "comment"
+							case entity.NotificationTypeNewFollower, entity.NotificationTypeMention:
+								enrichedData["target_type"] = "user"
+							default:
+								enrichedData["target_type"] = "user"
+							}
+						}
+						// Ensure target_id is present for validation
+						if _, ok := enrichedData["target_id"]; !ok {
+							enrichedData["target_id"] = userID.String()
+						}
 
-		// Send to all user devices
-		if err := d.firebase.SendPushToUser(ctx, userID, title, body, data); err != nil {
-			log.Printf("Warning: failed to send FCM push for user %s: %v", userID, err)
-			// Don't return error - notification was saved successfully
+						if err := d.firebase.SendPushToUser(ctx, userID, title, body, enrichedData); err != nil {
+							log.Printf("Error: failed to send FCM push for user %s: %v", userID, err)
+						}
+					}
+				})
+			}
+		case "email":
+			if emailEnabled && d.email != nil && d.taskRunner != nil {
+				d.taskRunner.Submit(func(ctx context.Context) {
+					if err := d.email.SendNotification(ctx, userID, notifType, data); err != nil {
+						log.Printf("Error: failed to send email notification for user %s: %v", userID, err)
+					}
+				})
+			}
 		}
 	}
 

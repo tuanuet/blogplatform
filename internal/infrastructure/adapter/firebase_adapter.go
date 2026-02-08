@@ -95,8 +95,8 @@ func (a *firebaseAdapter) SendPush(ctx context.Context, deviceTokens []string, t
 	return nil
 }
 
-// SendToUser sends a push notification to all devices of a user
-func (a *firebaseAdapter) SendToUser(ctx context.Context, userID uuid.UUID, title, body string, data map[string]interface{}) error {
+// SendPushToUser sends a push notification to all devices of a user
+func (a *firebaseAdapter) SendPushToUser(ctx context.Context, userID uuid.UUID, title, body string, data map[string]interface{}) error {
 	// Validate title
 	if title == "" {
 		return errors.New("title cannot be empty")
@@ -127,6 +127,11 @@ func (a *firebaseAdapter) SendToUser(ctx context.Context, userID uuid.UUID, titl
 
 	// Send push notification
 	return a.SendPush(ctx, deviceTokens, title, body, data)
+}
+
+// SendToUser is an alias for SendPushToUser to satisfy other interfaces
+func (a *firebaseAdapter) SendToUser(ctx context.Context, userID uuid.UUID, title, body string, data map[string]interface{}) error {
+	return a.SendPushToUser(ctx, userID, title, body, data)
 }
 
 // validateDataPayload validates the data payload structure

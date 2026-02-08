@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN facebook_url VARCHAR(255);

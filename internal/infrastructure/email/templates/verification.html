@@ -1,0 +1,14 @@
+{{define "content"}}
+<h2 style="margin-top: 0; color: #343a40;">Verify Your Email Address</h2>
+<p>Thanks for signing up for AI Agent! Before we get started, we need to verify that this is your email address.</p>
+<div style="margin-top: 30px;">
+    <a href="{{.VerificationURL}}" class="btn btn-primary">Verify Email</a>
+</div>
+<p style="margin-top: 30px;">
+    Or copy and paste this link into your browser: <br>
+    <span style="color: #007bff;">{{.VerificationURL}}</span>
+</p>
+<p style="margin-top: 30px; font-size: 14px; color: #6c757d;">
+    If you did not create an account, no further action is required.
+</p>
+{{end}}

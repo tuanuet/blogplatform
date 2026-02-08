@@ -109,8 +109,8 @@ func (s *notificationAggregator) buildRateLimitKey(userID uuid.UUID, notifType e
 
 // FirebaseAdapter defines the interface for Firebase Cloud Messaging (FCM) operations
 type FirebaseAdapter interface {
-	// SendPush sends a push notification to the specified device token
-	SendPush(ctx context.Context, deviceToken string, title, body string, data map[string]interface{}) error
+	// SendPush sends a push notification to the specified device tokens
+	SendPush(ctx context.Context, deviceTokens []string, title, body string, data map[string]interface{}) error
 
 	// SendPushToUser sends a push notification to all device tokens for a user
 	SendPushToUser(ctx context.Context, userID uuid.UUID, title, body string, data map[string]interface{}) error

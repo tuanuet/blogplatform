@@ -167,3 +167,90 @@ func TestGetPublicProfile_WithDescription(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.Equal(t, description, resp.Description)
 }
+
+func TestUpdateProfile_WithFacebookURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	facebookURL := "https://facebook.com/testuser"
+	req := dto.UpdateProfileRequest{
+		FacebookURL: &facebookURL,
+	}
+
+	mockUserSvc.EXPECT().UpdateUser(gomock.Any(), userID, gomock.Any()).Return(nil)
+
+	user := &entity.User{
+		ID:          userID,
+		Name:        "Test User",
+		Email:       "test@example.com",
+		FacebookURL: &facebookURL,
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.UpdateProfile(context.Background(), userID, req)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, facebookURL, resp.FacebookURL)
+}
+
+func TestGetProfile_WithFacebookURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	facebookURL := "https://facebook.com/testuser"
+	user := &entity.User{
+		ID:          userID,
+		Name:        "Test User",
+		Email:       "test@example.com",
+		FacebookURL: &facebookURL,
+		CreatedAt:   time.Now(),
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.GetProfile(context.Background(), userID)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, facebookURL, resp.FacebookURL)
+}
+
+func TestGetPublicProfile_WithFacebookURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	facebookURL := "https://facebook.com/testuser"
+	user := &entity.User{
+		ID:          userID,
+		Name:        "Test User",
+		FacebookURL: &facebookURL,
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.GetPublicProfile(context.Background(), userID)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, facebookURL, resp.FacebookURL)
+}
