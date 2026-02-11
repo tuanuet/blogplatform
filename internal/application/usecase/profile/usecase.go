@@ -118,6 +118,9 @@ func (uc *profileUseCase) UpdateProfile(ctx context.Context, userID uuid.UUID, r
 	if req.GoogleURL != nil {
 		updates["google_url"] = *req.GoogleURL
 	}
+	if req.ZaloURL != nil {
+		updates["zalo_url"] = *req.ZaloURL
+	}
 	if req.Gender != nil {
 		updates["gender"] = *req.Gender
 	}
@@ -249,6 +252,9 @@ func (uc *profileUseCase) toProfileResponse(user *entity.User) *dto.ProfileRespo
 	if user.GoogleURL != nil {
 		resp.GoogleURL = *user.GoogleURL
 	}
+	if user.ZaloURL != nil {
+		resp.ZaloURL = *user.ZaloURL
+	}
 	if user.Gender != nil {
 		resp.Gender = *user.Gender
 	}
@@ -297,6 +303,9 @@ func (uc *profileUseCase) toPublicProfileResponse(user *entity.User) *dto.Public
 	}
 	if user.GoogleURL != nil {
 		resp.GoogleURL = *user.GoogleURL
+	}
+	if user.ZaloURL != nil {
+		resp.ZaloURL = *user.ZaloURL
 	}
 	if user.Description != nil {
 		resp.Description = *user.Description

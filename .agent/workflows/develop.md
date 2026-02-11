@@ -17,9 +17,7 @@ flowchart TB
     Gatekeeper -->|User approves spec| Architect[Phase 2: Architect]
     Gatekeeper -.->|Needs clarification| Gatekeeper
     
-    Architect --> ReviewerArch[Review 1: Architecture]
-    ReviewerArch -->|APPROVED| BuilderP2[Phase 3a: Builder - Core Implementation]
-    ReviewerArch -->|NEEDS_CHANGES| Architect
+    Architect --> BuilderP2[Phase 3a: Builder - Core Implementation]
     
     BuilderP2 --> ReviewerImpl[Review 2: Implementation]
     ReviewerImpl -->|APPROVED| BuilderP3[Phase 3b: Builder - Integration]
@@ -31,7 +29,6 @@ flowchart TB
 
     style Gatekeeper fill:#e1f5fe
     style Architect fill:#e8f5e9
-    style ReviewerArch fill:#f3e5f5
     style BuilderP2 fill:#fce4ec
     style ReviewerImpl fill:#f3e5f5
     style BuilderP3 fill:#fce4ec
@@ -47,9 +44,9 @@ flowchart TB
 - Load agent, refine requirements, obtain user approval on spec.
 - **Output**: Formal Feature Specification.
 
-### Phase 2: Architect → Architecture Review
+### Phase 2: Architect
 - **Architect**: Design contracts and phase-based plan.
-- **Reviewer**: Verify plan and SOLID boundaries using `consolidated-review`.
+- **Self-Review**: Verify plan and SOLID boundaries. Directly hands off to Phase 3.
 
 ### Phase 3: Builder Implementation (2 Phases + 2 Reviews)
 - **Phase 3a (Core)**: Builder implements logic + Unit tests.
@@ -73,7 +70,7 @@ flowchart TB
 | Situation                 | Action                                    |
 | ------------------------- | ----------------------------------------- |
 | Request unclear           | Gatekeeper asks questions → Loop          |
-| Architecture review fails | Architect revises contracts → Loop        |
+| Plan rejected by user     | Architect revises contracts → Loop        |
 | Implementation fails      | Builder fixes → Re-submit Phase 3a        |
 | Integration fails         | Builder fixes → Re-submit Phase 3b        |
 | 3 rounds exceeded         | Escalate to user                          |

@@ -10,11 +10,6 @@ description: High-density, multi-phase quality gate checklist (token-optimized)
 - Use `serena_search_for_pattern` to check for similar existing patterns.
 - Focus on `git diff` or changed files only to minimize token load.
 
-## Phase 1: Architecture Review
-- **Contracts**: Interfaces are minimal, follow Go idioms, and avoid leaked implementation details.
-- **SOLID**: Proper abstraction; No circular dependencies between `domain`, `application`, and `infrastructure`.
-- **Plan**: Logical task order, covers all requirements, includes verification steps.
-
 ## Phase 2: Implementation Review (Code Quality)
 - **TDD**: Verification that tests were written and fail before implementation.
 - **Clean Code**: No magic numbers, small functions (<30 lines), meaningful names (Go: concise for locals).

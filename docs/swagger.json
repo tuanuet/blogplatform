@@ -4379,6 +4379,9 @@
                 "githubHandle": {
                     "type": "string"
                 },
+                "googleUrl": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -4398,6 +4401,9 @@
                     "type": "string"
                 },
                 "website": {
+                    "type": "string"
+                },
+                "zaloUrl": {
                     "type": "string"
                 }
             }
@@ -4423,6 +4429,9 @@
                 "githubHandle": {
                     "type": "string"
                 },
+                "googleUrl": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -4439,6 +4448,9 @@
                     "type": "string"
                 },
                 "website": {
+                    "type": "string"
+                },
+                "zaloUrl": {
                     "type": "string"
                 }
             }
@@ -4805,6 +4817,10 @@
                     "type": "string",
                     "maxLength": 50
                 },
+                "googleUrl": {
+                    "type": "string",
+                    "maxLength": 255
+                },
                 "linkedinUrl": {
                     "type": "string",
                     "maxLength": 255
@@ -4822,6 +4838,10 @@
                     "maxLength": 50
                 },
                 "website": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "zaloUrl": {
                     "type": "string",
                     "maxLength": 255
                 }

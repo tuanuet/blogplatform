@@ -31,6 +31,7 @@ type User struct {
 	FacebookURL   *string    `gorm:"size:255" json:"facebookUrl,omitempty"`
 	TiktokURL     *string    `gorm:"size:255" json:"tiktokUrl,omitempty"`
 	GoogleURL     *string    `gorm:"size:255" json:"googleUrl,omitempty"`
+	ZaloURL       *string    `gorm:"size:255" json:"zaloUrl,omitempty"`
 	Gender        *string    `gorm:"size:10" json:"gender,omitempty"`
 	Birthday      *time.Time `gorm:"type:date" json:"birthday,omitempty"`
 

@@ -428,3 +428,90 @@ func TestGetPublicProfile_WithGoogleURL(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.Equal(t, googleURL, resp.GoogleURL)
 }
+
+func TestUpdateProfile_WithZaloURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	zaloURL := "https://zalo.me/testuser"
+	req := dto.UpdateProfileRequest{
+		ZaloURL: &zaloURL,
+	}
+
+	mockUserSvc.EXPECT().UpdateUser(gomock.Any(), userID, gomock.Any()).Return(nil)
+
+	user := &entity.User{
+		ID:      userID,
+		Name:    "Test User",
+		Email:   "test@example.com",
+		ZaloURL: &zaloURL,
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.UpdateProfile(context.Background(), userID, req)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, zaloURL, resp.ZaloURL)
+}
+
+func TestGetProfile_WithZaloURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	zaloURL := "https://zalo.me/testuser"
+	user := &entity.User{
+		ID:        userID,
+		Name:      "Test User",
+		Email:     "test@example.com",
+		ZaloURL:   &zaloURL,
+		CreatedAt: time.Now(),
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.GetProfile(context.Background(), userID)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, zaloURL, resp.ZaloURL)
+}
+
+func TestGetPublicProfile_WithZaloURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	zaloURL := "https://zalo.me/testuser"
+	user := &entity.User{
+		ID:      userID,
+		Name:    "Test User",
+		ZaloURL: &zaloURL,
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.GetPublicProfile(context.Background(), userID)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, zaloURL, resp.ZaloURL)
+}

@@ -87,7 +87,7 @@ Ask user before designing:
 
 ## Handoff Checklist
 
-**Before handoff to Reviewer (Architecture Review):**
+**Before handoff to Builder (Phase 2):**
 
 - [ ] All design questions answered by user
 - [ ] User approved Schema design

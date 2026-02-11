@@ -75,11 +75,3 @@ skill(explore-code)      → Impact analysis before changes
 - [ ] **Security**: No raw SQL, no sensitive data in logs.
 
 ---
-
-## Handoff
-
-**Phase 2 complete → Reviewer (Implementation Review)**
-**Phase 3 complete → Reviewer (Integration Review)**
-
-**DO NOT mark phase complete until Reviewer approves.**
-**TIP**: Provide the `git diff` of your changes to the Reviewer to save tokens.

@@ -466,6 +466,8 @@ definitions:
         type: string
       githubHandle:
         type: string
+      googleUrl:
+        type: string
       id:
         type: string
       linkedinUrl:
@@ -479,6 +481,8 @@ definitions:
       twitterHandle:
         type: string
       website:
+        type: string
+      zaloUrl:
         type: string
     type: object
   dto.PublicProfileResponse:
@@ -495,6 +499,8 @@ definitions:
         type: string
       githubHandle:
         type: string
+      googleUrl:
+        type: string
       id:
         type: string
       linkedinUrl:
@@ -506,6 +512,8 @@ definitions:
       twitterHandle:
         type: string
       website:
+        type: string
+      zaloUrl:
         type: string
     type: object
   dto.PublishBlogRequest:
@@ -751,6 +759,9 @@ definitions:
       githubHandle:
         maxLength: 50
         type: string
+      googleUrl:
+        maxLength: 255
+        type: string
       linkedinUrl:
         maxLength: 255
         type: string
@@ -764,6 +775,9 @@ definitions:
         maxLength: 50
         type: string
       website:
+        maxLength: 255
+        type: string
+      zaloUrl:
         maxLength: 255
         type: string
     type: object

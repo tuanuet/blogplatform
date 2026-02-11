@@ -4385,6 +4385,9 @@ const docTemplate = `{
                 "githubHandle": {
                     "type": "string"
                 },
+                "googleUrl": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -4404,6 +4407,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "website": {
+                    "type": "string"
+                },
+                "zaloUrl": {
                     "type": "string"
                 }
             }
@@ -4429,6 +4435,9 @@ const docTemplate = `{
                 "githubHandle": {
                     "type": "string"
                 },
+                "googleUrl": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -4445,6 +4454,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "website": {
+                    "type": "string"
+                },
+                "zaloUrl": {
                     "type": "string"
                 }
             }
@@ -4811,6 +4823,10 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 50
                 },
+                "googleUrl": {
+                    "type": "string",
+                    "maxLength": 255
+                },
                 "linkedinUrl": {
                     "type": "string",
                     "maxLength": 255
@@ -4828,6 +4844,10 @@ const docTemplate = `{
                     "maxLength": 50
                 },
                 "website": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "zaloUrl": {
                     "type": "string",
                     "maxLength": 255
                 }

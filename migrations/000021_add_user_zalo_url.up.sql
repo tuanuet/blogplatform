@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN zalo_url VARCHAR(255);
