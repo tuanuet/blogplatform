@@ -59,21 +59,20 @@ skill(explore-code)      → Impact analysis before changes
    - Write MINIMAL code to pass
    - Follow the interface contract
 
-4. REFACTOR - Clean Up
-   - Apply clean-code principles
-   - Run test → MUST still pass
+4. REFACTOR - Clean Up & Self-Review
+   - Apply clean-code principles.
+   - Run tests → MUST still pass.
+   - **Self-Review**: Run the `Clean Code Checklist` below before handoff.
 ```
 
 ---
 
-## Clean Code Checklist
+## Clean Code Checklist (Self-Review)
 
-- [ ] Meaningful names
-- [ ] Functions do one thing
-- [ ] No magic numbers (use constants)
-- [ ] No deep nesting (max 2-3 levels)
-- [ ] DRY - No duplicated logic
-- [ ] Comments explain WHY, not WHAT
+- [ ] **Minimalism**: Small functions (<30 lines), no magic numbers.
+- [ ] **Go Idioms**: Short local names, explicit error handling, context propagation.
+- [ ] **TDD**: Verification that failing tests were created first.
+- [ ] **Security**: No raw SQL, no sensitive data in logs.
 
 ---
 
@@ -83,3 +82,4 @@ skill(explore-code)      → Impact analysis before changes
 **Phase 3 complete → Reviewer (Integration Review)**
 
 **DO NOT mark phase complete until Reviewer approves.**
+**TIP**: Provide the `git diff` of your changes to the Reviewer to save tokens.

@@ -1,5 +1,5 @@
 ---
-description: Implementation workflow for pre-defined specs.
+description: Implementation workflow for pre-defined specs (Token-Optimized).
 ---
 
 # Implementation Workflow
@@ -7,29 +7,26 @@ description: Implementation workflow for pre-defined specs.
 User Request: $1
 
 > **Core Principle**: Skip requirement refinement, go straight to technical design and implementation.
+> **Efficiency**: Diff-based reviews and consolidated quality gates.
 
-> **Use Case**: When requirements are already well-defined (e.g., from /brainstorm output)
-
-## Workflow Flow (Contract First - 3 Reviews)
+## Workflow Flow (Contract First - Optimized)
 
 ```mermaid
 flowchart TB
-    Start([Feature Spec\nfrom /brainstorm]) --> Architect[Phase 1: Architect]
+    Start([Feature Spec]) --> Architect[Phase 1: Architect]
     
-    Architect -->|Contracts + Plan defined| ReviewerArch[Review 1: Architecture]
-    Architect -.->|Needs revision| Architect
-    
-    ReviewerArch -->|NEEDS_CHANGES| Architect
+    Architect --> ReviewerArch[Review 1: Architecture]
     ReviewerArch -->|APPROVED| BuilderP2[Phase 2a: Builder - Core Implementation]
+    ReviewerArch -->|NEEDS_CHANGES| Architect
     
-    BuilderP2 -->|Phase 2 complete| ReviewerImpl[Review 2: Implementation]
-    ReviewerImpl -->|NEEDS_CHANGES| BuilderP2
+    BuilderP2 --> ReviewerImpl[Review 2: Implementation]
     ReviewerImpl -->|APPROVED| BuilderP3[Phase 2b: Builder - Integration]
+    ReviewerImpl -->|NEEDS_CHANGES| BuilderP2
     
-    BuilderP3 -->|Phase 3 complete| ReviewerInt[Review 3: Integration]
-    ReviewerInt -->|NEEDS_CHANGES| BuilderP3
+    BuilderP3 --> ReviewerInt[Review 3: Final Integration]
     ReviewerInt -->|APPROVED| Complete([Complete])
-    
+    ReviewerInt -->|NEEDS_CHANGES| BuilderP3
+
     style Architect fill:#e8f5e9
     style ReviewerArch fill:#f3e5f5
     style BuilderP2 fill:#fce4ec
@@ -41,92 +38,36 @@ flowchart TB
 
 ---
 
-## Execution
+## Execution (Token-Efficient)
 
-### Phase 1: Architect → Review
+### Phase 1: Architect → Architecture Review
+1. **Architect**: Design contracts and phase-based plan.
+2. **Reviewer**: 
+   - Load `consolidated-review`.
+   - Verify plan viability and SOLID boundaries.
+   - **Tip**: For small tasks, Reviewer can auto-approve if Architect output is precise.
 
-#### Phase 1: Architect
-Load agent to design contracts and create phase-based plan.
+### Phase 2: Implementation (RED-GREEN-REFACTOR)
+1. **Builder**: Core logic + Unit tests.
+   - **Self-Review**: Builder must run its own checklist before handoff.
+2. **Reviewer**:
+   - **Diff-Only Review**: Use `git diff` to identify changes; use `serena` to read only modified symbols.
+   - Verify TDD (check that tests pass and cover logic).
 
-**Architect Output**:
-- Phase 1: Interface Definition (Contracts) - ✅ Done by Architect
-- Phase 2: Core Implementation tasks - For Builder
-- Phase 3: Integration tasks - For Builder
-
-#### Review 1: Architecture Review
-```
-1. Load Reviewer agent
-   - Input: Contracts + Plan from Architect
-   - Check: Interface consistency, SOLID principles, plan viability
-   - Output: APPROVED or NEEDS_CHANGES
-2. IF NEEDS_CHANGES:
-   - Return to Architect for revision
-   - Re-submit to Reviewer (max 3 rounds)
-3. IF APPROVED:
-   - Proceed to Phase 2a
-```
-
-### Phase 2: Builder Implementation (2 Phases + 2 Reviews)
-
-#### Phase 2a: Core Implementation
-```
-1. Load Builder agent
-   - Input: Phase 2 tasks + Component Interfaces
-   - Output: Implemented components + Unit tests
-```
-
-#### Review 2: Implementation Review
-```
-1. Load Reviewer agent
-   - Input: Component implementations
-   - Check: Tests pass, follows interfaces, code quality
-   - Output: APPROVED or NEEDS_CHANGES
-2. IF NEEDS_CHANGES:
-   - Return to Builder for fixes
-   - Re-submit to Reviewer (max 3 rounds)
-3. IF APPROVED:
-   - Proceed to Phase 2b
-```
-
-#### Phase 2b: Integration
-```
-1. Load Builder agent
-   - Input: Phase 3 tasks + Approved components
-   - Output: Wired components + Integration/E2E tests
-```
-
-#### Review 3: Integration Review
-```
-1. Load Reviewer agent
-   - Input: Complete feature
-   - Check: Integration tests, E2E tests, acceptance criteria
-   - Output: APPROVED or NEEDS_CHANGES
-2. IF NEEDS_CHANGES:
-   - Return to Builder for fixes
-   - Re-submit to Reviewer (max 3 rounds)
-3. IF APPROVED:
-   - Feature complete
-```
+### Phase 3: Integration & Final Review
+1. **Builder**: Wiring + Integration/E2E tests.
+2. **Reviewer**: 
+   - Verify end-to-end functionality.
+   - **Optimization**: For low-complexity features, this gate can be combined with Review 2.
 
 ---
 
-## Context Passing
+## Token Safety Rules
 
-| From         | To           | Context                              |
-| ------------ | ------------ | ------------------------------------ |
-| Architect    | Builder      | Task assignment, Contract reference  |
-| Builder      | Reviewer     | Implementation, Test results         |
-| Reviewer     | Builder      | Feedback (if NEEDS_CHANGES)          |
-
----
-
-## Rules
-
-1. **Load agent file** before each phase
-2. **Never skip approval gates**
-3. **Never write code** in Architect
-4. **MANDATORY Review** - Every task must pass Reviewer
-5. **Max 3 review rounds** - Escalate if issues persist
+1. **Lazy Loading**: Reviewer agent should NOT read files it doesn't need.
+2. **Diff-Based Input**: Do not pass the whole file content to Reviewer. Use `serena_find_symbol` for specific symbols.
+3. **Consolidated Skill**: Never load old individual skills (`code-review`, etc.). Load ONLY `consolidated-review`.
+4. **Context Preservation**: Re-use `task_id` for subagents to maintain session memory without re-sending full context.
 
 ---
 
@@ -134,22 +75,7 @@ Load agent to design contracts and create phase-based plan.
 
 | Situation                 | Action                                    |
 | ------------------------- | ----------------------------------------- |
-| User rejects design       | Architect revises → Loop                  |
-| User rejects plan         | Architect revises → Loop                  |
 | Architecture review fails | Architect revises contracts → Loop        |
-| Implementation review fails| Builder fixes → Re-submit Phase 2        |
-| Integration review fails  | Builder fixes → Re-submit Phase 3         |
+| Implementation fails      | Builder fixes → Re-submit Phase 2        |
+| Integration fails         | Builder fixes → Re-submit Phase 3         |
 | 3 rounds exceeded         | Escalate to user                          |
-
----
-
-## Comparison with /develop
-
-| Aspect       | /develop                           | /implementation                    |
-| ------------ | ---------------------------------- | ---------------------------------- |
-| Input        | Raw user request                   | Pre-defined spec (from /brainstorm)|
-| Phase 1      | Gatekeeper (requirement analysis)  | Architect (contracts + phase plan) |
-| Phase 2      | Architect (contracts + phase plan) | Builder Phase 2a + 2b              |
-| When to use  | Unclear requirements               | Clear, well-defined requirements   |
-| Prep work    | None needed                        | /brainstorm recommended            |
-| Reviews      | 3 (architecture, implementation, integration) | 3 (architecture, implementation, integration) |
