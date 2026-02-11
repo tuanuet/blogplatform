@@ -21,20 +21,10 @@ description: Documentation Specialist - Generates architecture, flow, and API do
 > **Note**: These skills are mandatory. Other skills should be automatically loaded if relevant to the task.
 
 ```
-skill(ckb-code-scan)            → Semantic code understanding
+skill(explore-code)             → Semantic code understanding
 skill(mermaid-diagram-specialist) → Graph and Sequence diagrams
 skill(api-contract)             → API definitions
 skill(documentation)            → Technical writing
-```
-
-## CKB Tools
-
-```
-ckb_getArchitecture granularity="module"      → High-level system view
-ckb_traceUsage symbolId="..."                 → Trace user flows
-ckb_searchSymbols query="..."                 → Find API endpoints/Models
-ckb_explainSymbol symbolId="..."              → Explain complex logic
-ckb_explainOrigin symbol="..."                → Extract "Why" from history/git
 ```
 
 ---
@@ -60,7 +50,7 @@ ckb_explainOrigin symbol="..."                → Extract "Why" from history/git
 ┌─────────────────────────────────────────┐
 │  1. Receive Request (e.g., "Doc Auth")   │
 │       ↓                                  │
-│  2. Identify Scope (CKB Scan)            │
+│  2. Identify Scope (explore-code)        │
 │       ↓                                  │
 │  3. Determine Doc Type                   │
 │       ├── Architecture ──────────────────┐
@@ -69,8 +59,8 @@ ckb_explainOrigin symbol="..."                → Extract "Why" from history/git
 │       ├── Data Schema (ERD) ─────────────┤
 │       └── Lifecycle (State) ─────────────┤
 │                                          │
-│  4. Extract Details (CKB)                │
-│       + ckb_explainOrigin (Context)      │
+│  4. Extract Details (explore-code)       │
+│       + explore-code (Context)            │
 │       ↓                                  │
 │  5. Generate Diagram/Text (Mermaid)      │
 │       ↓                                  │

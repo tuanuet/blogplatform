@@ -23,17 +23,7 @@ skill(code-review)       → Security, performance, best practices checklist
 skill(testing)           → Verify test coverage and quality
 skill(clean-code)        → Readability and maintainability
 skill(design-patterns)   → SOLID, Repository, Service patterns
-skill(ckb-code-scan)     → Impact analysis, architecture verification
-```
-
----
-
-## CKB Tools
-
-```
-ckb_understand query="ImplementedFunction"    → Verify patterns
-ckb_getArchitecture granularity="file"        → Check dependencies
-ckb_prepareChange target="..." changeType="modify" → Verify impact
+skill(explore-code)      → Impact analysis, architecture verification
 ```
 
 ---

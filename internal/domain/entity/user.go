@@ -29,6 +29,7 @@ type User struct {
 	GithubHandle  *string    `gorm:"size:50" json:"githubHandle,omitempty"`
 	LinkedinURL   *string    `gorm:"size:255" json:"linkedinUrl,omitempty"`
 	FacebookURL   *string    `gorm:"size:255" json:"facebookUrl,omitempty"`
+	TiktokURL     *string    `gorm:"size:255" json:"tiktokUrl,omitempty"`
 	Gender        *string    `gorm:"size:10" json:"gender,omitempty"`
 	Birthday      *time.Time `gorm:"type:date" json:"birthday,omitempty"`
 

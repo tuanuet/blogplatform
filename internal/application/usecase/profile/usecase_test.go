@@ -254,3 +254,90 @@ func TestGetPublicProfile_WithFacebookURL(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.Equal(t, facebookURL, resp.FacebookURL)
 }
+
+func TestUpdateProfile_WithTiktokURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	tiktokURL := "https://tiktok.com/@testuser"
+	req := dto.UpdateProfileRequest{
+		TiktokURL: &tiktokURL,
+	}
+
+	mockUserSvc.EXPECT().UpdateUser(gomock.Any(), userID, gomock.Any()).Return(nil)
+
+	user := &entity.User{
+		ID:        userID,
+		Name:      "Test User",
+		Email:     "test@example.com",
+		TiktokURL: &tiktokURL,
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.UpdateProfile(context.Background(), userID, req)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, tiktokURL, resp.TiktokURL)
+}
+
+func TestGetProfile_WithTiktokURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	tiktokURL := "https://tiktok.com/@testuser"
+	user := &entity.User{
+		ID:        userID,
+		Name:      "Test User",
+		Email:     "test@example.com",
+		TiktokURL: &tiktokURL,
+		CreatedAt: time.Now(),
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.GetProfile(context.Background(), userID)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, tiktokURL, resp.TiktokURL)
+}
+
+func TestGetPublicProfile_WithTiktokURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	tiktokURL := "https://tiktok.com/@testuser"
+	user := &entity.User{
+		ID:        userID,
+		Name:      "Test User",
+		TiktokURL: &tiktokURL,
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.GetPublicProfile(context.Background(), userID)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, tiktokURL, resp.TiktokURL)
+}

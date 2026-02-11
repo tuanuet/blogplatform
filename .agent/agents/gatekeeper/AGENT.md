@@ -22,15 +22,7 @@ description: Technical Product Manager - Validates and refines requirements befo
 ```
 skill(requirement-analysis)  → Ambiguity detection (6W matrix)
 skill(tech-stack-detect)     → Auto-detect tech stack from codebase
-skill(ckb-code-scan)         → Semantic code understanding
-```
-
-## CKB Tools
-
-```
-ckb_explore target="src/" depth="shallow"     → Project overview
-ckb_getArchitecture granularity="module"      → Module structure
-ckb_searchSymbols query="[related]"           → Find existing patterns
+skill(explore-code)          → Semantic code understanding
 ```
 
 ---

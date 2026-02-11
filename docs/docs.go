@@ -2624,6 +2624,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/series/highlighted": {
+            "get": {
+                "description": "Get a list of highlighted series",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Series"
+                ],
+                "summary": "Get highlighted series",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/series/slug/{slug}": {
             "get": {
                 "description": "Get a series by its slug",
@@ -4338,10 +4367,16 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "displayName": {
                     "type": "string"
                 },
                 "email": {
+                    "type": "string"
+                },
+                "facebookUrl": {
                     "type": "string"
                 },
                 "gender": {
@@ -4362,6 +4397,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "tiktokUrl": {
+                    "type": "string"
+                },
                 "twitterHandle": {
                     "type": "string"
                 },
@@ -4379,7 +4417,13 @@ const docTemplate = `{
                 "bio": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "displayName": {
+                    "type": "string"
+                },
+                "facebookUrl": {
                     "type": "string"
                 },
                 "githubHandle": {
@@ -4392,6 +4436,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "location": {
+                    "type": "string"
+                },
+                "tiktokUrl": {
                     "type": "string"
                 },
                 "twitterHandle": {
@@ -4739,10 +4786,18 @@ const docTemplate = `{
                 "birthday": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string",
+                    "maxLength": 5000
+                },
                 "displayName": {
                     "type": "string",
                     "maxLength": 50,
                     "minLength": 3
+                },
+                "facebookUrl": {
+                    "type": "string",
+                    "maxLength": 255
                 },
                 "gender": {
                     "type": "string",
@@ -4763,6 +4818,10 @@ const docTemplate = `{
                 "location": {
                     "type": "string",
                     "maxLength": 100
+                },
+                "tiktokUrl": {
+                    "type": "string",
+                    "maxLength": 255
                 },
                 "twitterHandle": {
                     "type": "string",

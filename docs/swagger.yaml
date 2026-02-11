@@ -454,9 +454,13 @@ definitions:
         type: string
       createdAt:
         type: string
+      description:
+        type: string
       displayName:
         type: string
       email:
+        type: string
+      facebookUrl:
         type: string
       gender:
         type: string
@@ -470,6 +474,8 @@ definitions:
         type: string
       name:
         type: string
+      tiktokUrl:
+        type: string
       twitterHandle:
         type: string
       website:
@@ -481,7 +487,11 @@ definitions:
         type: string
       bio:
         type: string
+      description:
+        type: string
       displayName:
+        type: string
+      facebookUrl:
         type: string
       githubHandle:
         type: string
@@ -490,6 +500,8 @@ definitions:
       linkedinUrl:
         type: string
       location:
+        type: string
+      tiktokUrl:
         type: string
       twitterHandle:
         type: string
@@ -720,9 +732,15 @@ definitions:
         type: string
       birthday:
         type: string
+      description:
+        maxLength: 5000
+        type: string
       displayName:
         maxLength: 50
         minLength: 3
+        type: string
+      facebookUrl:
+        maxLength: 255
         type: string
       gender:
         enum:
@@ -738,6 +756,9 @@ definitions:
         type: string
       location:
         maxLength: 100
+        type: string
+      tiktokUrl:
+        maxLength: 255
         type: string
       twitterHandle:
         maxLength: 50
@@ -2792,6 +2813,25 @@ paths:
       security:
       - Bearer: []
       summary: Remove blog from series
+      tags:
+      - Series
+  /api/v1/series/highlighted:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of highlighted series
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get highlighted series
       tags:
       - Series
   /api/v1/series/slug/{slug}:

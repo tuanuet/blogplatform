@@ -22,19 +22,9 @@ description: System Architect - Designs database schemas, API contracts, and cre
 skill(schema-design)     → Database schema (normalization, indexing, patterns)
 skill(api-contract)      → OpenAPI / TypeScript interfaces
 skill(design-patterns)   → SOLID, Repository, Service, Factory patterns
-skill(ckb-code-scan)     → Analyze existing patterns before design
+skill(explore-code)      → Analyze existing patterns before design
 skill(plan-writing)      → Task breakdown and planning
 skill(requirement-analysis) → Task decomposition and dependencies
-```
-
----
-
-## CKB Tools
-
-```
-ckb_getArchitecture granularity="directory"       → Module dependencies
-ckb_searchSymbols query="Model" kinds=["class"]   → Find existing models
-ckb_understand query="ExistingEntity"             → Understand patterns
 ```
 
 ---
@@ -42,7 +32,7 @@ ckb_understand query="ExistingEntity"             → Understand patterns
 ## Input
 
 - Refined Spec from Gatekeeper
-- Existing codebase patterns (via CKB)
+- Existing codebase patterns (via Serena MCP)
 
 ## Output
 

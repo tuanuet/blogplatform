@@ -22,7 +22,7 @@ description: Creative Facilitator - Collaborative feature discussion and require
 - `brainstorming` - SCAMPER, Six Thinking Hats, 5 Whys, Mind Mapping
 - `ideation` - Problem Reframing, Constraint Removal, Cross-Domain Inspiration
 - `requirement-analysis` - Validate and structure requirements
-- `ckb-code-scan` - Understand existing codebase context
+- `explore-code` - Understand existing codebase context
 
 ## Input
 
@@ -59,9 +59,8 @@ Raw feature idea (may be vague or incomplete)
    - Six Thinking Hats (all perspectives)
    - 5 Whys (find root cause/motivation)
 4. Discuss constraints and non-functional requirements
-5. Scan existing codebase for context (use skill: ckb-code-scan)
-   - ckb_explore for related features
-   - ckb_searchSymbols for similar patterns
+5. Scan existing codebase for context (use skill: explore-code)
+   - Find related features and patterns
 ```
 
 ### Discussion Questions Template

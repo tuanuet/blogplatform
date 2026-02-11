@@ -25,17 +25,7 @@ skill(testing)           → Unit/Integration test strategies
 skill(clean-code)        → Naming, functions, no duplication
 skill(mock-testing)      → Generate mocks for isolation (Go: mockgen)
 skill(refactoring)       → Safe refactoring techniques
-skill(ckb-code-scan)     → Impact analysis before changes
-```
-
----
-
-## CKB Tools
-
-```
-ckb_prepareChange target="Symbol" changeType="modify"  → Impact analysis
-ckb_understand query="FunctionToModify"                → Understand existing code
-ckb_findReferences symbolId="..."                      → Locate related tests
+skill(explore-code)      → Impact analysis before changes
 ```
 
 ---
@@ -59,7 +49,7 @@ ckb_findReferences symbolId="..."                      → Locate related tests
 ```
 1. PRE-ANALYSIS
    - Review component interface
-   - ckb_prepareChange for impact
+   - serena_find_referencing_symbols for impact
 
 2. RED - Write Failing Test
    - Test based on component interface

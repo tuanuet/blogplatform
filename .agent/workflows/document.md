@@ -42,7 +42,7 @@ flowchart LR
 ### 2. Review Phase
 
 - **Agent**: `document-reviewer`
-- **Action**: Verify the draft against the codebase using CKB.
+- **Action**: Verify the draft against the codebase using the `explore-code` skill.
 - **Input**: Draft files + Original User Request.
 - **Output**: `APPROVED` or `NEEDS_CHANGES`.
 

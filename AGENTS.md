@@ -1,303 +1,63 @@
-# Agent & Skill Registry
+# AI Agent
 
-## Orchestration
+This file defines the project context, coding standards, and agent configurations for the OpenCode AI system. It serves as the primary source of truth for all AI agents working on this repository.
 
-### Development Workflow
+## Project Overview
 
-**Location**: `.agent/workflows/develop.md`
+**Go Boilerplate API** is a production-ready Go API boilerplate implementing Clean Architecture.
+It uses **GORM**, **Gin**, **PostgreSQL**, **Redis**, and **Swagger** to provide a robust foundation for building scalable web services.
 
-**Trigger**: `/develop` command or auto-detected for multi-phase development
+## Tech Stack & Standards
 
-**Responsibility**: Coordinates the development pipeline by loading and following agent instructions in sequence.
+- **Language**: Go 1.24+
+- **Web Framework**: Gin (`github.com/gin-gonic/gin`)
+- **ORM**: GORM (`gorm.io/gorm`)
+- **Database**: PostgreSQL (Driver: `pgx`)
+- **Cache**: Redis (`go-redis/v9`)
+- **Configuration**: Viper
+- **Logging**: Zerolog
+- **Documentation**: Swagger (swaggo)
+- **Testing**: Testcontainers, testify
 
-**Flow**: Gatekeeper → Architect → Reviewer (Architecture) → Builder Phase 2 → Reviewer (Implementation) → Builder Phase 3 → Reviewer (Integration)
+## Project Structure
 
-### Brainstorm Workflow
+The project follows a **Clean Architecture** layout:
 
-**Location**: `.agent/workflows/brainstorm.md`
+- `cmd/api/`: Application entry point (main.go).
+- `internal/`: Private application logic.
+  - `domain/`: Business entities & repository interfaces.
+  - `application/`: Use cases & DTOs.
+  - `infrastructure/`: Database, cache, external service implementations.
+  - `interfaces/`: HTTP handlers, middleware, routes.
+- `pkg/`: Shared public packages (logger, response, validator).
+- `docs/`: Swagger documentation.
+- `migrations/`: Database migrations.
 
-**Trigger**: `/brainstorm` command
+## Coding Conventions
 
-**Responsibility**: Collaborative feature discussion and requirement definition. Pre-cursor to `/develop`.
-
-**Flow**: Discuss → Define → Prepare → Output Feature Spec for `/develop`
-
-### Implementation Workflow
-
-**Location**: `.agent/workflows/implementation.md`
-
-**Trigger**: `/implementation` command
-
-**Responsibility**: Implementation workflow for pre-defined specs. Skips Gatekeeper phase, starts from Architect.
-
-**Flow**: Architect → Reviewer (Architecture) → Builder Phase 2 → Reviewer (Implementation) → Builder Phase 3 → Reviewer (Integration)
-
-### Document Workflow
-
-**Location**: `.agent/workflows/document.md`
-
-**Trigger**: `/document` command
-
-**Responsibility**: Generate and verify documentation on demand.
-
-**Flow**: Documenter → Document-Reviewer
-
----
-
-## Agents
-
-### Brainstormer Agent
-
-**Role**: Creative Facilitator
-
-**Location**: `.agent/agents/brainstormer/AGENT.md`
-
-**Skills**:
-
-- `brainstorming`
-- `ideation`
-- `requirement-analysis`
-- `ckb-code-scan`
-
-**Input**: Raw feature idea (may be vague)
-
-**Output**:
-
-- Feature Specification (ready for `/develop`)
-
-**Workflow**: DISCUSS (context) → DEFINE (specs) → PREPARE (output)
-
-**Integration**: `/brainstorm` → Feature Spec → `/develop` (Gatekeeper)
+- **Architecture**: Strictly adhere to Clean Architecture boundaries. `domain` should have no external dependencies.
+- **Error Handling**: Use explicit error handling. Wrap errors with context where appropriate.
+- **Testing**:
+  - Unit tests for domain logic.
+  - Integration tests (using Testcontainers) for infrastructure.
+  - End-to-end tests for API endpoints.
+- **Documentation**: All public functions and types must have GoDoc comments. API handlers must have Swagger annotations.
 
 ---
 
-### Gatekeeper Agent
+### Tooling Configuration
 
-**Role**: Technical Product Manager
+#### Serena MCP (High Priority)
 
-**Location**: `.agent/agents/gatekeeper/AGENT.md`
+**Repository**: [oraios/serena](https://github.com/oraios/serena)
+**Description**: Provides deep code intelligence via LSP (Symbol resolution, references, etc.).
 
-**Skills**:
-
-- `requirement-analysis`
-- `tech-stack-detect`
-- `ckb-code-scan`
-- `documentation`
-
-**Input**: Raw user request
-
-**Output**:
-
-- Refined Spec (User Stories + Edge Cases)
-- OR Clarifying Questions (if ambiguous)
-
-**⚠️ MANDATORY**: Must ask user clarifying questions and loop until ALL requirements are clear. User must explicitly approve the Refined Spec before proceeding.
-
-**Stop Condition**: DO NOT proceed if request is vague or user hasn't confirmed spec
+**Usage Rule**: Always prefer Serena's semantic tools over basic `grep`/`glob` for code navigation and understanding.
 
 ---
 
-### Architect Agent
+**Instructions**:
 
-**Role**: System Architect
-
-**Location**: `.agent/agents/architect/AGENT.md`
-
-**Skills**:
-
-- `schema-design`
-- `api-contract`
-- `design-patterns`
-- `ckb-code-scan`
-- `documentation`
-
-**Input**: Refined Spec from Gatekeeper
-
-**Output**:
-
-- Database Schema (auto-detect format from codebase)
-- API Contract (OpenAPI/Interface)
-- Phase-Based Implementation Plan
-
-**⚠️ MANDATORY**: 
-- Must ask user about design decisions and loop until ALL architectural choices are confirmed
-- User must explicitly approve the design and task plan before proceeding
-- **After approval → Handoff to Reviewer for Architecture Review**
-
-**Constraint**: DO NOT write function bodies
-
----
-
-
-
-### Builder Agent
-
-**Role**: Senior Developer
-
-**Location**: `.agent/agents/builder/AGENT.md`
-
-**Skills**:
-
-- `tdd-workflow`
-- `clean-code`
-- `testing`
-- `mock-testing`
-- `refactoring`
-- `code-review`
-- `ckb-code-scan`
-- `documentation`
-
-**Input**: API Contract from Architect + Todo List from Architect
-
-**Output**:
-
-- Failing tests (RED)
-- Implementation (GREEN)
-- Refactored code (REFACTOR)
-
-**Workflow**: TDD cycle - RED → GREEN → REFACTOR
-
-**Handoff**: Pass to Reviewer for verification
-
----
-
-### Reviewer Agent
-
-**Role**: Quality Gatekeeper - Reviews at 3 stages
-
-**Location**: `.agent/agents/reviewer/AGENT.md`
-
-**Skills**:
-
-- `code-review`
-- `testing`
-- `clean-code`
-- `design-patterns`
-- `ckb-code-scan`
-
-**Input**: 
-- Phase 1: Contracts and Plan from Architect
-- Phase 2: Component implementations from Builder
-- Phase 3: Complete feature from Builder
-
-**Output**:
-
-- **Phase 1 (Architecture)**: APPROVED/NEEDS_CHANGES on contracts
-- **Phase 2 (Implementation)**: APPROVED/NEEDS_CHANGES on components
-- **Phase 3 (Integration)**: APPROVED/NEEDS_CHANGES on complete feature
-
-**Workflow**: 3 Review Gates → Feedback Loop → Until Approved
-
-**Constraint**: Max 3 review rounds per phase, then escalate to user
-
----
-
-### Documenter Agent
-
-**Role**: Documentation Specialist
-
-**Location**: `.agent/agents/documenter/AGENT.md`
-
-**Skills**:
-
-- `ckb-code-scan`
-- `mermaid-diagram-specialist`
-- `api-contract`
-- `documentation`
-
-**Input**: User request (Scope/Type) + Codebase
-
-**Output**:
-
-- Architecture Diagrams (C4)
-- User Flow Diagrams (Sequence)
-- API Documentation
-
-**Workflow**: Analyze → Scan → Generate → Save
-
-**Trigger**: On-demand (e.g. "Document auth flow")
-
----
-
-### Document-Reviewer Agent
-
-**Role**: Documentation QA
-
-**Location**: `.agent/agents/document-reviewer/AGENT.md`
-
-**Skills**:
-
-- `code-review`
-- `ckb-code-scan`
-- `api-contract`
-- `documentation`
-
-**Input**: Draft Documentation + Codebase
-
-**Output**:
-
-- APPROVED (ready to save)
-- NEEDS_CHANGES (feedback to Documenter)
-
-**Workflow**: Verify Accuracy → Verify Quality → Report
-
----
-
-## Pipeline Flow
-
-```
-┌─────────────────────────────────────────────────────┐
-│  User Request                                       │
-│       ↓                                             │
-│  [/develop workflow] ──→ Load appropriate agent    │
-│       │                                             │
-│       ↓                                             │
-│  [Gatekeeper] ──→ Refined Spec or Questions         │
-│       │         ⚠️ MANDATORY LOOP:                  │
-│       │         - Ask clarifying questions          │
-│       │         - Wait for user response            │
-│       │         - Loop until ALL clear              │
-│       │         - User MUST approve spec            │
-│       ↓                                             │
-│  [Architect] ──→ Contracts + Phase-Based Plan       │
-│       │         ⚠️ MANDATORY LOOP:                  │
-│       │         - Ask design questions              │
-│       │         - Create implementation plan            │
-│       │         - Wait for user response            │
-│       │         - Loop until ALL confirmed          │
-│       │         - User MUST approve design + plan       │
-│       ↓                                             │
-│  [Reviewer] ──→ Architecture Review                 │
-│       │         "Contracts OK? Patterns OK?"        │
-│       │         ├─ NEEDS_CHANGES → Back to Architect│
-│       │         └─ APPROVED → Continue              │
-│       ↓                                             │
-│  ┌─────────────────────────────────────────────┐    │
-│  │  PHASE 2: CORE IMPLEMENTATION               │    │
-│  │                                             │    │
-│  │  [Builder] ──→ Implement components         │    │
-│  │       │                                     │    │
-│  │       ↓                                     │    │
-│  │  [Reviewer] ──→ Implementation Review       │    │
-│  │       │         "Components work? Quality?"   │    │
-│  │       │         ├─ NEEDS_CHANGES → Back       │    │
-│  │       │         └─ APPROVED → Phase 3         │    │
-│  └─────────────────────────────────────────────┘    │
-│       ↓                                             │
-│  ┌─────────────────────────────────────────────┐    │
-│  │  PHASE 3: INTEGRATION                       │    │
-│  │                                             │    │
-│  │  [Builder] ──→ Wire up + Tests              │    │
-│  │       │                                     │    │
-│  │       ↓                                     │    │
-│  │  [Reviewer] ──→ Integration Review          │    │
-│  │       │         "Feature complete? E2E OK?" │    │
-│  │       │         ├─ NEEDS_CHANGES → Back       │    │
-│  │       │         └─ APPROVED → Complete!       │    │
-│  └─────────────────────────────────────────────┘    │
-│       ↓                                             │
-│  Return to User                                     │
-└─────────────────────────────────────────────────────┘
-
-Total Reviews: 3 (Architecture, Implementation, Integration)
-```
+- Do NOT preemptively load all references - use lazy loading based on actual need.
+- When loaded, treat content as mandatory instructions that override defaults.
+- Follow references recursively when needed.

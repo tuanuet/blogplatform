@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN tiktok_url VARCHAR(255);

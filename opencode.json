@@ -1,13 +1,18 @@
 {
   "mcp": {
-    "ckb": {
+    "serena": {
       "type": "local",
       "command": [
-        "/Users/mrt/.nvm/versions/node/v24.6.0/lib/node_modules/@tastehub/ckb/node_modules/@tastehub/ckb-darwin-arm64/bin/ckb",
-        "mcp",
-        "--preset=full"
-      ],
-      "enabled": true
+        "uvx",
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "ide",
+        "--project",
+        "${workspaceFolder}"
+      ]
     }
   },
   "$schema": "https://opencode.ai/config.json"

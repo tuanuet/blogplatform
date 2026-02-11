@@ -19,17 +19,9 @@ description: Documentation Reviewer - Verifies documentation against codebase im
 
 ```
 skill(code-review)              → Identify discrepancies
-skill(ckb-code-scan)            → Verify implementation details
+skill(explore-code)             → Verify implementation details
 skill(api-contract)             → Check API accuracy
 skill(documentation)            → Style and clarity check
-```
-
-## CKB Tools
-
-```
-ckb_searchSymbols query="..."                 → Verify symbol existence
-ckb_explainSymbol symbolId="..."              → Verify logic explanation
-ckb_checkDocStaleness                         → Check for broken references
 ```
 
 ---
@@ -40,7 +32,7 @@ ckb_checkDocStaleness                         → Check for broken references
 ┌─────────────────────────────────────────┐
 │  1. Receive Draft Docs + Context        │
 │       ↓                                 │
-│  2. Verify Accuracy (CKB)               │
+│  2. Verify Accuracy (explore-code)         │
 │       ├── Check API Signatures ─────────┐
 │       ├── Check Code References ────────┤
 │       └── Check Logic Descriptions ─────┤
