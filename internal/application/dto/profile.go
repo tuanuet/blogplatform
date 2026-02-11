@@ -13,6 +13,7 @@ type UpdateProfileRequest struct {
 	LinkedinURL   *string `json:"linkedinUrl" validate:"omitempty,max=255,url"`
 	FacebookURL   *string `json:"facebookUrl" validate:"omitempty,max=255,url"`
 	TiktokURL     *string `json:"tiktokUrl" validate:"omitempty,max=255,url"`
+	GoogleURL     *string `json:"googleUrl" validate:"omitempty,max=255,url"`
 	Gender        *string `json:"gender" validate:"omitempty,oneof=male female other"`
 	Birthday      *string `json:"birthday" validate:"omitempty,datetime=2006-01-02"`
 	Description   *string `json:"description" validate:"omitempty,max=5000"`
@@ -33,6 +34,7 @@ type ProfileResponse struct {
 	LinkedinURL   string    `json:"linkedinUrl,omitempty"`
 	FacebookURL   string    `json:"facebookUrl,omitempty"`
 	TiktokURL     string    `json:"tiktokUrl,omitempty"`
+	GoogleURL     string    `json:"googleUrl,omitempty"`
 	Gender        string    `json:"gender,omitempty"`
 	Birthday      string    `json:"birthday,omitempty"`
 	Description   string    `json:"description,omitempty"`
@@ -53,6 +55,7 @@ type PublicProfileResponse struct {
 	LinkedinURL   string    `json:"linkedinUrl,omitempty"`
 	FacebookURL   string    `json:"facebookUrl,omitempty"`
 	TiktokURL     string    `json:"tiktokUrl,omitempty"`
+	GoogleURL     string    `json:"googleUrl,omitempty"`
 }
 
 // AvatarUploadResponse represents the response after avatar upload

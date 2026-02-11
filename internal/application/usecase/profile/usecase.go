@@ -115,6 +115,9 @@ func (uc *profileUseCase) UpdateProfile(ctx context.Context, userID uuid.UUID, r
 	if req.TiktokURL != nil {
 		updates["tiktok_url"] = *req.TiktokURL
 	}
+	if req.GoogleURL != nil {
+		updates["google_url"] = *req.GoogleURL
+	}
 	if req.Gender != nil {
 		updates["gender"] = *req.Gender
 	}
@@ -243,6 +246,9 @@ func (uc *profileUseCase) toProfileResponse(user *entity.User) *dto.ProfileRespo
 	if user.TiktokURL != nil {
 		resp.TiktokURL = *user.TiktokURL
 	}
+	if user.GoogleURL != nil {
+		resp.GoogleURL = *user.GoogleURL
+	}
 	if user.Gender != nil {
 		resp.Gender = *user.Gender
 	}
@@ -288,6 +294,9 @@ func (uc *profileUseCase) toPublicProfileResponse(user *entity.User) *dto.Public
 	}
 	if user.TiktokURL != nil {
 		resp.TiktokURL = *user.TiktokURL
+	}
+	if user.GoogleURL != nil {
+		resp.GoogleURL = *user.GoogleURL
 	}
 	if user.Description != nil {
 		resp.Description = *user.Description

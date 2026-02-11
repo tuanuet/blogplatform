@@ -341,3 +341,90 @@ func TestGetPublicProfile_WithTiktokURL(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.Equal(t, tiktokURL, resp.TiktokURL)
 }
+
+func TestUpdateProfile_WithGoogleURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	googleURL := "https://google.com/profile"
+	req := dto.UpdateProfileRequest{
+		GoogleURL: &googleURL,
+	}
+
+	mockUserSvc.EXPECT().UpdateUser(gomock.Any(), userID, gomock.Any()).Return(nil)
+
+	user := &entity.User{
+		ID:        userID,
+		Name:      "Test User",
+		Email:     "test@example.com",
+		GoogleURL: &googleURL,
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.UpdateProfile(context.Background(), userID, req)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, googleURL, resp.GoogleURL)
+}
+
+func TestGetProfile_WithGoogleURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	googleURL := "https://google.com/profile"
+	user := &entity.User{
+		ID:        userID,
+		Name:      "Test User",
+		Email:     "test@example.com",
+		GoogleURL: &googleURL,
+		CreatedAt: time.Now(),
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.GetProfile(context.Background(), userID)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, googleURL, resp.GoogleURL)
+}
+
+func TestGetPublicProfile_WithGoogleURL(t *testing.T) {
+	// Arrange
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserSvc := serviceMocks.NewMockUserService(ctrl)
+	uc := profile.NewProfileUseCase(mockUserSvc)
+	userID := uuid.New()
+
+	googleURL := "https://google.com/profile"
+	user := &entity.User{
+		ID:        userID,
+		Name:      "Test User",
+		GoogleURL: &googleURL,
+	}
+	mockUserSvc.EXPECT().GetUser(gomock.Any(), userID).Return(user, nil)
+
+	// Act
+	resp, err := uc.GetPublicProfile(context.Background(), userID)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, googleURL, resp.GoogleURL)
+}
