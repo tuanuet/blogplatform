@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/aiagent/internal/domain/repository"
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,12 @@ func SessionAuth(repo repository.SessionRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, err := c.Cookie("session_id")
 		if err != nil {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		// Prevent other token types (e.g. email verification / password reset) from being used as an auth session.
+		if strings.HasPrefix(sessionID, "verify:") || strings.HasPrefix(sessionID, "reset:") {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}

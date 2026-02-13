@@ -18,6 +18,31 @@ type LoginWithSocialRequest struct {
 	Code     string `json:"code" validate:"required" binding:"required"`
 }
 
+type ResendVerificationRequest struct {
+	Email string `json:"email" validate:"omitempty,email" binding:"omitempty,email"`
+}
+
+type ForgotPasswordRequest struct {
+	Email string `json:"email" validate:"omitempty,email" binding:"omitempty,email"`
+}
+
+type ForgotPasswordResponse struct {
+	Message string `json:"message"`
+}
+
+type ResetPasswordValidateResponse struct {
+	Valid bool `json:"valid"`
+}
+
+type ResetPasswordRequest struct {
+	Token    string `json:"token" validate:"required" binding:"required"`
+	Password string `json:"password" validate:"required,min=8" binding:"required,min=8"`
+}
+
+type ResetPasswordResponse struct {
+	Message string `json:"message"`
+}
+
 type AuthResponse struct {
 	SessionID string    `json:"sessionId"`
 	UserID    uuid.UUID `json:"userId"`

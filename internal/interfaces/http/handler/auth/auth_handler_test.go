@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/aiagent/internal/application/dto"
+	authUC "github.com/aiagent/internal/application/usecase/auth"
 	"github.com/aiagent/internal/application/usecase/auth/mocks"
 	"github.com/aiagent/internal/interfaces/http/handler/auth"
 	"github.com/gin-gonic/gin"
@@ -216,6 +217,113 @@ func TestAuthHandler_Logout(t *testing.T) {
 		r.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	})
+}
+
+func TestAuthHandler_ForgotPassword(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUseCase := mocks.NewMockAuthUseCase(ctrl)
+	handler := auth.NewAuthHandler(mockUseCase)
+
+	t.Run("always_200_even_on_bad_json", func(t *testing.T) {
+		r, w := setupRouter()
+		r.POST("/forgot-password", handler.ForgotPassword)
+
+		mockUseCase.EXPECT().ForgotPassword(gomock.Any(), gomock.Any()).Times(0)
+
+		req, _ := http.NewRequest(http.MethodPost, "/forgot-password", bytes.NewBufferString("{bad-json"))
+		req.Header.Set("Content-Type", "application/json")
+		r.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("calls_usecase_when_email_present", func(t *testing.T) {
+		r, w := setupRouter()
+		r.POST("/forgot-password", handler.ForgotPassword)
+
+		reqBody := dto.ForgotPasswordRequest{Email: "test@example.com"}
+		jsonBody, _ := json.Marshal(reqBody)
+
+		mockUseCase.EXPECT().ForgotPassword(gomock.Any(), reqBody.Email).Return(nil)
+
+		req, _ := http.NewRequest(http.MethodPost, "/forgot-password", bytes.NewBuffer(jsonBody))
+		req.Header.Set("Content-Type", "application/json")
+		r.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+}
+
+func TestAuthHandler_ValidateResetPasswordToken(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUseCase := mocks.NewMockAuthUseCase(ctrl)
+	handler := auth.NewAuthHandler(mockUseCase)
+
+	t.Run("valid_token_200", func(t *testing.T) {
+		r, w := setupRouter()
+		r.GET("/reset-password/validate", handler.ValidateResetPasswordToken)
+
+		token := "reset:token"
+		mockUseCase.EXPECT().ValidateResetPasswordToken(gomock.Any(), token).Return(nil)
+
+		req, _ := http.NewRequest(http.MethodGet, "/reset-password/validate?token="+token, nil)
+		r.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("invalid_token_400", func(t *testing.T) {
+		r, w := setupRouter()
+		r.GET("/reset-password/validate", handler.ValidateResetPasswordToken)
+
+		token := "reset:bad"
+		mockUseCase.EXPECT().ValidateResetPasswordToken(gomock.Any(), token).Return(authUC.ErrResetTokenInvalid)
+
+		req, _ := http.NewRequest(http.MethodGet, "/reset-password/validate?token="+token, nil)
+		r.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+}
+
+func TestAuthHandler_ResetPassword(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUseCase := mocks.NewMockAuthUseCase(ctrl)
+	handler := auth.NewAuthHandler(mockUseCase)
+
+	t.Run("success_200", func(t *testing.T) {
+		r, w := setupRouter()
+		r.POST("/reset-password", handler.ResetPassword)
+
+		reqBody := dto.ResetPasswordRequest{Token: "reset:token", Password: "password123"}
+		jsonBody, _ := json.Marshal(reqBody)
+
+		mockUseCase.EXPECT().ResetPassword(gomock.Any(), reqBody.Token, reqBody.Password).Return(nil)
+
+		req, _ := http.NewRequest(http.MethodPost, "/reset-password", bytes.NewBuffer(jsonBody))
+		req.Header.Set("Content-Type", "application/json")
+		r.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("invalid_token_400", func(t *testing.T) {
+		r, w := setupRouter()
+		r.POST("/reset-password", handler.ResetPassword)
+
+		reqBody := dto.ResetPasswordRequest{Token: "reset:bad", Password: "password123"}
+		jsonBody, _ := json.Marshal(reqBody)
+
+		mockUseCase.EXPECT().ResetPassword(gomock.Any(), reqBody.Token, reqBody.Password).Return(authUC.ErrResetTokenInvalid)
+
+		req, _ := http.NewRequest(http.MethodPost, "/reset-password", bytes.NewBuffer(jsonBody))
+		req.Header.Set("Content-Type", "application/json")
+		r.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 }
 

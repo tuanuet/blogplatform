@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/aiagent/pkg/logger"
@@ -12,7 +14,7 @@ func Logging() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
-		query := c.Request.URL.RawQuery
+		query := redactQuery(c.Request.URL.RawQuery)
 
 		// Process request
 		c.Next()
@@ -33,4 +35,27 @@ func Logging() gin.HandlerFunc {
 			"errors":     c.Errors.ByType(gin.ErrorTypePrivate).String(),
 		})
 	}
+}
+
+func redactQuery(rawQuery string) string {
+	if rawQuery == "" {
+		return ""
+	}
+
+	values, err := url.ParseQuery(rawQuery)
+	if err != nil {
+		// As a fallback, don't log raw query when it might contain secrets.
+		if strings.Contains(rawQuery, "token=") || strings.Contains(rawQuery, "code=") {
+			return "[REDACTED]"
+		}
+		return rawQuery
+	}
+
+	for _, key := range []string{"token", "code"} {
+		if values.Has(key) {
+			values.Set(key, "[REDACTED]")
+		}
+	}
+
+	return values.Encode()
 }

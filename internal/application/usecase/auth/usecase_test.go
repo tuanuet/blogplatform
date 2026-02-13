@@ -24,7 +24,8 @@ func TestAuthUseCase_Register(t *testing.T) {
 
 	mockUserRepo := mocks.NewMockUserRepository(ctrl)
 	mockSessionRepo := mocks.NewMockSessionRepository(ctrl)
-	authUC := auth.NewAuthUseCase(mockUserRepo, mockSessionRepo, nil, nil)
+	mockEmailService := serviceMocks.NewMockEmailService(ctrl)
+	authUC := auth.NewAuthUseCase(mockUserRepo, mockSessionRepo, nil, nil, mockEmailService)
 
 	ctx := context.Background()
 
@@ -51,6 +52,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 
 		// Expect Session Create for Verification Token (Logic to be added)
 		mockSessionRepo.EXPECT().CreateSession(ctx, gomock.Any(), gomock.Any(), 24*time.Hour).Return(nil)
+		mockEmailService.EXPECT().SendVerificationEmail(ctx, gomock.Any(), req.Email, gomock.Any()).Return(nil)
 
 		resp, err := authUC.Register(ctx, req)
 		assert.NoError(t, err)
@@ -85,7 +87,8 @@ func TestAuthUseCase_Login(t *testing.T) {
 
 	mockUserRepo := mocks.NewMockUserRepository(ctrl)
 	mockSessionRepo := mocks.NewMockSessionRepository(ctrl)
-	authUC := auth.NewAuthUseCase(mockUserRepo, mockSessionRepo, nil, nil)
+	mockEmailService := serviceMocks.NewMockEmailService(ctrl)
+	authUC := auth.NewAuthUseCase(mockUserRepo, mockSessionRepo, nil, nil, mockEmailService)
 
 	ctx := context.Background()
 
@@ -185,7 +188,8 @@ func TestAuthUseCase_Logout(t *testing.T) {
 
 	mockUserRepo := mocks.NewMockUserRepository(ctrl)
 	mockSessionRepo := mocks.NewMockSessionRepository(ctrl)
-	authUC := auth.NewAuthUseCase(mockUserRepo, mockSessionRepo, nil, nil)
+	mockEmailService := serviceMocks.NewMockEmailService(ctrl)
+	authUC := auth.NewAuthUseCase(mockUserRepo, mockSessionRepo, nil, nil, mockEmailService)
 
 	ctx := context.Background()
 
@@ -214,8 +218,9 @@ func TestAuthUseCase_LoginWithSocial(t *testing.T) {
 	mockSessionRepo := mocks.NewMockSessionRepository(ctrl)
 	mockSocialRepo := mocks.NewMockSocialAccountRepository(ctrl)
 	mockSocialAuthService := serviceMocks.NewMockSocialAuthService(ctrl)
+	mockEmailService := serviceMocks.NewMockEmailService(ctrl)
 
-	authUC := auth.NewAuthUseCase(mockUserRepo, mockSessionRepo, mockSocialRepo, mockSocialAuthService)
+	authUC := auth.NewAuthUseCase(mockUserRepo, mockSessionRepo, mockSocialRepo, mockSocialAuthService, mockEmailService)
 	ctx := context.Background()
 
 	t.Run("SocialAccountExists_Login", func(t *testing.T) {
@@ -299,12 +304,13 @@ func TestAuthUseCase_VerifyEmail(t *testing.T) {
 
 	mockUserRepo := mocks.NewMockUserRepository(ctrl)
 	mockSessionRepo := mocks.NewMockSessionRepository(ctrl)
-	authUC := auth.NewAuthUseCase(mockUserRepo, mockSessionRepo, nil, nil)
+	mockEmailService := serviceMocks.NewMockEmailService(ctrl)
+	authUC := auth.NewAuthUseCase(mockUserRepo, mockSessionRepo, nil, nil, mockEmailService)
 
 	ctx := context.Background()
 
 	t.Run("Success", func(t *testing.T) {
-		token := "verification-token"
+		token := "verify:verification-token"
 		userID := uuid.New()
 		user := &entity.User{
 			ID:              userID,
@@ -334,14 +340,14 @@ func TestAuthUseCase_VerifyEmail(t *testing.T) {
 
 	t.Run("InvalidToken", func(t *testing.T) {
 		token := "invalid-token"
-		mockSessionRepo.EXPECT().GetUserID(ctx, token).Return("", errors.New("not found"))
+		mockSessionRepo.EXPECT().GetUserID(gomock.Any(), gomock.Any()).Times(0)
 
 		err := authUC.VerifyEmail(ctx, token)
 		assert.Error(t, err)
 	})
 
 	t.Run("UserNotFound", func(t *testing.T) {
-		token := "valid-token"
+		token := "verify:valid-token"
 		userID := uuid.New()
 
 		mockSessionRepo.EXPECT().GetUserID(ctx, token).Return(userID.String(), nil)
@@ -349,6 +355,6 @@ func TestAuthUseCase_VerifyEmail(t *testing.T) {
 
 		err := authUC.VerifyEmail(ctx, token)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "user not found")
+		assert.ErrorIs(t, err, auth.ErrVerificationTokenInvalid)
 	})
 }

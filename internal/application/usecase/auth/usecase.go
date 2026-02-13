@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aiagent/internal/application/dto"
@@ -13,8 +14,18 @@ import (
 	"github.com/aiagent/internal/domain/repository"
 	"github.com/aiagent/internal/domain/service"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )
+
+const verifyTokenPrefix = "verify:"
+const resetTokenPrefix = "reset:"
+
+const defaultPasswordResetTTL = 30 * time.Minute
+
+var ErrResetTokenInvalid = errors.New("invalid or expired reset token")
+var ErrPasswordTooShort = errors.New("password must be at least 8 characters")
+var ErrVerificationTokenInvalid = errors.New("invalid or expired verification token")
 
 type AuthUseCase interface {
 	Register(ctx context.Context, req dto.RegisterRequest) (*dto.AuthResponse, error)
@@ -23,6 +34,10 @@ type AuthUseCase interface {
 	GetSocialAuthURL(ctx context.Context, provider string) (string, error)
 	Logout(ctx context.Context, sessionID string) error
 	VerifyEmail(ctx context.Context, token string) error
+	ResendVerificationEmail(ctx context.Context, email string) error
+	ForgotPassword(ctx context.Context, email string) error
+	ValidateResetPasswordToken(ctx context.Context, token string) error
+	ResetPassword(ctx context.Context, token string, newPassword string) error
 }
 
 type authUseCase struct {
@@ -30,6 +45,8 @@ type authUseCase struct {
 	sessionRepo       repository.SessionRepository
 	socialRepo        repository.SocialAccountRepository
 	socialAuthService service.SocialAuthService
+	emailService      service.EmailService
+	resetTokenTTL     time.Duration
 }
 
 func NewAuthUseCase(
@@ -37,12 +54,15 @@ func NewAuthUseCase(
 	sessionRepo repository.SessionRepository,
 	socialRepo repository.SocialAccountRepository,
 	socialAuthService service.SocialAuthService,
+	emailService service.EmailService,
 ) AuthUseCase {
 	return &authUseCase{
 		userRepo:          userRepo,
 		sessionRepo:       sessionRepo,
 		socialRepo:        socialRepo,
 		socialAuthService: socialAuthService,
+		emailService:      emailService,
+		resetTokenTTL:     defaultPasswordResetTTL,
 	}
 }
 
@@ -78,15 +98,17 @@ func (u *authUseCase) Register(ctx context.Context, req dto.RegisterRequest) (*d
 	}
 
 	// Generate verification token
-	verificationToken := uuid.New().String()
+	verificationToken := verifyTokenPrefix + uuid.New().String()
 	// Store token in session repo (reuse generic session storage)
 	// Using a prefix or separate store would be better, but for now we reuse session repo
 	if err := u.sessionRepo.CreateSession(ctx, verificationToken, user.ID.String(), 24*time.Hour); err != nil {
 		return nil, fmt.Errorf("failed to create verification token: %w", err)
 	}
 
-	// Stub: Send email
-	fmt.Printf("[STUB] Sending verification email to %s with token: %s\n", user.Email, verificationToken)
+	// Send verification email (registration succeeds even if email fails)
+	if err := u.emailService.SendVerificationEmail(ctx, user.ID, user.Email, verificationToken); err != nil {
+		log.Warn().Err(err).Str("user_id", user.ID.String()).Msg("failed to send verification email")
+	}
 
 	return &dto.AuthResponse{
 		UserID: user.ID,
@@ -135,14 +157,18 @@ func (u *authUseCase) Logout(ctx context.Context, sessionID string) error {
 }
 
 func (u *authUseCase) VerifyEmail(ctx context.Context, token string) error {
+	if token == "" || !strings.HasPrefix(token, verifyTokenPrefix) {
+		return ErrVerificationTokenInvalid
+	}
+
 	userIDStr, err := u.sessionRepo.GetUserID(ctx, token)
 	if err != nil {
-		return errors.New("invalid or expired verification token")
+		return ErrVerificationTokenInvalid
 	}
 
 	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
-		return errors.New("invalid user ID in token")
+		return ErrVerificationTokenInvalid
 	}
 
 	user, err := u.userRepo.FindByID(ctx, userID)
@@ -150,7 +176,7 @@ func (u *authUseCase) VerifyEmail(ctx context.Context, token string) error {
 		return err
 	}
 	if user == nil {
-		return errors.New("user not found")
+		return ErrVerificationTokenInvalid
 	}
 
 	if user.EmailVerifiedAt != nil {
@@ -167,6 +193,114 @@ func (u *authUseCase) VerifyEmail(ctx context.Context, token string) error {
 
 	// Invalidate token
 	_ = u.sessionRepo.DeleteSession(ctx, token)
+
+	return nil
+}
+
+func (u *authUseCase) ResendVerificationEmail(ctx context.Context, email string) error {
+	user, err := u.userRepo.FindByEmail(ctx, email)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return nil
+	}
+	if !user.IsActive {
+		return nil
+	}
+	if user.EmailVerifiedAt != nil {
+		return nil
+	}
+
+	verificationToken := verifyTokenPrefix + uuid.New().String()
+	if err := u.sessionRepo.CreateSession(ctx, verificationToken, user.ID.String(), 24*time.Hour); err != nil {
+		return fmt.Errorf("failed to create verification token: %w", err)
+	}
+
+	return u.emailService.SendVerificationEmail(ctx, user.ID, user.Email, verificationToken)
+}
+
+func (u *authUseCase) ForgotPassword(ctx context.Context, email string) error {
+	user, err := u.userRepo.FindByEmail(ctx, email)
+	if err != nil {
+		log.Warn().Err(err).Msg("failed to look up user for forgot password")
+		return nil
+	}
+	if user == nil {
+		return nil
+	}
+
+	resetToken := resetTokenPrefix + uuid.New().String()
+	if err := u.sessionRepo.CreateSession(ctx, resetToken, user.ID.String(), u.resetTokenTTL); err != nil {
+		log.Warn().Err(err).Str("user_id", user.ID.String()).Msg("failed to create password reset token")
+		return nil
+	}
+
+	if err := u.emailService.SendPasswordResetEmail(ctx, user.ID, user.Email, resetToken); err != nil {
+		log.Warn().Err(err).Str("user_id", user.ID.String()).Msg("failed to send password reset email")
+		if delErr := u.sessionRepo.DeleteSession(ctx, resetToken); delErr != nil {
+			log.Warn().Err(delErr).Str("user_id", user.ID.String()).Msg("failed to delete password reset token after email failure")
+		}
+		return nil
+	}
+
+	return nil
+}
+
+func (u *authUseCase) ValidateResetPasswordToken(ctx context.Context, token string) error {
+	if token == "" || !strings.HasPrefix(token, resetTokenPrefix) {
+		return ErrResetTokenInvalid
+	}
+	userIDStr, err := u.sessionRepo.GetUserID(ctx, token)
+	if err != nil || userIDStr == "" {
+		return ErrResetTokenInvalid
+	}
+	return nil
+}
+
+func (u *authUseCase) ResetPassword(ctx context.Context, token string, newPassword string) error {
+	if len(newPassword) < 8 {
+		return ErrPasswordTooShort
+	}
+
+	if token == "" || !strings.HasPrefix(token, resetTokenPrefix) {
+		return ErrResetTokenInvalid
+	}
+
+	userIDStr, err := u.sessionRepo.GetUserID(ctx, token)
+	if err != nil || userIDStr == "" {
+		return ErrResetTokenInvalid
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return ErrResetTokenInvalid
+	}
+
+	user, err := u.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return ErrResetTokenInvalid
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+	user.PasswordHash = string(hashedPassword)
+	user.UpdatedAt = now
+
+	if err := u.userRepo.Update(ctx, user); err != nil {
+		return err
+	}
+
+	if err := u.sessionRepo.DeleteSession(ctx, token); err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -9,6 +9,7 @@ import (
 
 // Config holds all application configuration
 type Config struct {
+	App       AppConfig
 	Server    ServerConfig
 	Database  DatabaseConfig
 	Redis     RedisConfig
@@ -18,6 +19,11 @@ type Config struct {
 	Firebase  FirebaseConfig
 	SePay     SePayConfig
 	Email     EmailConfig
+}
+
+// AppConfig holds application-level configuration
+type AppConfig struct {
+	PublicURL string `mapstructure:"public_url"`
 }
 
 // EmailConfig holds SMTP-related configuration
@@ -121,6 +127,9 @@ func Load(path string) (*Config, error) {
 
 // setDefaults sets default configuration values
 func setDefaults() {
+	// App defaults
+	viper.SetDefault("app.public_url", "http://localhost:8080")
+
 	// Server defaults
 	viper.SetDefault("server.port", "8080")
 	viper.SetDefault("server.mode", "debug")

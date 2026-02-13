@@ -5,7 +5,9 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"net/url"
 	"path/filepath"
+	"strings"
 
 	"github.com/aiagent/internal/domain/entity"
 	"github.com/aiagent/internal/domain/repository"
@@ -19,6 +21,7 @@ type emailServiceImpl struct {
 	provider    adapter.EmailProvider
 	taskRunner  TaskRunner
 	templateDir string
+	publicURL   string
 	templates   map[string]*template.Template
 }
 
@@ -28,12 +31,14 @@ func NewEmailServiceImpl(
 	provider adapter.EmailProvider,
 	taskRunner TaskRunner,
 	templateDir string,
+	publicURL string,
 ) EmailService {
 	s := &emailServiceImpl{
 		userRepo:    userRepo,
 		provider:    provider,
 		taskRunner:  taskRunner,
 		templateDir: templateDir,
+		publicURL:   publicURL,
 		templates:   make(map[string]*template.Template),
 	}
 
@@ -137,13 +142,42 @@ func (s *emailServiceImpl) SendWelcomeEmail(ctx context.Context, userID uuid.UUI
 func (s *emailServiceImpl) SendVerificationEmail(ctx context.Context, userID uuid.UUID, email string, token string) error {
 	subject := "Verify your email address"
 
+	base := strings.TrimRight(s.publicURL, "/")
+	if base == "" {
+		base = "http://localhost:8080"
+	}
+
+	verificationURL := fmt.Sprintf("%s/api/v1/auth/verify-email?token=%s", base, url.QueryEscape(token))
+
 	tmplData := map[string]interface{}{
-		"VerificationURL": fmt.Sprintf("https://aiagent.com/verify?token=%s", token),
+		"VerificationURL": verificationURL,
 	}
 
 	htmlBody, textBody, err := s.renderTemplate("verification.html", tmplData)
 	if err != nil {
 		return fmt.Errorf("failed to render verification email: %w", err)
+	}
+
+	return s.provider.Send(ctx, []string{email}, subject, htmlBody, textBody)
+}
+
+func (s *emailServiceImpl) SendPasswordResetEmail(ctx context.Context, userID uuid.UUID, email string, token string) error {
+	subject := "Reset your password"
+
+	base := strings.TrimRight(s.publicURL, "/")
+	if base == "" {
+		base = "http://localhost:8080"
+	}
+
+	resetURL := fmt.Sprintf("%s/reset-password?token=%s", base, url.QueryEscape(token))
+
+	tmplData := map[string]interface{}{
+		"ResetURL": resetURL,
+	}
+
+	htmlBody, textBody, err := s.renderTemplate("password_reset.html", tmplData)
+	if err != nil {
+		return fmt.Errorf("failed to render password reset email: %w", err)
 	}
 
 	return s.provider.Send(ctx, []string{email}, subject, htmlBody, textBody)

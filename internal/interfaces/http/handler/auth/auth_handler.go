@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/aiagent/internal/application/dto"
@@ -13,6 +14,11 @@ type AuthHandler interface {
 	Register(c *gin.Context)
 	Login(c *gin.Context)
 	Logout(c *gin.Context)
+	VerifyEmail(c *gin.Context)
+	ResendVerification(c *gin.Context)
+	ForgotPassword(c *gin.Context)
+	ValidateResetPasswordToken(c *gin.Context)
+	ResetPassword(c *gin.Context)
 	SocialLogin(c *gin.Context)
 	SocialCallback(c *gin.Context)
 }
@@ -82,6 +88,128 @@ func (h *authHandler) Logout(c *gin.Context) {
 	c.SetCookie("session_id", "", -1, "/", "", secure, true)
 
 	response.Success(c, http.StatusOK, nil)
+}
+
+// VerifyEmail godoc
+// @Summary Verify email address
+// @Description Verify a user's email using the verification token sent via email
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param token query string true "Verification token"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Router /api/v1/auth/verify-email [get]
+func (h *authHandler) VerifyEmail(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		response.BadRequest(c, "token is required")
+		return
+	}
+
+	if err := h.authUseCase.VerifyEmail(c.Request.Context(), token); err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, gin.H{"message": "email verified"})
+}
+
+// ResendVerification godoc
+// @Summary Resend verification email
+// @Description Resend a verification email (always returns 200 to prevent account enumeration)
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body dto.ResendVerificationRequest true "Email"
+// @Success 200 {object} response.Response
+// @Router /api/v1/auth/resend-verification [post]
+func (h *authHandler) ResendVerification(c *gin.Context) {
+	var req dto.ResendVerificationRequest
+	_ = c.ShouldBindJSON(&req)
+
+	if req.Email != "" {
+		_ = h.authUseCase.ResendVerificationEmail(c.Request.Context(), req.Email)
+	}
+
+	response.Success(c, http.StatusOK, gin.H{
+		"message": "If an account exists for this email, a verification message will be sent.",
+	})
+}
+
+// ForgotPassword godoc
+// @Summary Request password reset
+// @Description Always returns 200 to prevent account enumeration. If the user exists, issues a time-limited token and attempts to send email.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body dto.ForgotPasswordRequest true "Email"
+// @Success 200 {object} response.Response{data=dto.ForgotPasswordResponse}
+// @Router /api/v1/auth/forgot-password [post]
+func (h *authHandler) ForgotPassword(c *gin.Context) {
+	var req dto.ForgotPasswordRequest
+	_ = c.ShouldBindJSON(&req)
+
+	if req.Email != "" {
+		_ = h.authUseCase.ForgotPassword(c.Request.Context(), req.Email)
+	}
+
+	response.Success(c, http.StatusOK, dto.ForgotPasswordResponse{Message: "If an account exists for this email, a password reset link will be sent."})
+}
+
+// ValidateResetPasswordToken godoc
+// @Summary Validate password reset token
+// @Description Returns 200 if token is valid, 400 if invalid or expired.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param token query string true "Password reset token"
+// @Success 200 {object} response.Response{data=dto.ResetPasswordValidateResponse}
+// @Failure 400 {object} response.Response
+// @Router /api/v1/auth/reset-password/validate [get]
+func (h *authHandler) ValidateResetPasswordToken(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		response.BadRequest(c, "token is required")
+		return
+	}
+
+	if err := h.authUseCase.ValidateResetPasswordToken(c.Request.Context(), token); err != nil {
+		response.BadRequest(c, "invalid or expired reset token")
+		return
+	}
+
+	response.Success(c, http.StatusOK, dto.ResetPasswordValidateResponse{Valid: true})
+}
+
+// ResetPassword godoc
+// @Summary Reset password
+// @Description Validates token, updates bcrypt password_hash, invalidates token.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body dto.ResetPasswordRequest true "Reset token and new password"
+// @Success 200 {object} response.Response{data=dto.ResetPasswordResponse}
+// @Failure 400 {object} response.Response
+// @Router /api/v1/auth/reset-password [post]
+func (h *authHandler) ResetPassword(c *gin.Context) {
+	var req dto.ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	err := h.authUseCase.ResetPassword(c.Request.Context(), req.Token, req.Password)
+	if err != nil {
+		if errors.Is(err, auth.ErrResetTokenInvalid) || errors.Is(err, auth.ErrPasswordTooShort) {
+			response.BadRequest(c, err.Error())
+			return
+		}
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, dto.ResetPasswordResponse{Message: "password reset successful"})
 }
 
 func (h *authHandler) SocialLogin(c *gin.Context) {

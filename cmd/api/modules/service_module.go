@@ -6,6 +6,7 @@ import (
 	"github.com/aiagent/internal/domain/repository"
 	"github.com/aiagent/internal/domain/service"
 	"github.com/aiagent/internal/infrastructure/adapter"
+	"github.com/aiagent/internal/infrastructure/config"
 	"go.uber.org/fx"
 )
 
@@ -40,8 +41,8 @@ var DomainServiceModule = fx.Module("domain_service",
 			return service.NewTaskRunner(30 * time.Second)
 		},
 		// Email Service
-		func(userRepo repository.UserRepository, provider adapter.EmailProvider, taskRunner service.TaskRunner) service.EmailService {
-			return service.NewEmailServiceImpl(userRepo, provider, taskRunner, "internal/infrastructure/email/templates")
+		func(cfg *config.Config, userRepo repository.UserRepository, provider adapter.EmailProvider, taskRunner service.TaskRunner) service.EmailService {
+			return service.NewEmailServiceImpl(userRepo, provider, taskRunner, "internal/infrastructure/email/templates", cfg.App.PublicURL)
 		},
 	),
 )

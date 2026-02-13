@@ -10,6 +10,11 @@ func RegisterAuthRoutes(v1 *gin.RouterGroup, p Params, rateLimit, sessionAuth gi
 		authGroup.POST("/register", rateLimit, p.AuthHandler.Register)
 		authGroup.POST("/login", rateLimit, p.AuthHandler.Login)
 		authGroup.POST("/logout", sessionAuth, p.AuthHandler.Logout)
+		authGroup.GET("/verify-email", p.AuthHandler.VerifyEmail)
+		authGroup.POST("/resend-verification", rateLimit, p.AuthHandler.ResendVerification)
+		authGroup.POST("/forgot-password", rateLimit, p.AuthHandler.ForgotPassword)
+		authGroup.GET("/reset-password/validate", p.AuthHandler.ValidateResetPasswordToken)
+		authGroup.POST("/reset-password", p.AuthHandler.ResetPassword)
 		authGroup.GET("/:provider", p.AuthHandler.SocialLogin)
 		authGroup.GET("/:provider/callback", p.AuthHandler.SocialCallback)
 	}

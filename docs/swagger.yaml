@@ -335,6 +335,16 @@ definitions:
     - name
     - slug
     type: object
+  dto.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  dto.ForgotPasswordResponse:
+    properties:
+      message:
+        type: string
+    type: object
   dto.GetAuthorPlansResponse:
     properties:
       authorId:
@@ -576,6 +586,32 @@ definitions:
         type: string
       lastReadAt:
         type: string
+    type: object
+  dto.ResendVerificationRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  dto.ResetPasswordRequest:
+    properties:
+      password:
+        minLength: 8
+        type: string
+      token:
+        type: string
+    required:
+    - password
+    - token
+    type: object
+  dto.ResetPasswordResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  dto.ResetPasswordValidateResponse:
+    properties:
+      valid:
+        type: boolean
     type: object
   dto.RoleResponse:
     properties:
@@ -1012,6 +1048,143 @@ info:
   title: Go Boilerplate API
   version: "1.0"
 paths:
+  /api/v1/auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Always returns 200 to prevent account enumeration. If the user
+        exists, issues a time-limited token and attempts to send email.
+      parameters:
+      - description: Email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ForgotPasswordResponse'
+              type: object
+      summary: Request password reset
+      tags:
+      - Auth
+  /api/v1/auth/resend-verification:
+    post:
+      consumes:
+      - application/json
+      description: Resend a verification email (always returns 200 to prevent account
+        enumeration)
+      parameters:
+      - description: Email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResendVerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Resend verification email
+      tags:
+      - Auth
+  /api/v1/auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Validates token, updates bcrypt password_hash, invalidates token.
+      parameters:
+      - description: Reset token and new password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ResetPasswordResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Reset password
+      tags:
+      - Auth
+  /api/v1/auth/reset-password/validate:
+    get:
+      consumes:
+      - application/json
+      description: Returns 200 if token is valid, 400 if invalid or expired.
+      parameters:
+      - description: Password reset token
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ResetPasswordValidateResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Validate password reset token
+      tags:
+      - Auth
+  /api/v1/auth/verify-email:
+    get:
+      consumes:
+      - application/json
+      description: Verify a user's email using the verification token sent via email
+      parameters:
+      - description: Verification token
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Verify email address
+      tags:
+      - Auth
   /api/v1/authors/{authorId}/plans:
     get:
       consumes:

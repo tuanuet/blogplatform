@@ -33,7 +33,7 @@ func TestEmailService_SendWelcomeEmail(t *testing.T) {
 	wd, _ := os.Getwd()
 	templateDir := filepath.Join(wd, "../../infrastructure/email/templates")
 
-	service := NewEmailServiceImpl(mockUserRepo, mockProvider, taskRunner, templateDir)
+	service := NewEmailServiceImpl(mockUserRepo, mockProvider, taskRunner, templateDir, "http://localhost:8080")
 
 	userID := uuid.New()
 	email := "test@example.com"
@@ -58,7 +58,7 @@ func TestEmailService_SendNotification(t *testing.T) {
 	wd, _ := os.Getwd()
 	templateDir := filepath.Join(wd, "../../infrastructure/email/templates")
 
-	service := NewEmailServiceImpl(mockUserRepo, mockProvider, taskRunner, templateDir)
+	service := NewEmailServiceImpl(mockUserRepo, mockProvider, taskRunner, templateDir, "http://localhost:8080")
 
 	userID := uuid.New()
 	user := &entity.User{
@@ -94,7 +94,7 @@ func TestEmailService_SendVerificationEmail(t *testing.T) {
 	wd, _ := os.Getwd()
 	templateDir := filepath.Join(wd, "../../infrastructure/email/templates")
 
-	service := NewEmailServiceImpl(mockUserRepo, mockProvider, taskRunner, templateDir)
+	service := NewEmailServiceImpl(mockUserRepo, mockProvider, taskRunner, templateDir, "http://localhost:8080")
 
 	userID := uuid.New()
 	email := "test@example.com"
