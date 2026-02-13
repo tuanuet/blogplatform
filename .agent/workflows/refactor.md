@@ -2,123 +2,30 @@
 description: Safe refactoring (Builder phase only)
 ---
 
-# Refactor Workflow
+# Refactor workflow
 
-User Request: $1
+Input: $1
 
-Minimal workflow: **Builder only**, focus on safety.
+Use this workflow for behavior-preserving changes (cleanup, readability,
+performance improvements without contract changes).
 
-## When to Use
+## Steps
 
-- Code cleanup without behavior change
-- Improving readability/performance
-- Reducing technical debt
+1. Baseline
+   - Ensure tests exist for the area you will change
+   - Run tests and confirm the baseline is green
 
-## Phases
+2. Refactor loop
+   - Make one small change
+   - Run tests immediately
+   - Repeat
 
-```mermaid
-flowchart TB
-    Start([Refactor Request]) --> Verify[Verify Tests Exist]
-    Verify -->|No tests| WriteTests[Write Tests First]
-    WriteTests --> Verify
-    
-    Verify -->|Tests exist| Baseline[Run Tests\nVerify Baseline]
-    Baseline --> RefactorLoop[Refactor Loop]
-    
-    subgraph RefactorLoop[Refactor Loop]
-        direction TB
-        Change[Make ONE Change] --> Test[Run Tests]
-        Test -->|Pass| Commit[Commit]
-        Test -->|Fail| Undo[Undo Change]
-        Undo --> Change
-        Commit --> More{More to\nrefactor?}
-        More -->|Yes| Change
-    end
-    
-    More -->|No| Final[Final Verify]
-    Final --> Output([Complete])
-    
-    style Verify fill:#fff3e0
-    style RefactorLoop fill:#e8f5e9
-    style Output fill:#c8e6c9
-```
+3. Verify
+   - Run the full test suite
+   - Confirm behavior is unchanged
 
-### ~~Phase 1: GATEKEEPER~~ — SKIPPED
+## Notes
 
-Requirement is clear: improve code without changing behavior.
-
-### ~~Phase 2: ARCHITECT~~ — SKIPPED
-
-No new design needed for refactoring.
-
-### Phase 3: BUILDER (Refactor Focus)
-
-#### Pre-conditions
-
-```
-⚠️ REQUIRED: Tests must exist before refactoring
-   If no tests → Write tests first!
-```
-
-#### Step 1: Verify Baseline
-
-```
-1. Run all tests → MUST pass
-2. Note current coverage
-3. Identify refactoring targets
-```
-
-#### Step 2: Refactor Loop
-
-```
-For each change:
-1. Make ONE small change
-2. Run tests immediately
-3. If fail → Undo
-4. If pass → Commit
-5. Repeat
-```
-
-#### Step 3: Verify
-
-```
-1. All tests still pass
-2. Coverage not decreased
-3. No new code smells
-4. Behavior unchanged
-```
-
-## Refactoring Techniques
-
-| Technique        | When                    |
-| ---------------- | ----------------------- |
-| Extract Function | Long function           |
-| Extract Variable | Complex expression      |
-| Rename           | Unclear names           |
-| Inline           | Unnecessary abstraction |
-| Move             | Wrong location          |
-
-## Output Checklist
-
-- [ ] Tests existed before (or added)
-- [ ] All tests pass after
-- [ ] Code is cleaner
-- [ ] No behavior change
-- [ ] Each change committed separately
-
-## Example
-
-```
-Refactor: "Clean up UserService"
-
-Before:
-- 300 line function
-- Magic numbers
-- Duplicate code
-
-After:
-- 5 small functions
-- Named constants
-- Shared utilities
-- Same behavior, same tests pass
-```
+- If tests are missing, write tests first.
+- Commit only if the user asked for commits in this session.
+- Avoid destructive git commands; prefer small, reversible edits.

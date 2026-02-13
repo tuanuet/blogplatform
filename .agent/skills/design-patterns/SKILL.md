@@ -1,6 +1,6 @@
 ---
 name: design-patterns
-description: Apply SOLID principles, DDD, and Clean Architecture patterns
+description: Apply SOLID principles, DDD, and Clean Architecture patterns. Use when defining boundaries (domain/application/interfaces/infrastructure), designing repository/service interfaces, or reviewing architecture.
 ---
 
 # Design Patterns Skill
@@ -596,6 +596,12 @@ func (h *Handler) GetUser(c *gin.Context) {
 ```
 
 **Dependency Rule**: Inner layers DON'T know outer layers
+
+## Go Clean Architecture Contracts (Reference)
+
+When you need a Go-style entity + repository interface contract (no implementation), read:
+
+- `references/go-contracts.md`
 
 ## Pattern Selection Guide
 

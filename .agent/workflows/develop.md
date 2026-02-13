@@ -2,75 +2,48 @@
 description: Master orchestrator for multi-phase development (Token-Optimized).
 ---
 
-# Development Workflow
+# Develop workflow
 
-User Request: $1
+Input: $1
 
-> **Core Principle**: Delegate, don't do. Use token-efficient review gates and self-verifying agents.
+Use this workflow for new features when requirements need refinement.
 
-## Pipeline Flow (Contract First - Optimized)
+## Roles (subagents)
 
-```mermaid
-flowchart TB
-    Start([User Request]) --> Gatekeeper[Phase 1: Gatekeeper]
-    
-    Gatekeeper -->|User approves spec| Architect[Phase 2: Architect]
-    Gatekeeper -.->|Needs clarification| Gatekeeper
-    
-    Architect --> BuilderP2[Phase 3a: Builder - Core Implementation]
-    
-    BuilderP2 --> ReviewerImpl[Review 2: Implementation]
-    ReviewerImpl -->|APPROVED| BuilderP3[Phase 3b: Builder - Integration]
-    ReviewerImpl -->|NEEDS_CHANGES| BuilderP2
-    
-    BuilderP3 --> ReviewerInt[Review 3: Final Integration]
-    ReviewerInt -->|APPROVED| Complete([Complete])
-    ReviewerInt -->|NEEDS_CHANGES| BuilderP3
+- `gatekeeper`: clarify requirements and produce a user-approved spec
+- `architect`: design contracts and a phased implementation plan
+- `builder`: implement with tests (core, then integration)
+- `reviewer`: diff-only quality gate (loads `consolidated-review` only)
 
-    style Gatekeeper fill:#e1f5fe
-    style Architect fill:#e8f5e9
-    style BuilderP2 fill:#fce4ec
-    style ReviewerImpl fill:#f3e5f5
-    style BuilderP3 fill:#fce4ec
-    style ReviewerInt fill:#f3e5f5
-    style Complete fill:#c8e6c9
-```
+## How to run subagents (minimal)
 
----
+- Start: `task(subagent_type="gatekeeper", description="Spec", prompt="...")`
+- Continue: `task(task_id="<id>", subagent_type="gatekeeper", description="Spec", prompt="...")`
+- Load a skill: `skill(name="<skill>")`
+- Ask one blocking question: `question(...)`
 
-## Execution (Token-Efficient)
+## Flow
 
-### Phase 1: Gatekeeper
-- Load agent, refine requirements, obtain user approval on spec.
-- **Output**: Formal Feature Specification.
+1. Spec (gatekeeper)
+   - Exit: user confirms acceptance criteria and non-goals
 
-### Phase 2: Architect
-- **Architect**: Design contracts and phase-based plan.
-- **Self-Review**: Verify plan and SOLID boundaries. Directly hands off to Phase 3.
+2. Design (architect)
+   - Exit: contracts + phased plan + test plan
 
-### Phase 3: Builder Implementation (2 Phases + 2 Reviews)
-- **Phase 3a (Core)**: Builder implements logic + Unit tests.
-- **Review 2**: Reviewer performs **Diff-Only** review.
-- **Phase 3b (Integration)**: Builder wires components + Integration/E2E tests.
-- **Review 3**: Final verification of acceptance criteria.
+3. Build core (builder)
+   - Exit: unit tests green, core behavior implemented
 
----
+4. Implementation review (reviewer)
+   - Exit: `APPROVED` or `NEEDS_CHANGES` (max 3 loops)
 
-## Token Safety Rules
+5. Integrate (builder)
+   - Exit: wiring complete, integration or e2e coverage added as needed
 
-1. **Lazy Loading**: Reviewer agent should ONLY load the `consolidated-review` skill.
-2. **Diff-Based Review**: Reviewer uses `git diff` and `serena` to read only modified symbols/lines.
-3. **Session Re-use**: Use `task_id` to maintain subagent context across rounds.
-4. **Self-Review**: Builder must verify against `Clean Code Checklist` before handoff.
+6. Final review (reviewer)
+   - Exit: acceptance criteria met, test suite green
 
----
+## Token rules
 
-## Error Recovery
-
-| Situation                 | Action                                    |
-| ------------------------- | ----------------------------------------- |
-| Request unclear           | Gatekeeper asks questions → Loop          |
-| Plan rejected by user     | Architect revises contracts → Loop        |
-| Implementation fails      | Builder fixes → Re-submit Phase 3a        |
-| Integration fails         | Builder fixes → Re-submit Phase 3b        |
-| 3 rounds exceeded         | Escalate to user                          |
+- Reviews are diff-only (`git diff` + targeted reads)
+- Reviewer loads only `skill(name="consolidated-review")`
+- Reuse `task_id` for review loops; avoid re-sending full context

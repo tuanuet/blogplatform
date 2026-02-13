@@ -2,60 +2,29 @@
 description: Create or Update documentation on demand.
 ---
 
-# Document Workflow
+# Document workflow
 
-**Trigger**: `/document $1` command
+Trigger: `/document $1`
 
-**Arguments**:
-- `$1`: The target to document (e.g., "auth flow", "User model", "system architecture")
-
-**Goal**: Create or Update documentation on demand.
-
-## Flow
-
-```mermaid
-flowchart LR
-    Start([User Request]) --> Documenter[Documenter]
-    Documenter --> Draft[Draft Docs]
-    Draft --> Reviewer[Document-Reviewer]
-    
-    Reviewer -->|APPROVED| Output([Final Output])
-    Reviewer -->|NEEDS_CHANGES| Documenter
-    
-    style Documenter fill:#e3f2fd
-    style Reviewer fill:#fce4ec
-    style Output fill:#c8e6c9
-```
+Use this workflow to create or update documentation for the requested scope.
 
 ## Steps
 
-### 1. Generation/Update Phase
+1. Draft (documenter)
+   - Locate existing docs for the scope, or decide where new docs belong
+   - Create or edit Markdown in place
+   - Prefer `skill(name="docs-writer")` when writing `.md`
 
-- **Agent**: `documenter`
-- **Input**: `$1` (scope)
-- **Action**: 
-  - Analyze code based on scope.
-  - Check if docs already exist (Update) or need creation (Create).
-  - Generate/Edit documentation (Markdown/Mermaid).
-- **Output**: Draft files in `.agent/temp/docs/` or modified existing files.
+2. Review (document-reviewer)
+   - Verify the doc against the codebase
+   - Return `APPROVED` or `NEEDS_CHANGES`
 
-### 2. Review Phase
+3. Loop
+   - If `NEEDS_CHANGES`, apply feedback and re-submit
+   - Stop after 3 loops and escalate unresolved issues
 
-- **Agent**: `document-reviewer`
-- **Action**: Verify the draft against the codebase using the `explore-code` skill.
-- **Input**: Draft files + Original User Request.
-- **Output**: `APPROVED` or `NEEDS_CHANGES`.
+## Exit criteria
 
-### 3. Loop (if needed)
-
-- If `NEEDS_CHANGES`:
-  - Pass feedback back to `documenter`.
-  - `documenter` regenerates/fixes.
-  - Return to Step 2.
-- **Limit**: Max 3 loops.
-
-### 4. Finalize
-
-- If `APPROVED`:
-  - Move/Save files to final destination (e.g., `docs/`).
-  - Report success to user.
+- Docs reflect actual behavior (no invented APIs)
+- Examples and commands are runnable for this repo
+- Links and references are consistent

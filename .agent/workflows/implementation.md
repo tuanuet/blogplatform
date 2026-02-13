@@ -2,75 +2,35 @@
 description: Implementation workflow for pre-defined specs (Token-Optimized).
 ---
 
-# Implementation Workflow
+# Implementation workflow
 
-User Request: $1
+Input: $1 (feature spec)
 
-> **Core Principle**: Skip requirement refinement, go straight to technical design and implementation.
-> **Efficiency**: Diff-based reviews and consolidated quality gates.
+Use this workflow when the spec is already approved. Skip requirement discovery
+and go straight to design and implementation.
 
-## Workflow Flow (Contract First - Optimized)
+## Flow
 
-```mermaid
-flowchart TB
-    Start([Feature Spec]) --> Architect[Phase 1: Architect]
-    
-    Architect --> BuilderP2[Phase 2a: Builder - Core Implementation]
-    
-    BuilderP2 --> ReviewerImpl[Review 2: Implementation]
-    ReviewerImpl -->|APPROVED| BuilderP3[Phase 2b: Builder - Integration]
-    ReviewerImpl -->|NEEDS_CHANGES| BuilderP2
-    
-    BuilderP3 --> ReviewerInt[Review 3: Final Integration]
-    ReviewerInt -->|APPROVED| Complete([Complete])
-    ReviewerInt -->|NEEDS_CHANGES| BuilderP3
+1. Design (architect)
+   - Contracts and phased plan
+   - Test plan and risks
 
-    style Architect fill:#e8f5e9
-    style BuilderP2 fill:#fce4ec
-    style ReviewerImpl fill:#f3e5f5
-    style BuilderP3 fill:#fce4ec
-    style ReviewerInt fill:#f3e5f5
-    style Complete fill:#c8e6c9
-```
+2. Build core (builder)
+   - Unit tests and minimal implementation
 
----
+3. Implementation review (reviewer)
+   - Diff-only review
+   - Reviewer loads only `skill(name="consolidated-review")`
 
-## Execution (Token-Efficient)
+4. Integrate (builder)
+   - Wire components (routes, DB, cache, config)
+   - Add integration or e2e tests when needed
 
-### Phase 1: Architect
-1. **Architect**: Design contracts and phase-based plan.
-   - **Self-Review**: Verify plan viability and SOLID boundaries.
-   - **Handoff**: Directly to Phase 2 (Builder).
+5. Final review (reviewer)
+   - Verify acceptance criteria and test suite
 
-### Phase 2: Implementation (RED-GREEN-REFACTOR)
-1. **Builder**: Core logic + Unit tests.
-   - **Self-Review**: Builder must run its own checklist before handoff.
-2. **Reviewer**:
-   - **Diff-Only Review**: Use `git diff` to identify changes; use `serena` to read only modified symbols.
-   - Verify TDD (check that tests pass and cover logic).
+## Token rules
 
-### Phase 3: Integration & Final Review
-1. **Builder**: Wiring + Integration/E2E tests.
-2. **Reviewer**: 
-   - Verify end-to-end functionality.
-   - **Optimization**: For low-complexity features, this gate can be combined with Review 2.
-
----
-
-## Token Safety Rules
-
-1. **Lazy Loading**: Reviewer agent should NOT read files it doesn't need.
-2. **Diff-Based Input**: Do not pass the whole file content to Reviewer. Use `serena_find_symbol` for specific symbols.
-3. **Consolidated Skill**: Never load old individual skills (`code-review`, etc.). Load ONLY `consolidated-review`.
-4. **Context Preservation**: Re-use `task_id` for subagents to maintain session memory without re-sending full context.
-
----
-
-## Error Recovery
-
-| Situation                 | Action                                    |
-| ------------------------- | ----------------------------------------- |
-| Plan rejected by user     | Architect revises contracts → Loop        |
-| Implementation fails      | Builder fixes → Re-submit Phase 2        |
-| Integration fails         | Builder fixes → Re-submit Phase 3         |
-| 3 rounds exceeded         | Escalate to user                          |
+- Reviewer reads only changed symbols or lines
+- Do not paste full files into reviews
+- Reuse `task_id` for loops (max 3)

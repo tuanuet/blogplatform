@@ -2,69 +2,38 @@
 description: Create a new skill using the skill-creator
 ---
 
-# Create Skill Workflow
+# Create-skill workflow
 
-User Request: $1
+Input: $1
 
-Uses the `skill-creator` skill to guide the creation of high-quality, effective new skills for the agent system.
+Use this workflow to add a reusable, loadable skill to the agent system.
 
-## When to Use
+## Steps
 
-- You want to teach the agent a new capability or domain knowledge.
-- You need to standardize a complex workflow that isn't covered by existing skills.
-- You want to package a set of instructions and best practices for reuse.
+1. Define the skill
+   - Problem it solves
+   - Trigger conditions (when to load it)
+   - Inputs and outputs
+   - Constraints (tools, safety rules, boundaries)
 
-## Phases
+2. Load the guidelines
+   - `skill(name="skill-creator")`
 
-```mermaid
-flowchart TB
-    Start([Skill Request]) --> Prep[Phase 1: Preparation]
-    
-    Prep -->|Load skill-creator| Design[Define Context]
-    Design --> Create[Phase 2: Creation]
-    
-    Create -->|Scaffold directory| Draft[Draft SKILL.md]
-    Draft --> Review[Review Format]
-    Review -->|Needs changes| Draft
-    Review -->|Approved| Verify[Phase 3: Verification]
-    
-    Verify -->|Test skill| Test{Works?}
-    Test -->|No| Draft
-    Test -->|Yes| Output([Skill Ready])
-    
-    style Prep fill:#e3f2fd
-    style Create fill:#e8f5e9
-    style Verify fill:#fff3e0
-    style Output fill:#c8e6c9
-```
+3. Scaffold
+   - Create: `.opencode/skills/<skill-name>/SKILL.md`
 
-### Phase 1: Preparation & Design
+4. Draft `SKILL.md`
+   - Role and goal
+   - Rules and constraints
+   - Tool workflow
+   - One or two realistic examples
 
-1. **Load Skill**: `skill-creator`
-   - Use the command: `Skill(name="skill-creator")`
-2. **Define Context**:
-   - What problem does this skill solve?
-   - What are the inputs and outputs?
-   - What tools will this skill use?
+5. Verify
+   - Load the new skill in a fresh session
+   - Run a tiny dry-run prompt to confirm behavior
 
-### Phase 2: Creation
+## Exit criteria
 
-1. **Scaffold Directory**:
-   - Create a new directory: `.agent/skills/<skill-name>/`
-2. **Draft Content**:
-   - Use the `skill-creator` guidelines to write the `SKILL.md` file.
-   - Include sections for: Role, Description, Instructions, Examples, and Constraints.
-3. **Review**:
-   - Ensure the skill follows the standard format and best practices.
-
-### Phase 3: Verification
-
-1. **Test the Skill**:
-   - Try to load the new skill in a new session to ensure it works.
-   - Verify that the agent understands and follows the new instructions.
-
-## Output Checklist
-
-- [ ] New directory created in `.agent/skills/`
-- [ ] `SKILL.md` file created and populated
-- [ ] Skill functionality verified
+- The skill loads successfully
+- The examples produce the intended behavior
+- The skill is narrow and reusable (not project-specific trivia)

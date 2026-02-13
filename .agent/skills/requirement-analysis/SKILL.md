@@ -1,6 +1,6 @@
 ---
 name: requirement-analysis
-description: Analyze and validate requirements, detect ambiguity, generate clarifying questions
+description: Analyze and validate requirements, detect ambiguity, and generate targeted clarifying questions. Use for definition-of-ready specs (especially backend/API work), acceptance criteria, and scoping before design/implementation.
 ---
 
 # Requirement Analysis Skill
@@ -8,6 +8,8 @@ description: Analyze and validate requirements, detect ambiguity, generate clari
 ## Purpose
 
 Analyze input requirements to detect ambiguity and ensure sufficient information before development.
+
+For backend work, ensure the spec includes endpoints, auth, validation, error model, and data changes when relevant.
 
 ## When to Use
 
@@ -34,6 +36,12 @@ Analyze input requirements to detect ambiguity and ensure sufficient information
 3. If missing info → Generate targeted questions
 4. If complete → Mark as READY for next phase
 ```
+
+## Backend Spec Templates (This Repo)
+
+When you need a full feature spec or a refined spec with backend/API sections, read:
+
+- `references/backend-spec-templates.md`
 
 ## Question Templates
 

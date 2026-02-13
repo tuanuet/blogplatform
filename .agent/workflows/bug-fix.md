@@ -2,100 +2,37 @@
 description: Bug fix with regression test (skips Architect phase)
 ---
 
-# Bug Fix Workflow
+# Bug-fix workflow
 
-User Request: $1
+Input: $1
 
-Simplified workflow: **Skip Architect**, focus on reproducing and fixing.
+Use this workflow for small, contained fixes that do not change API contracts
+or database schema.
 
-## When to Use
+If the fix needs new endpoints, schema changes, or a behavior contract change,
+route to `/develop` (unclear requirements) or `/implementation` (clear spec).
 
-- Fixing reported bugs
-- No schema/API changes needed
-- Quick turnaround required
+## Steps
 
-## Phases
+1. Gather repro info
+   - Steps to reproduce
+   - Expected vs actual behavior
+   - Logs, stack traces, screenshots
 
-```mermaid
-flowchart TB
-    Start([Bug Report]) --> Gatekeeper[Phase 1: Gatekeeper\nGather Bug Info]
-    
-    Gatekeeper --> Reproduce[Phase 3: Builder\nCreate Failing Test]
-    
-    Reproduce -->|Test Fails| Fix[Write Minimal Fix]
-    Fix --> Tests[Run All Tests]
-    
-    Tests -->|Pass| Verify[Manual Verify]
-    Tests -->|Fail| Fix
-    
-    Verify --> Output([Complete])
-    
-    style Gatekeeper fill:#ffebee
-    style Reproduce fill:#fff3e0
-    style Fix fill:#e8f5e9
-    style Output fill:#c8e6c9
-```
+2. Reproduce
+   - Add a failing regression test (`*_test.go`) that demonstrates the bug
+   - Run it and confirm it fails
 
-### Phase 1: GATEKEEPER (Lite)
+3. Fix
+   - Apply the smallest change that makes the new test pass
 
-Gather bug info:
+4. Verify
+   - Run the full test suite
+   - Do a quick manual check if applicable
 
-- [ ] Steps to reproduce?
-- [ ] Expected behavior?
-- [ ] Actual behavior?
-- [ ] Error logs/screenshots?
+## Exit criteria
 
-### ~~Phase 2: ARCHITECT~~ — SKIPPED
-
-No design needed for bug fixes.
-
-### Phase 3: BUILDER (Bug Focus)
-
-#### Step 1: Reproduce
-
-```
-1. Create failing test that reproduces bug
-2. Run test → MUST fail
-3. This becomes your regression test
-```
-
-#### Step 2: Fix
-
-```
-1. Write minimal fix
-2. Run new test → should pass
-3. Run ALL tests → should pass
-```
-
-#### Step 3: Verify
-
-```
-1. Manual verification if possible
-2. Check for side effects
-3. Review fix for code smells
-```
-
-## Output Checklist
-
-- [ ] Bug reproduced in test
-- [ ] Root cause identified
-- [ ] Fix implemented
-- [ ] Regression test passing
-- [ ] All other tests passing
-- [ ] No new code smells
-
-## Example
-
-```
-Bug: "Login fails for emails with + character"
-
-Phase 1 (Gatekeeper):
-- Reproduce: Login with "user+test@email.com"
-- Expected: Login succeeds
-- Actual: Returns 400 error
-
-Phase 3 (Builder):
-- Test: login.test.ts → "should accept + in email"
-- Fix: Update email validation regex
-- Verify: All auth tests pass
-```
+- Regression test exists and passes
+- Root cause is identified (one or two sentences)
+- Full test suite is green
+- No unrelated behavior changes

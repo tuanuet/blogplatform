@@ -2,97 +2,25 @@
 description: Analyze the current session and extract any patterns worth saving as skills.
 ---
 
-# /learn - Extract Reusable Patterns
+# Learn workflow
 
-Analyze the current session and extract any patterns worth saving as skills.
+Trigger: `/learn`
 
-## Trigger
+Use this workflow after a non-trivial session to save one reusable pattern.
 
-Run `/learn` at any point during a session when you've solved a non-trivial problem.
+## Steps
 
-## What to Extract
+1. Identify one pattern
+   - Error resolution pattern, debugging technique, workaround, or convention
+   - Avoid one-off incidents and trivial fixes
 
-Look for:
+2. Draft a short note
+   - Save to: `.opencode/skills/learned/<pattern-name>.md`
+   - Include: context, problem, solution, example, when to use
 
-1. **Error Resolution Patterns**
-   - What error occurred?
-   - What was the root cause?
-   - What fixed it?
-   - Is this reusable for similar errors?
+3. Confirm and save
+   - Ask for confirmation via `question` before writing the final file
 
-2. **Debugging Techniques**
-   - Non-obvious debugging steps
-   - Tool combinations that worked
-   - Diagnostic patterns
+## Exit criteria
 
-3. **Workarounds**
-   - Library quirks
-   - API limitations
-   - Version-specific fixes
-
-4. **Project-Specific Patterns**
-   - Codebase conventions discovered
-   - Architecture decisions made
-   - Integration patterns
-
-## Output Format
-
-Create a skill file at `.agent/skills/learned/[pattern-name].md`:
-
-```markdown
-# [Descriptive Pattern Name]
-
-**Extracted:** [Date]
-**Context:** [Brief description of when this applies]
-
-## Problem
-
-[What problem this solves - be specific]
-
-## Solution
-
-[The pattern/technique/workaround]
-
-## Example
-
-[Code example if applicable]
-
-## When to Use
-
-[Trigger conditions - what should activate this skill]
-```
-
-## Process
-
-```mermaid
-flowchart TB
-    Start([/learn]) --> Review[Review Session]
-    
-    Review --> Identify[Identify Pattern]
-    Identify --> Draft[Draft Skill File]
-    
-    Draft --> Confirm{User\nConfirms?}
-    Confirm -->|No| Revise[Revise Draft]
-    Revise --> Draft
-    
-    Confirm -->|Yes| Save[Save to\n.agent/skills/learned/]
-    Save --> Output([Pattern Saved])
-    
-    style Review fill:#e3f2fd
-    style Identify fill:#f3e5f5
-    style Draft fill:#fff3e0
-    style Output fill:#c8e6c9
-```
-
-1. Review the session for extractable patterns
-2. Identify the most valuable/reusable insight
-3. Draft the skill file
-4. Ask user to confirm before saving
-5. Save to `.agent/skills/learned/`
-
-## Notes
-
-- Don't extract trivial fixes (typos, simple syntax errors)
-- Don't extract one-time issues (specific API outages, etc.)
-- Focus on patterns that will save time in future sessions
-- Keep skills focused - one pattern per skill
+- One focused note that is reusable in future sessions

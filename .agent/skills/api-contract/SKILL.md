@@ -1,6 +1,6 @@
 ---
 name: api-contract
-description: Design API contracts with OpenAPI and interface definitions
+description: Design API contracts with OpenAPI and interface definitions, including endpoint sketches, request/response schemas, status codes, auth, pagination, idempotency, and stable error models.
 ---
 
 # API Contract Skill
@@ -31,6 +31,24 @@ Design API contracts (endpoints, request/response schemas) before implementation
 - Request/Response: camelCase keys
 
 ## Contract Templates
+
+### Quick Endpoint Sketch (Text)
+
+Use this when you need a lightweight contract before writing full OpenAPI.
+
+```markdown
+- `POST /api/v1/examples`
+  - Auth: `public` | `session` | `rbac:role_name`
+  - Idempotency: `none` | `Idempotency-Key`
+  - Request: `{ "name": "..." }`
+  - Response: `{ "id": "uuid", ... }`
+  - Errors:
+    - `400 VALIDATION_ERROR` when ...
+    - `401 UNAUTHENTICATED` when ...
+    - `403 FORBIDDEN` when ...
+    - `404 NOT_FOUND` when ...
+    - `409 CONFLICT` when ...
+```
 
 ### OpenAPI YAML
 
