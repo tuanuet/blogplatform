@@ -1185,6 +1185,44 @@ paths:
       summary: Verify email address
       tags:
       - Auth
+  /api/v1/authors/{authorId}/blogs/slug/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: Get a blog post for an author using its slug
+      parameters:
+      - description: Author ID
+        in: path
+        name: authorId
+        required: true
+        type: string
+      - description: Blog slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BlogResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get blog by slug
+      tags:
+      - Blogs
   /api/v1/authors/{authorId}/plans:
     get:
       consumes:

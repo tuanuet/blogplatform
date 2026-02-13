@@ -26,6 +26,11 @@ func RegisterBlogRoutes(v1 *gin.RouterGroup, p Params, auth *middleware.Authoriz
 		blogs.GET("/:id/comments", p.CommentHandler.GetByBlogID)
 		blogs.POST("/:id/comments", sessionAuth, auth.RequireCreate("comments"), p.CommentHandler.Create)
 	}
+
+	authors := v1.Group("/authors")
+	{
+		authors.GET("/:authorId/blogs/slug/:slug", p.BlogHandler.GetBySlug)
+	}
 }
 
 func RegisterVersionRoutes(v1 *gin.RouterGroup, p Params, auth *middleware.Authorization, sessionAuth gin.HandlerFunc) {

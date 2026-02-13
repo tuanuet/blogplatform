@@ -2,6 +2,7 @@ package blog
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/aiagent/internal/application/dto"
 	blogUsecase "github.com/aiagent/internal/application/usecase/blog"
@@ -94,6 +95,54 @@ func (h *blogHandler) GetByID(c *gin.Context) {
 			return
 		}
 		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, blog)
+}
+
+// GetBySlug godoc
+// @Summary Get blog by slug
+// @Description Get a blog post for an author using its slug
+// @Tags Blogs
+// @Accept json
+// @Produce json
+// @Param authorId path string true "Author ID"
+// @Param slug path string true "Blog slug"
+// @Success 200 {object} dto.BlogResponse
+// @Failure 400 {object} response.Response
+// @Failure 403 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Router /api/v1/authors/{authorId}/blogs/slug/{slug} [get]
+func (h *blogHandler) GetBySlug(c *gin.Context) {
+	authorID, err := uuid.Parse(c.Param("authorId"))
+	if err != nil {
+		response.BadRequest(c, "invalid author ID")
+		return
+	}
+
+	slug := strings.TrimSpace(c.Param("slug"))
+	if slug == "" {
+		response.BadRequest(c, "slug is required")
+		return
+	}
+
+	var viewerID *uuid.UUID
+	if userID, exists := c.Get("userID"); exists {
+		uid := userID.(uuid.UUID)
+		viewerID = &uid
+	}
+
+	blog, err := h.blogUseCase.GetBySlug(c.Request.Context(), authorID, slug, viewerID)
+	if err != nil {
+		switch err {
+		case blogUsecase.ErrBlogNotFound:
+			response.NotFound(c, err.Error())
+		case blogUsecase.ErrBlogAccessDenied:
+			response.Forbidden(c, err.Error())
+		default:
+			response.InternalServerError(c, err.Error())
+		}
 		return
 	}
 

@@ -76,6 +76,18 @@ func (mr *MockBlogHandlerMockRecorder) GetByID(c any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockBlogHandler)(nil).GetByID), c)
 }
 
+// GetBySlug mocks base method.
+func (m *MockBlogHandler) GetBySlug(c *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "GetBySlug", c)
+}
+
+// GetBySlug indicates an expected call of GetBySlug.
+func (mr *MockBlogHandlerMockRecorder) GetBySlug(c any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBySlug", reflect.TypeOf((*MockBlogHandler)(nil).GetBySlug), c)
+}
+
 // List mocks base method.
 func (m *MockBlogHandler) List(c *gin.Context) {
 	m.ctrl.T.Helper()
