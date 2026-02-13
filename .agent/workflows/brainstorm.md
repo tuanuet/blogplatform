@@ -9,6 +9,23 @@ Input: $1
 Use this workflow when you have an idea but not a spec yet. Your goal is to
 produce a short feature spec that is ready for `/implementation`.
 
+## Execution note
+
+You can run this workflow as a single agent. If the task is large, you can
+optionally spawn specialized subagents via `task(...)` for specific phases.
+
+## Workflow diagram
+
+This diagram shows the high-level flow and where the workflow ends.
+
+```mermaid
+flowchart TD
+  A[Start] --> B[Discuss]
+  B --> C[Define]
+  C --> D[Confirm]
+  D -->|User confirms spec| E[Done: spec ready for /implementation]
+```
+
 ## Steps
 
 1. Discuss

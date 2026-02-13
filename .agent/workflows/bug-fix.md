@@ -9,8 +9,26 @@ Input: $1
 Use this workflow for small, contained fixes that do not change API contracts
 or database schema.
 
+## Execution note
+
+You can run this workflow as a single agent. If the task is large, you can
+optionally spawn specialized subagents via `task(...)` for specific phases.
+
 If the fix needs new endpoints, schema changes, or a behavior contract change,
 route to `/develop` (unclear requirements) or `/implementation` (clear spec).
+
+## Workflow diagram
+
+This diagram shows the minimal regression-test-driven loop for bug fixes.
+
+```mermaid
+flowchart TD
+  A[Start] --> B[Gather repro info]
+  B --> C[Reproduce: add failing regression test]
+  C --> D[Fix: smallest change]
+  D --> E[Verify: full test suite + quick manual check]
+  E --> F[Done: regression test passes]
+```
 
 ## Steps
 

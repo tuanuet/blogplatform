@@ -9,6 +9,25 @@ Input: $1
 Use this workflow for behavior-preserving changes (cleanup, readability,
 performance improvements without contract changes).
 
+## Execution note
+
+You can run this workflow as a single agent. If the task is large, you can
+optionally spawn specialized subagents via `task(...)` for specific phases.
+
+## Workflow diagram
+
+This diagram shows the safety-first refactoring loop.
+
+```mermaid
+flowchart TD
+  A[Start] --> B[Baseline: tests exist + baseline green]
+  B --> C[Refactor: one small change]
+  C --> D[Run tests immediately]
+  D -->|Repeat| C
+  D --> E[Verify: full test suite + behavior unchanged]
+  E --> F[Done]
+```
+
 ## Steps
 
 1. Baseline

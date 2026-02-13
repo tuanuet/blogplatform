@@ -8,6 +8,24 @@ Trigger: `/learn`
 
 Use this workflow after a non-trivial session to save one reusable pattern.
 
+## Execution note
+
+You can run this workflow as a single agent. If the task is large, you can
+optionally spawn specialized subagents via `task(...)` for specific phases.
+
+## Workflow diagram
+
+This diagram shows how a session insight becomes a reusable note.
+
+```mermaid
+flowchart TD
+  A[Start] --> B[Identify one pattern]
+  B --> C[Draft a short note]
+  C --> D[Confirm via question]
+  D -->|Confirmed| E[Save: .opencode/skills/learned/<pattern-name>.md]
+  E --> F[Done: one reusable pattern captured]
+```
+
 ## Steps
 
 1. Identify one pattern
