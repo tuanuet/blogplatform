@@ -11,8 +11,9 @@ produce a short feature spec that is ready for `/implementation`.
 
 ## Execution note
 
-You can run this workflow as a single agent. If the task is large, you can
-optionally spawn specialized subagents via `task(...)` for specific phases.
+Run this workflow with the `@brainstormer` agent by default. For larger or
+code-heavy topics, `@brainstormer` can spawn multiple `@explore` agents in
+parallel to search relevant parts of the codebase.
 
 ## Workflow diagram
 
