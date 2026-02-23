@@ -2045,6 +2045,33 @@ paths:
       summary: Get personalized feed
       tags:
       - Recommendations
+  /api/v1/blogs/top-viewed:
+    get:
+      consumes:
+      - application/json
+      description: List published and public blogs ordered by view count descending
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        maximum: 50
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List top viewed blogs
+      tags:
+      - Blogs
   /api/v1/bookmarks:
     get:
       consumes:

@@ -15,6 +15,11 @@ type blogHandler struct {
 	blogUseCase blogUsecase.BlogUseCase
 }
 
+type topViewedQuery struct {
+	Page     int `form:"page,default=1"`
+	PageSize int `form:"pageSize,default=10"`
+}
+
 func NewBlogHandler(blogUseCase blogUsecase.BlogUseCase) BlogHandler {
 	return &blogHandler{
 		blogUseCase: blogUseCase,
@@ -187,6 +192,44 @@ func (h *blogHandler) List(c *gin.Context) {
 	}
 
 	result, err := h.blogUseCase.List(c.Request.Context(), &params, viewerID)
+	if err != nil {
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.SuccessWithMeta(c, result.Data, &response.Meta{
+		Page:       result.Page,
+		PageSize:   result.PageSize,
+		Total:      result.Total,
+		TotalPages: result.TotalPages,
+	})
+}
+
+// TopViewed godoc
+// @Summary List top viewed blogs
+// @Description List published and public blogs ordered by view count descending
+// @Tags Blogs
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number" default(1)
+// @Param pageSize query int false "Page size" default(10) maximum(50)
+// @Success 200 {object} response.Response
+// @Router /api/v1/blogs/top-viewed [get]
+func (h *blogHandler) TopViewed(c *gin.Context) {
+	var params topViewedQuery
+	if err := c.ShouldBindQuery(&params); err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	if params.Page < 1 {
+		params.Page = 1
+	}
+	if params.PageSize < 1 || params.PageSize > 50 {
+		params.PageSize = 10
+	}
+
+	result, err := h.blogUseCase.TopViewed(c.Request.Context(), params.Page, params.PageSize)
 	if err != nil {
 		response.InternalServerError(c, err.Error())
 		return

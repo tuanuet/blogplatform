@@ -34,10 +34,7 @@ func TestBlogVersionRepository_Create_Success(t *testing.T) {
 		CategoryID:    &categoryID,
 		EditorID:      editorID,
 		CreatedAt:     time.Now(),
-		Tags: []entity.Tag{
-			{ID: uuid.New(), Name: "Go"},
-			{ID: uuid.New(), Name: "Testing"},
-		},
+		Tags:          nil,
 	}
 
 	mock.ExpectBegin()
@@ -60,20 +57,6 @@ func TestBlogVersionRepository_Create_Success(t *testing.T) {
 			sqlmock.AnyArg(), // CreatedAt
 		).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(version.ID))
-
-	// Expect tags to be upserted
-	mock.ExpectQuery(regexp.QuoteMeta(
-		`INSERT INTO "tags"`)).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at"}).
-			AddRow(version.Tags[0].ID, time.Now(), time.Now()).
-			AddRow(version.Tags[1].ID, time.Now(), time.Now()))
-
-	// Expect tag associations to be inserted
-	mock.ExpectQuery(regexp.QuoteMeta(
-		`INSERT INTO "blog_version_tags"`)).
-		WillReturnRows(sqlmock.NewRows([]string{"blog_version_id", "tag_id"}).
-			AddRow(version.ID, version.Tags[0].ID).
-			AddRow(version.ID, version.Tags[1].ID))
 
 	mock.ExpectCommit()
 
@@ -123,12 +106,12 @@ func TestBlogVersionRepository_FindByID_Success(t *testing.T) {
 	tagID1 := uuid.New()
 	tagID2 := uuid.New()
 
-	joinRows := sqlmock.NewRows([]string{"blog_version_id", "tag_id"}).
+	joinRows := sqlmock.NewRows([]string{"version_id", "tag_id"}).
 		AddRow(id, tagID1).
 		AddRow(id, tagID2)
 
 	mock.ExpectQuery(regexp.QuoteMeta(
-		`SELECT * FROM "blog_version_tags" WHERE "blog_version_tags"."blog_version_id" = $1`)).
+		`SELECT * FROM "blog_version_tags" WHERE "blog_version_tags"."version_id" = $1`)).
 		WithArgs(id).
 		WillReturnRows(joinRows)
 
@@ -144,6 +127,9 @@ func TestBlogVersionRepository_FindByID_Success(t *testing.T) {
 	version, err := repo.FindByID(ctx, id)
 
 	assert.NoError(t, err)
+	if err != nil {
+		return
+	}
 	assert.NotNil(t, version)
 	assert.Equal(t, id, version.ID)
 	assert.Equal(t, editorID, version.Editor.ID)

@@ -33,7 +33,7 @@ This repo is a Go 1.24+ Clean Architecture API (Gin + GORM + Postgres + Redis + 
 - Database schema changes (migrations), including indexes/constraints.
 - Domain contracts (entities + repository interfaces) and usecase boundaries.
 - HTTP/API contract: endpoints, authz rules, validation, stable error codes.
-- Phase-based plan for Builder (implementation + integration + verification).
+- Phase-based plan for Backend Specialist (implementation + integration + verification).
 
 ## Operating Rules
 
@@ -58,4 +58,4 @@ skill(requirement-analysis) -> Validate remaining ambiguities before handoff
 
 - Each endpoint has: auth, validation rules, error codes, and pagination (if list).
 - Each schema change has: migration SQL, constraints, indexes, and backfill notes (if needed).
-- Builder can implement without guessing.
+- Backend Specialist can implement without guessing.

@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/aiagent/internal/domain/entity"
+	"github.com/aiagent/internal/domain/repository"
 	repoMocks "github.com/aiagent/internal/domain/repository/mocks"
 	"github.com/aiagent/internal/domain/service"
 	serviceMocks "github.com/aiagent/internal/domain/service/mocks"
@@ -111,4 +113,84 @@ func TestBlogService_Update_VersionFailureDoesNotBlock(t *testing.T) {
 	// Should still return no error
 	err := s.Update(ctx, blog, nil)
 	assert.NoError(t, err)
+}
+
+func TestBlogService_GetByID_DoesNotIncrementViewCount(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockBlogRepo := repoMocks.NewMockBlogRepository(ctrl)
+	mockSubRepo := repoMocks.NewMockSubscriptionRepository(ctrl)
+	mockTagRepo := repoMocks.NewMockTagRepository(ctrl)
+	mockVersionService := serviceMocks.NewMockVersionService(ctrl)
+
+	ctx := context.Background()
+	blogID := uuid.New()
+	authorID := uuid.New()
+	publishedAt := time.Now().Add(-time.Hour)
+
+	blog := &entity.Blog{
+		ID:          blogID,
+		AuthorID:    authorID,
+		Status:      entity.BlogStatusPublished,
+		Visibility:  entity.BlogVisibilityPublic,
+		PublishedAt: &publishedAt,
+		ViewCount:   4,
+	}
+
+	mockBlogRepo.EXPECT().FindByID(ctx, blogID).Return(blog, nil)
+	s := service.NewBlogService(mockBlogRepo, mockSubRepo, mockTagRepo, nil, mockVersionService)
+
+	result, err := s.GetByID(ctx, blogID, nil)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, 4, result.ViewCount)
+}
+
+func TestBlogService_RecordView_DelegatesToRepository(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockBlogRepo := repoMocks.NewMockBlogRepository(ctrl)
+	mockSubRepo := repoMocks.NewMockSubscriptionRepository(ctrl)
+	mockTagRepo := repoMocks.NewMockTagRepository(ctrl)
+	mockVersionService := serviceMocks.NewMockVersionService(ctrl)
+
+	ctx := context.Background()
+	blogID := uuid.New()
+
+	mockBlogRepo.EXPECT().IncrementViewCount(ctx, blogID).Return(nil)
+
+	s := service.NewBlogService(mockBlogRepo, mockSubRepo, mockTagRepo, nil, mockVersionService)
+
+	err := s.RecordView(ctx, blogID)
+	assert.NoError(t, err)
+}
+
+func TestBlogService_GetTopViewed_UsesPublishedPublicFilter(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockBlogRepo := repoMocks.NewMockBlogRepository(ctrl)
+	mockSubRepo := repoMocks.NewMockSubscriptionRepository(ctrl)
+	mockTagRepo := repoMocks.NewMockTagRepository(ctrl)
+	mockVersionService := serviceMocks.NewMockVersionService(ctrl)
+
+	ctx := context.Background()
+	pagination := repository.Pagination{Page: 1, PageSize: 10}
+
+	mockBlogRepo.EXPECT().FindTopViewed(ctx, pagination, gomock.AssignableToTypeOf(time.Now())).Return(&repository.PaginatedResult[entity.Blog]{
+		Data:       []entity.Blog{},
+		Total:      0,
+		Page:       1,
+		PageSize:   10,
+		TotalPages: 0,
+	}, nil)
+
+	s := service.NewBlogService(mockBlogRepo, mockSubRepo, mockTagRepo, nil, mockVersionService)
+
+	result, err := s.GetTopViewed(ctx, pagination)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, int64(0), result.Total)
 }

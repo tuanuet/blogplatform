@@ -25,6 +25,7 @@ type BlogUseCase interface {
 	GetByID(ctx context.Context, id uuid.UUID, viewerID *uuid.UUID) (*dto.BlogResponse, error)
 	GetBySlug(ctx context.Context, authorID uuid.UUID, slug string, viewerID *uuid.UUID) (*dto.BlogResponse, error)
 	List(ctx context.Context, params *dto.BlogFilterParams, viewerID *uuid.UUID) (*repository.PaginatedResult[dto.BlogListResponse], error)
+	TopViewed(ctx context.Context, page, pageSize int) (*repository.PaginatedResult[dto.BlogListResponse], error)
 	Update(ctx context.Context, id uuid.UUID, authorID uuid.UUID, req *dto.UpdateBlogRequest) (*dto.BlogResponse, error)
 	Delete(ctx context.Context, id uuid.UUID, authorID uuid.UUID) error
 	Publish(ctx context.Context, id uuid.UUID, authorID uuid.UUID, req *dto.PublishBlogRequest) (*dto.BlogResponse, error)
@@ -72,8 +73,12 @@ func (uc *blogUseCase) Create(ctx context.Context, authorID uuid.UUID, req *dto.
 		return nil, err
 	}
 
-	// Fetch fresh to get relationships
-	return uc.GetByID(ctx, blog.ID, &authorID)
+	created, err := uc.blogSvc.GetByID(ctx, blog.ID, &authorID)
+	if err != nil {
+		return nil, err
+	}
+
+	return uc.toBlogResponse(created), nil
 }
 
 func (uc *blogUseCase) GetByID(ctx context.Context, id uuid.UUID, viewerID *uuid.UUID) (*dto.BlogResponse, error) {
@@ -81,6 +86,9 @@ func (uc *blogUseCase) GetByID(ctx context.Context, id uuid.UUID, viewerID *uuid
 	if err != nil {
 		return nil, err
 	}
+
+	_ = uc.blogSvc.RecordView(ctx, blog.ID)
+
 	return uc.toBlogResponse(blog), nil
 }
 
@@ -89,6 +97,9 @@ func (uc *blogUseCase) GetBySlug(ctx context.Context, authorID uuid.UUID, slug s
 	if err != nil {
 		return nil, err
 	}
+
+	_ = uc.blogSvc.RecordView(ctx, blog.ID)
+
 	return uc.toBlogResponse(blog), nil
 }
 
@@ -146,46 +157,32 @@ func (uc *blogUseCase) List(ctx context.Context, params *dto.BlogFilterParams, v
 	}, nil
 }
 
+func (uc *blogUseCase) TopViewed(ctx context.Context, page, pageSize int) (*repository.PaginatedResult[dto.BlogListResponse], error) {
+	result, err := uc.blogSvc.GetTopViewed(ctx, repository.Pagination{Page: page, PageSize: pageSize})
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]dto.BlogListResponse, len(result.Data))
+	for i, blog := range result.Data {
+		items[i] = uc.toBlogListResponse(&blog)
+	}
+
+	return &repository.PaginatedResult[dto.BlogListResponse]{
+		Data:       items,
+		Total:      result.Total,
+		Page:       result.Page,
+		PageSize:   result.PageSize,
+		TotalPages: result.TotalPages,
+	}, nil
+}
+
 func (uc *blogUseCase) Update(ctx context.Context, id uuid.UUID, authorID uuid.UUID, req *dto.UpdateBlogRequest) (*dto.BlogResponse, error) {
-	// First get the blog to ensure existence and ownership logic is handled by service,
-	// but service Update expects a populated blog object.
-	// Actually, service.Update logic expects us to pass the updated entity info.
-	// But to construct updated entity safely, we need current state.
-
-	// Better: UseCase fetches current, updates fields, calls Service Update.
-	// Service Update will re-check ownership?
-	// My service Update implementation DOES check ownership if we pass the original ID?
-	// Wait, my Service Update:
-	// func (s *blogService) Update(ctx context.Context, blog *entity.Blog, tagIDs []uuid.UUID) error
-	// It finds existing by Slug, but DOES NOT check author ownership inside Update explicitly?
-	// It checks `if existing != nil && existing.ID != blog.ID`
-
-	// Ah, I need to fetch it first to verify author ID matches.
-	// Service Update takes *entity.Blog. It assumes *entity.Blog has correct ID.
-	// Does it check if blog.AuthorID matches the one in DB?
-	// The Service implementation of Update calls `s.blogRepo.Update(ctx, blog)`.
-	// The REPO update might inherently be unsafe if we change AuthorID.
-
-	// Safest: UseCase fetches, verifies author, then updates fields.
-
-	// Wait, Service Update implementation I wrote:
-	// `existing, _ := s.blogRepo.FindBySlug(...)` checks slug collision.
-	// It doesn't check AuthorID matches caller.
-
-	// So UseCase MUST fetch first.
-	// However, `uc.blogSvc.GetByID` checks ACCESS, which might fail if draft and wrong viewer.
-	// But here `authorID` is viewerID.
-
-	// I'll call `uc.blogSvc.GetByID`.
-
 	blog, err := uc.blogSvc.GetByID(ctx, id, &authorID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Verify ownership explicitly just in case GetByID allows read but not write?
-	// (CheckAccess logic: Author can always access. So if err==nil, we are good to read).
-	// But to Update, we must be Author.
 	if blog.AuthorID != authorID {
 		return nil, ErrBlogAccessDenied
 	}
@@ -228,8 +225,12 @@ func (uc *blogUseCase) Update(ctx context.Context, id uuid.UUID, authorID uuid.U
 		return nil, err
 	}
 
-	// Fetch fresh
-	return uc.GetByID(ctx, id, &authorID)
+	updated, err := uc.blogSvc.GetByID(ctx, id, &authorID)
+	if err != nil {
+		return nil, err
+	}
+
+	return uc.toBlogResponse(updated), nil
 }
 
 func (uc *blogUseCase) Delete(ctx context.Context, id uuid.UUID, authorID uuid.UUID) error {

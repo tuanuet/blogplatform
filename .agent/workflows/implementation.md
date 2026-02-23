@@ -17,7 +17,7 @@ optionally spawn specialized subagents via `task(...)` for specific phases.
 ## How to run subagents (minimal)
 
 - Design: `task(subagent_type="architect", description="Design", prompt="...")`
-- Build: `task(subagent_type="builder", description="Build", prompt="...")`
+- Build: `task(subagent_type="backend-specialist", description="Build", prompt="...")`
 - Continue: `task(task_id="<id>", subagent_type="<same>", description="...", prompt="...")`
 - Load a skill: `skill(name="<skill>")`
 - Ask one blocking question: `question(...)`
@@ -45,17 +45,17 @@ minimal back-and-forth.
    - Define contracts and a phased plan.
    - Define the test plan and risks.
 
-2. Build end-to-end (builder)
-    - Implement the core logic with unit tests.
-    - Wire integration points (routes, DB, cache, config).
-    - Add integration or end-to-end tests when needed.
-    - Run the full test suite and any local checks used in this repo.
+2. Build end-to-end (backend-specialist)
+   - Implement the core logic with unit tests.
+   - Wire integration points (routes, DB, cache, config).
+   - Add integration or end-to-end tests when needed.
+   - Run the full test suite and any local checks used in this repo.
 
-3. Verify
-     - Verify acceptance criteria and that the test suite is adequate.
-     - Validate Clean Architecture boundaries and error handling.
-     - Run the full test suite and any local checks used in this repo.
-     - If verification is not OK, go back to Build, apply fixes, and verify again.
+3. Verify (reviewer)
+   - Verify acceptance criteria and that the test suite is adequate.
+   - Validate Clean Architecture boundaries and error handling.
+   - Run the full test suite and any local checks used in this repo.
+   - If verification is not OK, go back to Build, apply fixes, and verify again.
 
 ## Token rules
 

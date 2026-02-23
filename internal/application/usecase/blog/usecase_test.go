@@ -48,6 +48,19 @@ func (m *MockBlogService) List(ctx context.Context, filter repository.BlogFilter
 	return args.Get(0).(*repository.PaginatedResult[entity.Blog]), args.Error(1)
 }
 
+func (m *MockBlogService) GetTopViewed(ctx context.Context, pagination repository.Pagination) (*repository.PaginatedResult[entity.Blog], error) {
+	args := m.Called(ctx, pagination)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*repository.PaginatedResult[entity.Blog]), args.Error(1)
+}
+
+func (m *MockBlogService) RecordView(ctx context.Context, id uuid.UUID) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
 func (m *MockBlogService) Update(ctx context.Context, blog *entity.Blog, tagIDs []uuid.UUID) error {
 	args := m.Called(ctx, blog, tagIDs)
 	return args.Error(0)
@@ -140,5 +153,60 @@ func TestListBlog_PublicFiltering(t *testing.T) {
 
 	_, err := uc.List(context.Background(), params, nil)
 	assert.NoError(t, err)
+	mockService.AssertExpectations(t)
+}
+
+func TestTopViewedBlog_MapsPaginationAndResponse(t *testing.T) {
+	mockService := new(MockBlogService)
+	uc := blog.NewBlogUseCase(mockService)
+
+	now := time.Now()
+	blogs := []entity.Blog{
+		{ID: uuid.New(), Title: "Most Viewed", ViewCount: 12, PublishedAt: &now},
+		{ID: uuid.New(), Title: "Second", ViewCount: 10, PublishedAt: &now},
+	}
+
+	mockService.On("GetTopViewed", mock.Anything, repository.Pagination{Page: 2, PageSize: 5}).Return(&repository.PaginatedResult[entity.Blog]{
+		Data:       blogs,
+		Total:      11,
+		Page:       2,
+		PageSize:   5,
+		TotalPages: 3,
+	}, nil)
+
+	result, err := uc.TopViewed(context.Background(), 2, 5)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Len(t, result.Data, 2)
+	assert.Equal(t, int64(11), result.Total)
+	assert.Equal(t, 2, result.Page)
+	assert.Equal(t, 5, result.PageSize)
+	assert.Equal(t, 3, result.TotalPages)
+	assert.Equal(t, blogs[0].ID, result.Data[0].ID)
+	mockService.AssertExpectations(t)
+}
+
+func TestGetByID_RecordsView(t *testing.T) {
+	mockService := new(MockBlogService)
+	uc := blog.NewBlogUseCase(mockService)
+
+	blogID := uuid.New()
+	authorID := uuid.New()
+
+	mockService.On("GetByID", mock.Anything, blogID, mock.Anything).Return(&entity.Blog{
+		ID:       blogID,
+		AuthorID: authorID,
+		Title:    "Post",
+		Slug:     "post",
+		Content:  "content",
+	}, nil)
+	mockService.On("RecordView", mock.Anything, blogID).Return(nil)
+
+	result, err := uc.GetByID(context.Background(), blogID, nil)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, blogID, result.ID)
 	mockService.AssertExpectations(t)
 }

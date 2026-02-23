@@ -1,5 +1,5 @@
 ---
-name: builder
+name: backend-specialist
 description: Senior Developer - Implements features using Test-Driven Development (TDD)
 mode: subagent
 model: openai/gpt-5.3-codex
@@ -11,7 +11,7 @@ tools:
   task: true
 ---
 
-# Builder Agent
+# Backend Specialist Agent
 
 ## Mission
 

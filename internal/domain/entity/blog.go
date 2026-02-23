@@ -43,6 +43,7 @@ type Blog struct {
 	// Reactions (Denormalized counts)
 	UpvoteCount   int `gorm:"not null;default:0" json:"upvoteCount"`
 	DownvoteCount int `gorm:"not null;default:0" json:"downvoteCount"`
+	ViewCount     int `gorm:"not null;default:0" json:"viewCount"`
 
 	// Relationships
 	Author   *User     `gorm:"foreignKey:AuthorID" json:"author,omitempty"`

@@ -27,8 +27,10 @@ type BlogRepository interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*entity.Blog, error)
 	FindBySlug(ctx context.Context, authorID uuid.UUID, slug string) (*entity.Blog, error)
 	FindAll(ctx context.Context, filter BlogFilter, pagination Pagination) (*PaginatedResult[entity.Blog], error)
+	FindTopViewed(ctx context.Context, pagination Pagination, publishedBefore time.Time) (*PaginatedResult[entity.Blog], error)
 	Update(ctx context.Context, blog *entity.Blog) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	IncrementViewCount(ctx context.Context, id uuid.UUID) error
 
 	// Tag operations
 	AddTags(ctx context.Context, blogID uuid.UUID, tagIDs []uuid.UUID) error

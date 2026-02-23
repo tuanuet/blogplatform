@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"math"
+	"time"
 
 	"github.com/aiagent/internal/domain/entity"
 	"github.com/aiagent/internal/domain/repository"
@@ -110,6 +111,53 @@ func (r *blogRepository) FindAll(ctx context.Context, filter repository.BlogFilt
 		PageSize:   pagination.PageSize,
 		TotalPages: totalPages,
 	}, nil
+}
+
+func (r *blogRepository) FindTopViewed(ctx context.Context, pagination repository.Pagination, publishedBefore time.Time) (*repository.PaginatedResult[entity.Blog], error) {
+	var blogs []entity.Blog
+	var total int64
+
+	query := r.db.WithContext(ctx).
+		Model(&entity.Blog{}).
+		Where("deleted_at IS NULL").
+		Where("status = ?", entity.BlogStatusPublished).
+		Where("visibility = ?", entity.BlogVisibilityPublic).
+		Where("published_at <= ?", publishedBefore)
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, err
+	}
+
+	offset := (pagination.Page - 1) * pagination.PageSize
+	err := query.
+		Preload("Author").
+		Preload("Category").
+		Preload("Tags").
+		Order("view_count DESC").
+		Order("published_at DESC").
+		Offset(offset).
+		Limit(pagination.PageSize).
+		Find(&blogs).Error
+	if err != nil {
+		return nil, err
+	}
+
+	totalPages := int(math.Ceil(float64(total) / float64(pagination.PageSize)))
+
+	return &repository.PaginatedResult[entity.Blog]{
+		Data:       blogs,
+		Total:      total,
+		Page:       pagination.Page,
+		PageSize:   pagination.PageSize,
+		TotalPages: totalPages,
+	}, nil
+}
+
+func (r *blogRepository) IncrementViewCount(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).
+		Model(&entity.Blog{}).
+		Where("id = ? AND deleted_at IS NULL", id).
+		Update("view_count", gorm.Expr("view_count + 1")).Error
 }
 
 func (r *blogRepository) Update(ctx context.Context, blog *entity.Blog) error {

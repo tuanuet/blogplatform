@@ -9,6 +9,7 @@ func RegisterBlogRoutes(v1 *gin.RouterGroup, p Params, auth *middleware.Authoriz
 	blogs := v1.Group("/blogs")
 	{
 		blogs.GET("", p.BlogHandler.List)
+		blogs.GET("/top-viewed", p.BlogHandler.TopViewed)
 		blogs.GET("/feed", sessionAuth, p.RecommendationHandler.GetPersonalizedFeed) // Personalized feed
 		blogs.GET("/:id", p.BlogHandler.GetByID)
 		blogs.GET("/:id/related", p.RecommendationHandler.GetRelatedBlogs)                              // Related blogs

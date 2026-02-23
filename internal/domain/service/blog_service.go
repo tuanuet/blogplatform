@@ -31,6 +31,8 @@ type BlogService interface {
 	GetByID(ctx context.Context, id uuid.UUID, viewerID *uuid.UUID) (*entity.Blog, error)
 	GetBySlug(ctx context.Context, authorID uuid.UUID, slug string, viewerID *uuid.UUID) (*entity.Blog, error)
 	List(ctx context.Context, filter repository.BlogFilter, pagination repository.Pagination, viewerID *uuid.UUID) (*repository.PaginatedResult[entity.Blog], error)
+	GetTopViewed(ctx context.Context, pagination repository.Pagination) (*repository.PaginatedResult[entity.Blog], error)
+	RecordView(ctx context.Context, id uuid.UUID) error
 	Update(ctx context.Context, blog *entity.Blog, tagIDs []uuid.UUID) error
 	Delete(ctx context.Context, id uuid.UUID, authorID uuid.UUID) error
 	Publish(ctx context.Context, id uuid.UUID, authorID uuid.UUID, visibility entity.BlogVisibility, publishedAt *time.Time) (*entity.Blog, error)
@@ -148,6 +150,14 @@ func (s *blogService) List(ctx context.Context, filter repository.BlogFilter, pa
 		PageSize:   result.PageSize,
 		TotalPages: result.TotalPages,
 	}, nil
+}
+
+func (s *blogService) GetTopViewed(ctx context.Context, pagination repository.Pagination) (*repository.PaginatedResult[entity.Blog], error) {
+	return s.blogRepo.FindTopViewed(ctx, pagination, time.Now())
+}
+
+func (s *blogService) RecordView(ctx context.Context, id uuid.UUID) error {
+	return s.blogRepo.IncrementViewCount(ctx, id)
 }
 
 func (s *blogService) Update(ctx context.Context, blog *entity.Blog, tagIDs []uuid.UUID) error {

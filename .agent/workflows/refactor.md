@@ -1,5 +1,5 @@
 ---
-description: Safe refactoring (Builder phase only)
+description: Safe refactoring (Backend Specialist phase only)
 ---
 
 # Refactor workflow

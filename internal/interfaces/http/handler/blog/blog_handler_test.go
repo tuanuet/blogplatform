@@ -10,6 +10,7 @@ import (
 	"github.com/aiagent/internal/application/dto"
 	blogUsecase "github.com/aiagent/internal/application/usecase/blog"
 	blogmocks "github.com/aiagent/internal/application/usecase/blog/mocks"
+	"github.com/aiagent/internal/domain/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -117,5 +118,50 @@ func TestBlogHandler_GetBySlug_Errors(t *testing.T) {
 		handler.GetBySlug(c)
 
 		assert.Equal(t, http.StatusForbidden, w.Code)
+	})
+}
+
+func TestBlogHandler_TopViewed_SuccessAndPaginationRules(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUC := blogmocks.NewMockBlogUseCase(ctrl)
+	handler := NewBlogHandler(mockUC)
+
+	t.Run("uses defaults", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest(http.MethodGet, "/api/v1/blogs/top-viewed", nil)
+
+		mockUC.EXPECT().TopViewed(gomock.Any(), 1, 10).Return(&repository.PaginatedResult[dto.BlogListResponse]{
+			Data:       []dto.BlogListResponse{},
+			Total:      0,
+			Page:       1,
+			PageSize:   10,
+			TotalPages: 0,
+		}, nil)
+
+		handler.TopViewed(c)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("resets pageSize when over max", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest(http.MethodGet, "/api/v1/blogs/top-viewed?page=2&pageSize=99", nil)
+
+		mockUC.EXPECT().TopViewed(gomock.Any(), 2, 10).Return(&repository.PaginatedResult[dto.BlogListResponse]{
+			Data:       []dto.BlogListResponse{},
+			Total:      0,
+			Page:       2,
+			PageSize:   10,
+			TotalPages: 0,
+		}, nil)
+
+		handler.TopViewed(c)
+
+		assert.Equal(t, http.StatusOK, w.Code)
 	})
 }

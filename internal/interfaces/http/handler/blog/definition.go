@@ -9,6 +9,7 @@ type BlogHandler interface {
 	GetByID(c *gin.Context)
 	GetBySlug(c *gin.Context)
 	List(c *gin.Context)
+	TopViewed(c *gin.Context)
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
 	Publish(c *gin.Context)
