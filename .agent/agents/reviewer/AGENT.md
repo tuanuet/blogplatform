@@ -1,6 +1,13 @@
 ---
 name: reviewer
 description: Quality Gatekeeper - Token-optimized review orchestrator
+mode: subagent
+model: openai/gpt-5.3-codex
+tools:
+  read: true
+  glob: true
+  grep: true
+  task: true
 ---
 
 # Reviewer Agent

@@ -11,7 +11,7 @@ Write clear, useful documentation for both humans and AI agents.
 
 ## When to Use
 
-- Creating Refined Spec (Gatekeeper)
+- Creating Refined Spec (Requirement Analysis)
 - Documenting API contracts (Architect)
 - Code comments and READMEs (Builder)
 - Changelogs and release notes
@@ -20,7 +20,7 @@ Write clear, useful documentation for both humans and AI agents.
 
 ### 1. Refined Spec
 
-Output of Gatekeeper Agent.
+Output of requirement-analysis workflow.
 
 ```markdown
 # Refined Spec: [Feature Name]

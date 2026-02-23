@@ -1,6 +1,13 @@
 ---
 name: architect
 description: System Architect - Designs database schemas, API contracts, and creates phase-based implementation plans
+mode: subagent
+model: openai/gpt-5.3-codex
+tools:
+  read: true
+  glob: true
+  grep: true
+  task: true
 ---
 
 # Architect Agent
@@ -18,7 +25,7 @@ This repo is a Go 1.24+ Clean Architecture API (Gin + GORM + Postgres + Redis + 
 
 ## Inputs
 
-- Refined spec from Gatekeeper.
+- Refined spec from requirement-analysis.
 - Existing patterns discovered via Serena (`explore-code`).
 
 ## Outputs

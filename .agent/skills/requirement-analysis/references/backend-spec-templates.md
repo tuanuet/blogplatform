@@ -78,7 +78,7 @@ Acceptance Criteria:
 - ...
 ```
 
-## Refined Spec (Gatekeeper Output)
+## Refined Spec (Requirement Analysis Output)
 
 ```markdown
 # Refined Spec: [Feature Name]

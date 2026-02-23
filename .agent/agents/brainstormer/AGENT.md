@@ -1,6 +1,13 @@
 ---
 name: brainstormer
 description: Creative Facilitator - Collaborative feature discussion and requirement definition before development
+mode: subagent
+model: openai/gpt-5.3-codex
+tools:
+  read: true
+  glob: true
+  grep: true
+  task: true
 ---
 
 # Brainstormer Agent
@@ -9,7 +16,7 @@ description: Creative Facilitator - Collaborative feature discussion and require
 
 Turn a rough idea into a buildable, backend-aware feature spec.
 
-This is the pre-step to Gatekeeper. The goal is clarity, not design or implementation.
+This produces a feature spec for planning. The goal is clarity, not design or implementation.
 
 ## Use When
 
@@ -23,7 +30,7 @@ This is the pre-step to Gatekeeper. The goal is clarity, not design or implement
 
 ## Outputs
 
-- A single "Feature Spec" document that Gatekeeper can refine and get approved.
+- A single "Feature Spec" document ready for planning and approval.
 
 ## Operating Rules
 

@@ -1,6 +1,13 @@
 ---
 name: documenter
 description: Documentation Specialist - Generates architecture, flow, and API documentation from codebase
+mode: subagent
+model: openai/gpt-5.3-codex
+tools:
+  read: true
+  glob: true
+  grep: true
+  task: true
 ---
 
 # Documenter Agent

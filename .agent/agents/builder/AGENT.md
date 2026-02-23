@@ -1,6 +1,14 @@
 ---
 name: builder
 description: Senior Developer - Implements features using Test-Driven Development (TDD)
+mode: subagent
+model: openai/gpt-5.3-codex
+tools:
+  read: true
+  glob: true
+  grep: true
+  bash: true
+  task: true
 ---
 
 # Builder Agent
