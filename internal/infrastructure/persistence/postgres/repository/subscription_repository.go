@@ -107,6 +107,72 @@ func (r *subscriptionRepository) FindByAuthor(ctx context.Context, authorID uuid
 	}, nil
 }
 
+func (r *subscriptionRepository) FindTopSubscribedAuthors(ctx context.Context, pagination repository.Pagination) (*repository.PaginatedResult[entity.TopSubscribedAuthor], error) {
+	countQuery := `SELECT COUNT(*) FROM (
+		SELECT s.author_id
+		FROM subscriptions s
+		JOIN users u ON u.id = s.author_id
+		WHERE u.is_active = TRUE
+		  AND u.deleted_at IS NULL
+		GROUP BY s.author_id
+	) ranked_authors`
+
+	var total int64
+	if err := r.db.WithContext(ctx).Raw(countQuery).Scan(&total).Error; err != nil {
+		return nil, err
+	}
+
+	offset := (pagination.Page - 1) * pagination.PageSize
+
+	type topSubscribedAuthorRow struct {
+		AuthorID        uuid.UUID `gorm:"column:author_id"`
+		Username        string    `gorm:"column:username"`
+		DisplayName     string    `gorm:"column:display_name"`
+		AvatarURL       string    `gorm:"column:avatar_url"`
+		SubscriberCount int64     `gorm:"column:subscriber_count"`
+	}
+
+	query := `SELECT
+		s.author_id,
+		u.name AS username,
+		COALESCE(u.display_name, u.name) AS display_name,
+		COALESCE(u.avatar_url, '') AS avatar_url,
+		COUNT(*) AS subscriber_count
+	FROM subscriptions s
+	JOIN users u ON u.id = s.author_id
+	WHERE u.is_active = TRUE
+	  AND u.deleted_at IS NULL
+	GROUP BY s.author_id, u.name, u.display_name, u.avatar_url
+	ORDER BY subscriber_count DESC, s.author_id ASC
+	LIMIT ? OFFSET ?`
+
+	var rows []topSubscribedAuthorRow
+	if err := r.db.WithContext(ctx).Raw(query, pagination.PageSize, offset).Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	authors := make([]entity.TopSubscribedAuthor, 0, len(rows))
+	for _, row := range rows {
+		authors = append(authors, entity.TopSubscribedAuthor{
+			AuthorID:        row.AuthorID,
+			Username:        row.Username,
+			DisplayName:     row.DisplayName,
+			AvatarURL:       row.AvatarURL,
+			SubscriberCount: row.SubscriberCount,
+		})
+	}
+
+	totalPages := int(math.Ceil(float64(total) / float64(pagination.PageSize)))
+
+	return &repository.PaginatedResult[entity.TopSubscribedAuthor]{
+		Data:       authors,
+		Total:      total,
+		Page:       pagination.Page,
+		PageSize:   pagination.PageSize,
+		TotalPages: totalPages,
+	}, nil
+}
+
 func (r *subscriptionRepository) CountSubscribers(ctx context.Context, authorID uuid.UUID) (int64, error) {
 	var count int64
 	err := r.db.WithContext(ctx).

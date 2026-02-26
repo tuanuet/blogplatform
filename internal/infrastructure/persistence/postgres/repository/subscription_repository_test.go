@@ -8,6 +8,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/aiagent/internal/domain/entity"
+	"github.com/aiagent/internal/domain/repository"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -202,6 +203,132 @@ func TestSubscriptionRepository_FindActiveSubscription_NotFound(t *testing.T) {
 	result, err := repo.FindActiveSubscription(ctx, userID, authorID)
 
 	assert.NoError(t, err)
+	assert.Nil(t, result)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestSubscriptionRepository_FindTopSubscribedAuthors_Success(t *testing.T) {
+	db, mock := setupTestDB(t)
+	repo := NewSubscriptionRepository(db)
+
+	ctx := context.Background()
+	authorID1 := uuid.MustParse("00000000-0000-0000-0000-000000000001")
+	authorID2 := uuid.MustParse("00000000-0000-0000-0000-000000000002")
+
+	countQuery := `SELECT COUNT(*) FROM (
+		SELECT s.author_id
+		FROM subscriptions s
+		JOIN users u ON u.id = s.author_id
+		WHERE u.is_active = TRUE
+		  AND u.deleted_at IS NULL
+		GROUP BY s.author_id
+	) ranked_authors`
+
+	dataQuery := `SELECT
+		s.author_id,
+		u.name AS username,
+		COALESCE(u.display_name, u.name) AS display_name,
+		COALESCE(u.avatar_url, '') AS avatar_url,
+		COUNT(*) AS subscriber_count
+	FROM subscriptions s
+	JOIN users u ON u.id = s.author_id
+	WHERE u.is_active = TRUE
+	  AND u.deleted_at IS NULL
+	GROUP BY s.author_id, u.name, u.display_name, u.avatar_url
+	ORDER BY subscriber_count DESC, s.author_id ASC
+	LIMIT $1 OFFSET $2`
+
+	mock.ExpectQuery(regexp.QuoteMeta(countQuery)).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(4))
+
+	mock.ExpectQuery(regexp.QuoteMeta(dataQuery)).
+		WithArgs(2, 2).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"author_id", "username", "display_name", "avatar_url", "subscriber_count"}).
+				AddRow(authorID1, "alice", "Alice", "https://cdn.example.com/a.png", 25).
+				AddRow(authorID2, "bob", "Bob", "", 25),
+		)
+
+	result, err := repo.FindTopSubscribedAuthors(ctx, repository.Pagination{Page: 2, PageSize: 2})
+
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Len(t, result.Data, 2)
+	assert.Equal(t, authorID1, result.Data[0].AuthorID)
+	assert.Equal(t, "alice", result.Data[0].Username)
+	assert.Equal(t, int64(25), result.Data[0].SubscriberCount)
+	assert.Equal(t, authorID2, result.Data[1].AuthorID)
+	assert.Equal(t, int64(4), result.Total)
+	assert.Equal(t, 2, result.Page)
+	assert.Equal(t, 2, result.PageSize)
+	assert.Equal(t, 2, result.TotalPages)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestSubscriptionRepository_FindTopSubscribedAuthors_CountError(t *testing.T) {
+	db, mock := setupTestDB(t)
+	repo := NewSubscriptionRepository(db)
+
+	ctx := context.Background()
+
+	countQuery := `SELECT COUNT(*) FROM (
+		SELECT s.author_id
+		FROM subscriptions s
+		JOIN users u ON u.id = s.author_id
+		WHERE u.is_active = TRUE
+		  AND u.deleted_at IS NULL
+		GROUP BY s.author_id
+	) ranked_authors`
+
+	mock.ExpectQuery(regexp.QuoteMeta(countQuery)).
+		WillReturnError(assert.AnError)
+
+	result, err := repo.FindTopSubscribedAuthors(ctx, repository.Pagination{Page: 1, PageSize: 20})
+
+	assert.ErrorIs(t, err, assert.AnError)
+	assert.Nil(t, result)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestSubscriptionRepository_FindTopSubscribedAuthors_QueryError(t *testing.T) {
+	db, mock := setupTestDB(t)
+	repo := NewSubscriptionRepository(db)
+
+	ctx := context.Background()
+
+	countQuery := `SELECT COUNT(*) FROM (
+		SELECT s.author_id
+		FROM subscriptions s
+		JOIN users u ON u.id = s.author_id
+		WHERE u.is_active = TRUE
+		  AND u.deleted_at IS NULL
+		GROUP BY s.author_id
+	) ranked_authors`
+
+	dataQuery := `SELECT
+		s.author_id,
+		u.name AS username,
+		COALESCE(u.display_name, u.name) AS display_name,
+		COALESCE(u.avatar_url, '') AS avatar_url,
+		COUNT(*) AS subscriber_count
+	FROM subscriptions s
+	JOIN users u ON u.id = s.author_id
+	WHERE u.is_active = TRUE
+	  AND u.deleted_at IS NULL
+	GROUP BY s.author_id, u.name, u.display_name, u.avatar_url
+	ORDER BY subscriber_count DESC, s.author_id ASC
+	LIMIT $1 OFFSET $2`
+
+	mock.ExpectQuery(regexp.QuoteMeta(countQuery)).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+
+	mock.ExpectQuery(regexp.QuoteMeta(dataQuery)).
+		WithArgs(20, 0).
+		WillReturnError(assert.AnError)
+
+	result, err := repo.FindTopSubscribedAuthors(ctx, repository.Pagination{Page: 1, PageSize: 20})
+
+	assert.ErrorIs(t, err, assert.AnError)
 	assert.Nil(t, result)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }

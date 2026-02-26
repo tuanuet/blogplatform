@@ -103,6 +103,21 @@ func (mr *MockSubscriptionServiceMockRecorder) GetSubscriptions(ctx, subscriberI
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSubscriptions", reflect.TypeOf((*MockSubscriptionService)(nil).GetSubscriptions), ctx, subscriberID, page, pageSize)
 }
 
+// GetTopSubscribedAuthors mocks base method.
+func (m *MockSubscriptionService) GetTopSubscribedAuthors(ctx context.Context, page, pageSize int) (*repository.PaginatedResult[entity.TopSubscribedAuthor], error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTopSubscribedAuthors", ctx, page, pageSize)
+	ret0, _ := ret[0].(*repository.PaginatedResult[entity.TopSubscribedAuthor])
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTopSubscribedAuthors indicates an expected call of GetTopSubscribedAuthors.
+func (mr *MockSubscriptionServiceMockRecorder) GetTopSubscribedAuthors(ctx, page, pageSize any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTopSubscribedAuthors", reflect.TypeOf((*MockSubscriptionService)(nil).GetTopSubscribedAuthors), ctx, page, pageSize)
+}
+
 // IsSubscribed mocks base method.
 func (m *MockSubscriptionService) IsSubscribed(ctx context.Context, subscriberID, authorID uuid.UUID) (bool, error) {
 	m.ctrl.T.Helper()

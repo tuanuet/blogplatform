@@ -24,6 +24,15 @@ type Subscription struct {
 	Author     *User `gorm:"foreignKey:AuthorID" json:"author,omitempty"`
 }
 
+// TopSubscribedAuthor represents an author ranked by subscriber count.
+type TopSubscribedAuthor struct {
+	AuthorID        uuid.UUID `json:"authorId"`
+	Username        string    `json:"username"`
+	DisplayName     string    `json:"displayName"`
+	AvatarURL       string    `json:"avatarUrl"`
+	SubscriberCount int64     `json:"subscriberCount"`
+}
+
 // TableName returns the table name for Subscription
 func (Subscription) TableName() string {
 	return "subscriptions"

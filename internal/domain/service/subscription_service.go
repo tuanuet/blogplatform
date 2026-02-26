@@ -23,6 +23,7 @@ type SubscriptionService interface {
 	IsSubscribed(ctx context.Context, subscriberID, authorID uuid.UUID) (bool, error)
 	GetSubscriptions(ctx context.Context, subscriberID uuid.UUID, page, pageSize int) (*repository.PaginatedResult[entity.Subscription], error)
 	GetSubscribers(ctx context.Context, authorID uuid.UUID, page, pageSize int) (*repository.PaginatedResult[entity.Subscription], error)
+	GetTopSubscribedAuthors(ctx context.Context, page, pageSize int) (*repository.PaginatedResult[entity.TopSubscribedAuthor], error)
 	CountSubscribers(ctx context.Context, authorID uuid.UUID) (int64, error)
 	CountSubscriptions(ctx context.Context, subscriberID uuid.UUID) (int64, error)
 }
@@ -77,6 +78,10 @@ func (s *subscriptionService) GetSubscriptions(ctx context.Context, subscriberID
 
 func (s *subscriptionService) GetSubscribers(ctx context.Context, authorID uuid.UUID, page, pageSize int) (*repository.PaginatedResult[entity.Subscription], error) {
 	return s.subscriptionRepo.FindByAuthor(ctx, authorID, repository.Pagination{Page: page, PageSize: pageSize})
+}
+
+func (s *subscriptionService) GetTopSubscribedAuthors(ctx context.Context, page, pageSize int) (*repository.PaginatedResult[entity.TopSubscribedAuthor], error) {
+	return s.subscriptionRepo.FindTopSubscribedAuthors(ctx, repository.Pagination{Page: page, PageSize: pageSize})
 }
 
 func (s *subscriptionService) CountSubscribers(ctx context.Context, authorID uuid.UUID) (int64, error) {

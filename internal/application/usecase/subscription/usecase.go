@@ -24,6 +24,7 @@ type SubscriptionUseCase interface {
 	IsSubscribed(ctx context.Context, subscriberID, authorID uuid.UUID) (bool, error)
 	GetSubscriptions(ctx context.Context, subscriberID uuid.UUID, page, pageSize int) (*repository.PaginatedResult[dto.SubscriptionResponse], error)
 	GetSubscribers(ctx context.Context, authorID uuid.UUID, page, pageSize int) (*repository.PaginatedResult[dto.SubscriptionResponse], error)
+	GetTopSubscribedAuthors(ctx context.Context, page, pageSize int) (*repository.PaginatedResult[dto.TopSubscribedAuthorResponse], error)
 	CountSubscribers(ctx context.Context, authorID uuid.UUID) (*dto.SubscriptionCountResponse, error)
 	GetSubscriptionCounts(ctx context.Context, userID uuid.UUID) (*dto.SubscriptionCountResponse, error)
 }
@@ -87,6 +88,32 @@ func (uc *subscriptionUseCase) GetSubscribers(ctx context.Context, authorID uuid
 
 	return &repository.PaginatedResult[dto.SubscriptionResponse]{
 		Data:       subs,
+		Total:      result.Total,
+		Page:       result.Page,
+		PageSize:   result.PageSize,
+		TotalPages: result.TotalPages,
+	}, nil
+}
+
+func (uc *subscriptionUseCase) GetTopSubscribedAuthors(ctx context.Context, page, pageSize int) (*repository.PaginatedResult[dto.TopSubscribedAuthorResponse], error) {
+	result, err := uc.subscriptionSvc.GetTopSubscribedAuthors(ctx, page, pageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	authors := make([]dto.TopSubscribedAuthorResponse, 0, len(result.Data))
+	for _, author := range result.Data {
+		authors = append(authors, dto.TopSubscribedAuthorResponse{
+			AuthorID:        author.AuthorID,
+			Username:        author.Username,
+			DisplayName:     author.DisplayName,
+			AvatarURL:       author.AvatarURL,
+			SubscriberCount: author.SubscriberCount,
+		})
+	}
+
+	return &repository.PaginatedResult[dto.TopSubscribedAuthorResponse]{
+		Data:       authors,
 		Total:      result.Total,
 		Page:       result.Page,
 		PageSize:   result.PageSize,

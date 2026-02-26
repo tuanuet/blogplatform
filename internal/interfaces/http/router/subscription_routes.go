@@ -4,10 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterSubscriptionRoutes(v1 *gin.RouterGroup, p Params, sessionAuth gin.HandlerFunc) {
+func RegisterSubscriptionRoutes(v1 *gin.RouterGroup, p Params, sessionAuth, rateLimit gin.HandlerFunc) {
 	// Authors & Subscriptions
 	authors := v1.Group("/authors")
 	{
+		authors.GET("/top-subscribed", rateLimit, p.SubscriptionHandler.GetTopSubscribedAuthors)
 		authors.GET("/:authorId/subscribers", p.SubscriptionHandler.GetSubscribers)
 		authors.GET("/:authorId/subscribers/count", p.SubscriptionHandler.CountSubscribers)
 		authors.POST("/:authorId/subscribe", sessionAuth, p.SubscriptionHandler.Subscribe)

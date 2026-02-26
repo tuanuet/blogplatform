@@ -1,6 +1,7 @@
 package subscription
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -18,6 +19,64 @@ func NewSubscriptionHandler(subscriptionUseCase subscription.SubscriptionUseCase
 	return &subscriptionHandler{
 		subscriptionUseCase: subscriptionUseCase,
 	}
+}
+
+func parsePaginationQuery(c *gin.Context) (int, int, error) {
+	page := 1
+	pageSize := 20
+
+	if p := c.Query("page"); p != "" {
+		v, err := strconv.Atoi(p)
+		if err != nil || v <= 0 {
+			return 0, 0, errors.New("invalid page query parameter")
+		}
+		page = v
+	}
+
+	if ps := c.Query("pageSize"); ps != "" {
+		v, err := strconv.Atoi(ps)
+		if err != nil || v <= 0 || v > 100 {
+			return 0, 0, errors.New("invalid pageSize query parameter")
+		}
+		pageSize = v
+	}
+
+	return page, pageSize, nil
+}
+
+// GetTopSubscribedAuthors godoc
+// @Summary Get top subscribed authors
+// @Description Get paginated top authors ranked by subscriber count
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number" default(1)
+// @Param pageSize query int false "Page size" default(20) maximum(100)
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 429 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /api/v1/authors/top-subscribed [get]
+func (h *subscriptionHandler) GetTopSubscribedAuthors(c *gin.Context) {
+	page, pageSize, err := parsePaginationQuery(c)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	result, err := h.subscriptionUseCase.GetTopSubscribedAuthors(c.Request.Context(), page, pageSize)
+	if err != nil {
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.SuccessWithMeta(c, result.Data, &response.Meta{
+		Page:       result.Page,
+		PageSize:   result.PageSize,
+		Total:      result.Total,
+		TotalItems: result.Total,
+		TotalPages: result.TotalPages,
+	})
 }
 
 // Subscribe godoc

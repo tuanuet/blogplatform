@@ -4,13 +4,6 @@ description: Discuss and define a feature before development
 
 # Brainstorm workflow
 
-Input: $1
-
-Use this workflow when you have an idea but not a spec yet. Your goal is to
-produce a short feature spec that is ready for `/implementation`.
-
-## Execution note
-
 Run this workflow with the `@brainstormer` agent by default. For larger or
 code-heavy topics, `@brainstormer` can spawn multiple `@explore` agents in
 parallel to search relevant parts of the codebase.
@@ -58,18 +51,23 @@ You have a one-page spec with:
 # Feature: <name>
 
 ## Objective
+
 <what you are building and why>
 
 ## Requirements
+
 - [ ] <req>
 
 ## Non-goals
+
 - <explicitly out of scope>
 
 ## Acceptance criteria
+
 1. <observable behavior>
 
 ## Technical context
+
 - Impacted areas: <packages, services, endpoints>
 - Data changes: <tables, fields, events>
 ```
@@ -78,3 +76,8 @@ You have a one-page spec with:
 
 - `skill(name="requirement-analysis")`
 - `skill(name="brainstorming")`
+
+Input: $1
+
+Use this workflow when you have an idea but not a spec yet. Your goal is to
+produce a short feature spec that is ready for `/implementation`.

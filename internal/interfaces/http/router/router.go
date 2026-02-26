@@ -110,7 +110,7 @@ func New(p Params) *gin.Engine {
 		RegisterCommentRoutes(v1, p, auth, sessionAuth)
 		RegisterCategoryRoutes(v1, p, auth, sessionAuth)
 		RegisterTagRoutes(v1, p, auth, sessionAuth)
-		RegisterSubscriptionRoutes(v1, p, sessionAuth)
+		RegisterSubscriptionRoutes(v1, p, sessionAuth, rateLimit)
 		RegisterBookmarkRoutes(v1, p, sessionAuth)
 		RegisterReadingHistoryRoutes(v1, p, sessionAuth)
 		RegisterRankingRoutes(v1, p, auth, sessionAuth)

@@ -17,6 +17,7 @@ type SubscriptionRepository interface {
 	Exists(ctx context.Context, subscriberID, authorID uuid.UUID) (bool, error)
 	FindBySubscriber(ctx context.Context, subscriberID uuid.UUID, pagination Pagination) (*PaginatedResult[entity.Subscription], error)
 	FindByAuthor(ctx context.Context, authorID uuid.UUID, pagination Pagination) (*PaginatedResult[entity.Subscription], error)
+	FindTopSubscribedAuthors(ctx context.Context, pagination Pagination) (*PaginatedResult[entity.TopSubscribedAuthor], error)
 	CountSubscribers(ctx context.Context, authorID uuid.UUID) (int64, error)
 	CountBySubscriber(ctx context.Context, subscriberID uuid.UUID) (int64, error)
 	UpdateExpiry(ctx context.Context, userID, authorID uuid.UUID, expiresAt time.Time, tier string) error

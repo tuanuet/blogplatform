@@ -88,6 +88,18 @@ func (mr *MockSubscriptionHandlerMockRecorder) GetSubscribers(c any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSubscribers", reflect.TypeOf((*MockSubscriptionHandler)(nil).GetSubscribers), c)
 }
 
+// GetTopSubscribedAuthors mocks base method.
+func (m *MockSubscriptionHandler) GetTopSubscribedAuthors(c *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "GetTopSubscribedAuthors", c)
+}
+
+// GetTopSubscribedAuthors indicates an expected call of GetTopSubscribedAuthors.
+func (mr *MockSubscriptionHandlerMockRecorder) GetTopSubscribedAuthors(c any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTopSubscribedAuthors", reflect.TypeOf((*MockSubscriptionHandler)(nil).GetTopSubscribedAuthors), c)
+}
+
 // GetSubscriptionCounts mocks base method.
 func (m *MockSubscriptionHandler) GetSubscriptionCounts(c *gin.Context) {
 	m.ctrl.T.Helper()

@@ -22,3 +22,12 @@ type SubscriptionCountResponse struct {
 	SubscriberCount   int64     `json:"subscriberCount"`
 	SubscriptionCount int64     `json:"subscriptionCount,omitempty"`
 }
+
+// TopSubscribedAuthorResponse represents top-ranked subscribed author data.
+type TopSubscribedAuthorResponse struct {
+	AuthorID        uuid.UUID `json:"authorId"`
+	Username        string    `json:"username"`
+	DisplayName     string    `json:"displayName"`
+	AvatarURL       string    `json:"avatarUrl"`
+	SubscriberCount int64     `json:"subscriberCount"`
+}

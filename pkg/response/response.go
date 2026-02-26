@@ -26,6 +26,7 @@ type Meta struct {
 	Page       int   `json:"page,omitempty"`
 	PageSize   int   `json:"pageSize,omitempty"`
 	Total      int64 `json:"total,omitempty"`
+	TotalItems int64 `json:"totalItems,omitempty"`
 	TotalPages int   `json:"totalPages,omitempty"`
 }
 

@@ -162,6 +162,21 @@ func (mr *MockSubscriptionRepositoryMockRecorder) FindBySubscriber(ctx, subscrib
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindBySubscriber", reflect.TypeOf((*MockSubscriptionRepository)(nil).FindBySubscriber), ctx, subscriberID, pagination)
 }
 
+// FindTopSubscribedAuthors mocks base method.
+func (m *MockSubscriptionRepository) FindTopSubscribedAuthors(ctx context.Context, pagination repository.Pagination) (*repository.PaginatedResult[entity.TopSubscribedAuthor], error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindTopSubscribedAuthors", ctx, pagination)
+	ret0, _ := ret[0].(*repository.PaginatedResult[entity.TopSubscribedAuthor])
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindTopSubscribedAuthors indicates an expected call of FindTopSubscribedAuthors.
+func (mr *MockSubscriptionRepositoryMockRecorder) FindTopSubscribedAuthors(ctx, pagination any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindTopSubscribedAuthors", reflect.TypeOf((*MockSubscriptionRepository)(nil).FindTopSubscribedAuthors), ctx, pagination)
+}
+
 // UpdateExpiry mocks base method.
 func (m *MockSubscriptionRepository) UpdateExpiry(ctx context.Context, userID, authorID uuid.UUID, expiresAt time.Time, tier string) error {
 	m.ctrl.T.Helper()
